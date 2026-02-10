@@ -10,4 +10,10 @@
     <ProjectReference Include="..\DashyBoard.Domain\DashyBoard.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Queries\" />
+  </ItemGroup>
+
 </Project>
