@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/backned/" />
+  <Folder Name="/backned/src/">
+    <Project Path="DashyBoard.Api/DashyBoard.Api.csproj" Id="39df4c40-9fe1-47f4-b205-131e7d71138a" />
+    <Project Path="DashyBoard.Application/DashyBoard.Application.csproj" Id="85bec9ef-1c75-40d1-8107-db72c7c979d7" />
+    <Project Path="DashyBoard.Domain/DashyBoard.Domain.csproj" Id="b8342871-fe7d-4f88-8238-4781c983df7e" />
+    <Project Path="DashyBoard.Infrastructure/DashyBoard.Infrastructure.csproj" Id="12b4dbed-31df-46b6-bacb-daaa0b0bb1c3" />
+  </Folder>
+  <Folder Name="/backned/tests/">
+    <Project Path="DashyBoard.Application.Tests/DashyBoard.Application.Tests.csproj" Id="54522a8f-da91-49a5-a827-eb3c0d40b08d" />
+    <Project Path="DashyBoard.Domain.Tests/DashyBoard.Domain.Tests.csproj" Id="fbfb9062-7740-4133-8b41-0f3882088851" />
+  </Folder>
+  <Folder Name="/frontend/" />
+</Solution>
