@@ -18,7 +18,6 @@ export default defineConfig([
     files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
       'react/react-in-jsx-scope': 'off', // Disable for React 17+
-      'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
     plugins: { prettier: prettierPlugin },
     settings: {
