@@ -1,4 +1,3 @@
-import 'react';
 import './App.css';
 
 function App() {
