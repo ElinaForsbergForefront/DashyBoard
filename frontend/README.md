@@ -44,11 +44,11 @@ The application will be available at `http://localhost:5173`
 ```
 frontend/
 ├── src/
+│   ├── app/          # Root-level wiring layer (e.g, Global poviders, Error boundaries, App-level context)
 │   ├── api/          # API service layer
 │   ├── components/   # Reusable UI components
 │   ├── hooks/        # Custom React hooks
 │   ├── pages/        # Route-level page components
-│   ├── router/       # React Router configuration
 │   ├── utils/        # Helper functions and utilities
 │   ├── App.tsx       # Root component
 │   └── main.tsx      # Application entry point
