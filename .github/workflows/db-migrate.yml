@@ -1,0 +1,44 @@
+name: Apply EF Migrations (Supabase)
+
+on:
+  pull_request:
+    types: [closed]
+    branches: ["main"]
+
+jobs:
+  migrate:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: db-migrations-main
+      cancel-in-progress: false
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout merged commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore DashyBoard.sln
+
+      - name: Install EF tools
+        run: dotnet tool update --global dotnet-ef
+
+      - name: Run migrations
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.SUPABASE_CONNECTION_STRING }}
+        run: |
+          dotnet ef database update \
+            --project ./DashyBoard.Infrastructure/DashyBoard.Infrastructure.csproj \
+            --startup-project ./DashyBoard.Api/DashyBoard.Api.csproj
