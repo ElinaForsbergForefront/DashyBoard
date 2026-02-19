@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  dashyboard-backend:
+    container_name: Dashyboard-backend
+    build:
+      context: ./backend   
+      dockerfile: Dockerfile
+    image: backend
+    ports:
+      - "8000:5000" #Will probably be changed in the future.
+
+  dashyboard-frontend:
+    container_name: Dashyboard-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend
+    ports:
+      - "5173:5173"
