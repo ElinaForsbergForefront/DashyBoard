@@ -1,3 +1,4 @@
+using DashyBoard.Api.Middleware;
 using DashyBoard.Domain.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -74,6 +75,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseUserSync();
 app.UseAuthorization();
 
 app.MapControllers();
