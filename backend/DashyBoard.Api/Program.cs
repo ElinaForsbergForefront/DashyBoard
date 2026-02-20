@@ -1,41 +1,9 @@
-using DashyBoard.Api.Middleware;
-using DashyBoard.Domain.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using MongoDB.Driver;
+using DashyBoard.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Bind MongoDB settings from configuration
-builder.Services.Configure<MongoDbSettings>(
-    builder.Configuration.GetSection(MongoDbSettings.SectionName));
-
-// Bind Auth0 settings from configuration
-builder.Services.Configure<Auth0Settings>(
-    builder.Configuration.GetSection(Auth0Settings.SectionName));
-
-// Register MongoDB client
-builder.Services.AddSingleton<IMongoClient>(sp =>
-{
-    var settings = builder.Configuration
-        .GetSection(MongoDbSettings.SectionName)
-        .Get<MongoDbSettings>()
-        ?? throw new InvalidOperationException("MongoDB settings not configured");
-
-    return new MongoClient(settings.ConnectionString);
-});
-
-// Register IMongoDatabase
-builder.Services.AddScoped<IMongoDatabase>(sp =>
-{
-    var settings = builder.Configuration
-        .GetSection(MongoDbSettings.SectionName)
-        .Get<MongoDbSettings>()
-        ?? throw new InvalidOperationException("MongoDB settings not configured");
-
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(settings.DatabaseName);
-});
+// MongoDB
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Configure Auth0 JWT Authentication
 var auth0Settings = builder.Configuration
@@ -63,13 +31,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

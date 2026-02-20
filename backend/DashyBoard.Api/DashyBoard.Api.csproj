@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-    <PackageReference Include="MongoDB.Driver" Version="3.6.0" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DashyBoard.Application\DashyBoard.Application.csproj" />
+    <ProjectReference Include="..\DashyBoard.Infrastructure\DashyBoard.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
