@@ -30,11 +30,14 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore DashyBoard.sln
+        run: dotnet restore DashyBoard.slnx
 
       - name: Install EF tools
         run: dotnet tool update --global dotnet-ef
 
+      - name: Add .NET tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+        
       - name: Run migrations
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.SUPABASE_CONNECTION_STRING }}
