@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     image: backend
     ports:
-      - "8000:5000" #Will probably be changed in the future.
+      - "8000:8080" #Will probably be changed in the future.
 
   dashyboard-frontend:
     container_name: Dashyboard-frontend
