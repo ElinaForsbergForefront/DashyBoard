@@ -1,4 +1,9 @@
+using DashyBoard.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// MongoDB
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add services to the container.
 

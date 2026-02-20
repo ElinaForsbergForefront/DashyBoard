@@ -1,14 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2566b106-a129-4101-86f8-452e56023210</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-	  <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DashyBoard.Application\DashyBoard.Application.csproj" />
+    <ProjectReference Include="..\DashyBoard.Infrastructure\DashyBoard.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
