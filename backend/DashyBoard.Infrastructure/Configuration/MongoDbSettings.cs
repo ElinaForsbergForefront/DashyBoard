@@ -1,4 +1,4 @@
-﻿namespace DashyBoard.Domain.Configuration;
+﻿namespace DashyBoard.Infrastructure.Configuration;
 
 public class MongoDbSettings
 {

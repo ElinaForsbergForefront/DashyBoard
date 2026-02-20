@@ -1,34 +1,9 @@
-using DashyBoard.Domain.Configuration;
-using MongoDB.Driver;
+using DashyBoard.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Bind MongoDB settings from configuration
-builder.Services.Configure<MongoDbSettings>(
-    builder.Configuration.GetSection(MongoDbSettings.SectionName));
-
-// Register MongoDB client
-builder.Services.AddSingleton<IMongoClient>(sp =>
-{
-    var settings = builder.Configuration
-        .GetSection(MongoDbSettings.SectionName)
-        .Get<MongoDbSettings>()
-        ?? throw new InvalidOperationException("MongoDB settings not configured");
-
-    return new MongoClient(settings.ConnectionString);
-});
-
-// Register IMongoDatabase
-builder.Services.AddScoped<IMongoDatabase>(sp =>
-{
-    var settings = builder.Configuration
-        .GetSection(MongoDbSettings.SectionName)
-        .Get<MongoDbSettings>()
-        ?? throw new InvalidOperationException("MongoDB settings not configured");
-
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(settings.DatabaseName);
-});
+// MongoDB
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add services to the container.
 
