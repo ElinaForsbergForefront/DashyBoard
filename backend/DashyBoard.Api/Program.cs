@@ -1,30 +1,10 @@
+using DashyBoard.Api.Middleware;
 using DashyBoard.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MongoDB
+// Dependency Injection
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// Configure Auth0 JWT Authentication
-var auth0Settings = builder.Configuration
-    .GetSection(Auth0Settings.SectionName)
-    .Get<Auth0Settings>()
-    ?? throw new InvalidOperationException("Auth0 settings not configured");
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = $"https://{auth0Settings.Domain}/";
-        options.Audience = auth0Settings.Audience;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = $"https://{auth0Settings.Domain}/",
-            ValidateAudience = true,
-            ValidAudience = auth0Settings.Audience,
-            ValidateLifetime = true,
-        };
-    });
 
 // Add services to the container.
 
