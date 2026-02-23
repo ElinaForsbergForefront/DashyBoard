@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using DashyBoard.Infrastructure.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using DashyBoard.Infrastructure.Configuration;
 using MongoDB.Driver;
 
 namespace DashyBoard.Infrastructure;
@@ -12,6 +13,13 @@ public static class DependencyIncjection
         this IServiceCollection services,
         IConfiguration config)
     {
+
+        //EF Core
+        var cs = config.GetConnectionString("DefaultConnection")
+                 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+
+        services.AddDbContext<DashyBoardDbContext>(options =>
+            options.UseNpgsql(cs));
 
         // MongoDB
         services.Configure<MongoDbSettings>(
