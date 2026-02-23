@@ -32,6 +32,9 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore DashyBoard.slnx
 
+      - name: Build (verbose)
+        run: dotnet build DashyBoard.slnx -c Release -v normal 
+
       - name: Install EF tools
         run: dotnet tool update --global dotnet-ef
 
