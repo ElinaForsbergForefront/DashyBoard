@@ -32,19 +32,26 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore DashyBoard.slnx
 
-      - name: Build (verbose)
-        run: dotnet build DashyBoard.slnx -c Release -v normal 
+      - name: Build (Release)
+        run: dotnet build DashyBoard.slnx -c Release
 
       - name: Install EF tools
-        run: dotnet tool update --global dotnet-ef
+        run: dotnet tool update --global dotnet-ef --version 10.*
 
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-        
+
+      - name: Print connection string (masked)
+        run: echo "${{ secrets.SUPABASE_CONNECTION_STRING }}" | sed -E 's/(Password=)[^;]+/\1***HIDDEN***/Ig'
+
       - name: Run migrations
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.SUPABASE_CONNECTION_STRING }}
         run: |
+          echo "Running EF migrations..."
           dotnet ef database update \
+            --no-build \
+            --configuration Release \
+            --verbose \
             --project ./DashyBoard.Infrastructure/DashyBoard.Infrastructure.csproj \
             --startup-project ./DashyBoard.Api/DashyBoard.Api.csproj
