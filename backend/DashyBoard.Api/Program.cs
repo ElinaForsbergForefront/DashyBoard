@@ -1,14 +1,26 @@
+using DashyBoard.Api.Middleware;
 using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Dependency Injection
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Add services to the container.
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
+// Add services to the container.
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
@@ -25,6 +37,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
+app.UseUserSync();
 app.UseAuthorization();
 
 app.MapControllers();
