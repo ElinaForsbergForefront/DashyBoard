@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DashyBoard.Application\DashyBoard.Application.csproj" />
     <ProjectReference Include="..\DashyBoard.Infrastructure\DashyBoard.Infrastructure.csproj" />
   </ItemGroup>

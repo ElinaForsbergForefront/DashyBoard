@@ -1,6 +1,7 @@
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -8,7 +9,7 @@ using MongoDB.Driver;
 
 namespace DashyBoard.Infrastructure;
 
-public static class DependencyIncjection
+public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
