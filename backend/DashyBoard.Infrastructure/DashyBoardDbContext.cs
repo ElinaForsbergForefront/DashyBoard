@@ -11,7 +11,20 @@ namespace DashyBoard.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+
+                entity.Property(u => u.AuthSub).IsRequired();
+                entity.Property(u => u.Email).IsRequired(false);
+
+                entity.Property(u => u.Username).IsRequired(false);
+                entity.Property(u => u.DisplayName).IsRequired(false);
+                entity.Property(u => u.Country).IsRequired(false);
+                entity.Property(u => u.City).IsRequired(false);
+
+                entity.Property(u => u.CreatedAt).IsRequired();
+            });
         }
     }
 }
