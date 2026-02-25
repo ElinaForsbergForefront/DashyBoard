@@ -1,12 +1,15 @@
 using DashyBoard.Api.Middleware;
 using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
+using DashyBoard.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Dependency Injection
 builder.Services.AddInfrastructure(builder.Configuration);
+
+//Mediator
+builder.Services.AddApplication();
 
 // Add CORS
 builder.Services.AddCors(options =>
