@@ -1,5 +1,19 @@
 @import 'tailwindcss';
 
+@layer base {
+  /* Smooth transitions for theme changes */
+  * {
+    @apply transition-colors duration-300;
+  }
+
+  /* Exclude animations and transitions that shouldn't be affected */
+  *,
+  *::before,
+  *::after {
+    @apply transition-colors duration-300;
+  }
+}
+
 @theme {
   /* Typography */
   --font-family-base: 'Inter', system-ui, sans-serif;
