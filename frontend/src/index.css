@@ -198,3 +198,37 @@
     letter-spacing: var(--tracking-wide);
   }
 }
+
+/* Glass effect utilities */
+@layer components {
+  .glass-base {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-active {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg;
+  }
+
+  .glass-hover {
+    @apply hover:bg-white/5;
+  }
+
+  .glass-smooth {
+    @apply transition-all duration-300;
+  }
+}
+
+/* Light mode glass adjustments */
+.light {
+  .glass-base {
+    @apply bg-black/5 border-black/10;
+  }
+
+  .glass-active {
+    @apply bg-black/10 border-black/20;
+  }
+
+  .glass-hover {
+    @apply hover:bg-black/5;
+  }
+}

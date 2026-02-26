@@ -1,10 +1,15 @@
-import { ColorPalette } from './ColorPalette';
+import { Outlet } from 'react-router-dom';
+import { Navigation } from './components/layout/Navigation';
 
 function App() {
   return (
-    <div>
-      <ColorPalette />
-    </div>
+    <>
+      <Navigation />
+      <main>
+        <Outlet />
+      </main>
+      <footer></footer>
+    </>
   );
 }
 

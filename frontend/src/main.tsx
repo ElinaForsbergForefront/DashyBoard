@@ -2,7 +2,7 @@ import './index.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
-import { router } from './app/router/router.tsx';
+import { router } from '../router.tsx';
 import { AppProviders } from './app/providers/AppProviders.tsx';
 import { Auth0Provider } from '@auth0/auth0-react';
 
