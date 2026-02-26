@@ -12,8 +12,10 @@
 
   <ItemGroup>
     <Folder Include="Commands\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.0.0" />
   </ItemGroup>
 
 </Project>

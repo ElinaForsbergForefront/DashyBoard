@@ -1,5 +1,7 @@
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
+using DashyBoard.Application.Interfaces;         
+using DashyBoard.Infrastructure.External;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +17,12 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration config)
     {
+
+        // Gold API
+        services.AddHttpClient<IGoldApiClient, GoldApiClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.gold-api.com/");
+        });
 
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
