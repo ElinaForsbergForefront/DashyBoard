@@ -5,7 +5,7 @@ using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.Gold;
 using DashyBoard.Application.Queries.Gold.Dto;
 
-namespace DashyBoard.Application.Tests
+namespace DashyBoard.Application.Tests.Gold
 {
     public class WhenGettingGoldPriceFromGoldApi
     {

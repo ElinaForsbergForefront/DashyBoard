@@ -1,7 +1,8 @@
+using DashyBoard.Application.Interfaces;         
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
-using DashyBoard.Application.Interfaces;         
 using DashyBoard.Infrastructure.External;
+using DashyBoard.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,9 +25,12 @@ public static class DependencyInjection
             client.BaseAddress = new Uri("https://api.gold-api.com/");
         });
 
+        //Reminders
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
-                 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+            ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
 
         services.AddDbContext<DashyBoardDbContext>(options =>
             options.UseNpgsql(cs));
