@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from './nav-items';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface MobileNavProps {
 }
 
 export const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
+  const { hasPermission } = usePermissions();
   return (
     <nav
       id="mobile-menu"
@@ -16,24 +18,30 @@ export const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
       }`}
     >
       <ul className="flex flex-col px-4 py-2 space-y-1" role="menu">
-        {NAV_ITEMS.map(({ to, label }) => (
-          <li key={to} role="none">
-            <NavLink
-              to={to}
-              role="menuitem"
-              onClick={onClose}
-              className={({ isActive }) =>
-                `block w-full px-4 py-3 text-base font-medium rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                  isActive
-                    ? 'bg-overlay text-foreground'
-                    : 'text-muted hover:text-foreground hover:bg-overlay'
-                }`
-              }
-            >
-              {label}
-            </NavLink>
-          </li>
-        ))}
+        {NAV_ITEMS.map(({ to, label, requiredPermissions }) => {
+          const canView = !requiredPermissions || hasPermission(requiredPermissions);
+
+          if (!canView) return null;
+
+          return (
+            <li key={to} role="none">
+              <NavLink
+                to={to}
+                role="menuitem"
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `block w-full px-4 py-3 text-base font-medium rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                    isActive
+                      ? 'bg-overlay text-foreground'
+                      : 'text-muted hover:text-foreground hover:bg-overlay'
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
