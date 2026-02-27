@@ -1,5 +1,4 @@
 /* filepath: src/ColorPalette.tsx */
-import { ThemeToggle } from './components/ThemeToggle';
 
 export function ColorPalette() {
   const colorGroups = {
@@ -61,13 +60,12 @@ export function ColorPalette() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8 transition-colors duration-300">
+    <div className="min-h-screen bg-background p-8 duration-300">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-foreground">Color Palette</h1>
           <p className="text-muted mt-2">Tailwind CSS v4 • WCAG 2.2 AA Compliant</p>
         </div>
-        <ThemeToggle />
       </div>
 
       {/* Typography Section */}
@@ -105,16 +103,13 @@ export function ColorPalette() {
       <h2 className="text-foreground mb-8">Colors</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {Object.entries(colorGroups).map(([category, colors]) => (
-          <div
-            key={category}
-            className="bg-card rounded-xl p-6 border border-border transition-colors duration-300"
-          >
+          <div key={category} className="bg-card rounded-xl p-6 border border-border duration-300">
             <h4 className="text-foreground mb-6">{category}</h4>
             <div className="space-y-4">
               {colors.map(({ name, class: className }) => (
                 <div key={name} className="flex items-center gap-4">
                   <div
-                    className={`w-12 h-12 rounded-lg border border-border-subtle ${className} transition-colors duration-300`}
+                    className={`w-12 h-12 rounded-lg border border-border-subtle ${className} duration-300`}
                   />
                   <div>
                     <p className="text-foreground font-medium">{name}</p>
