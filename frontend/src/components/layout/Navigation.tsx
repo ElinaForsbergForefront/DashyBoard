@@ -4,6 +4,7 @@ import { Logo } from './navigation/Logo';
 import { MenuButton } from './navigation/MenuButton';
 import { MobileNav } from './navigation/MobileNav';
 import { ThemeToggle } from './navigation/ThemeToggle';
+import { LogoutButton } from '../auth/LogoutButton';
 
 export const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,14 +28,7 @@ export const Navigation = () => {
             >
               Preview
             </button>
-            <button
-              type="button"
-              className="size-10 rounded-full bg-overlay text-sm font-medium text-muted hover:bg-primary hover:text-on-primary cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              aria-label="Open user menu"
-              aria-haspopup="true"
-            >
-              U
-            </button>
+            <LogoutButton />
           </div>
 
           {/* Mobile Menu Button */}
