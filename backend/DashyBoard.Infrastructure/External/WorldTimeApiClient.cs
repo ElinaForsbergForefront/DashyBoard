@@ -23,4 +23,36 @@ public sealed class WorldTimeApiClient : IWorldTimeApiClient
         
         return result ?? throw new InvalidOperationException($"Could not fetch time for timezone: {timezone}");
     }
+
+	//public async Task<IReadOnlyList<TimezoneDto>> GetAllTimezonesAsync(CancellationToken ct)
+	//{
+	//	var result = await _http.GetFromJsonAsync<List<string>>(
+	//		"api/TimeZone/AvailableTimeZones", ct);
+
+	//	if (result is null)
+	//		throw new InvalidOperationException("Could not fetch timezones");
+
+	//	return result.Select(tz => new TimezoneDto(tz)).ToList();
+	//}
+
+	public async Task<IReadOnlyList<TimezoneDto>> GetAllTimezonesAsync(CancellationToken ct)
+    {
+        var result = await _http.GetFromJsonAsync<List<string>>(
+            "api/TimeZone/AvailableTimeZones", ct);
+        
+        if (result is null)
+            throw new InvalidOperationException("Could not fetch timezones");
+
+        var validPrefixes = new[] 
+        { 
+            "Africa/", "America/", "Antarctica/", "Arctic/", 
+            "Asia/", "Atlantic/", "Australia/", "Europe/", 
+            "Indian/", "Pacific/" 
+        };
+
+        return result
+            .Where(tz => validPrefixes.Any(prefix => tz.StartsWith(prefix)))
+            .Select(tz => new TimezoneDto(tz))
+            .ToList();
+    }
 }

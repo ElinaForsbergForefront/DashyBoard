@@ -27,4 +27,12 @@ public class WorldTimeController : ControllerBase
         var time = await _mediator.Send(new GetTimeByTimezoneQuery(timezone), cancellation);
         return Ok(time);
     }
+
+    [HttpGet("timezones")]
+    [ProducesResponseType(typeof(IReadOnlyList<TimezoneDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllTimezones(CancellationToken cancellation)
+    {
+        var timezones = await _mediator.Send(new GetAllTimezonesQuery(), cancellation);
+        return Ok(timezones);
+    }
 }

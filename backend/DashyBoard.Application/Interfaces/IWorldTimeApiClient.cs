@@ -5,4 +5,5 @@ namespace DashyBoard.Application.Interfaces;
 public interface IWorldTimeApiClient
 {
     Task<WorldTimeDto> GetTimeByTimezoneAsync(string timezone, CancellationToken ct);
+    Task<IReadOnlyList<TimezoneDto>> GetAllTimezonesAsync(CancellationToken ct);
 }
