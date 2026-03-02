@@ -6,5 +6,5 @@ using DashyBoard.Application.Queries.User.Dto;
 
 namespace DashyBoard.Application.Queries.User
 {
-    public record GetUserQuery(Guid Id): IRequest<UserDto>;
+    public record GetUserByIdQuery(Guid Id): IRequest<UserDto>;
 }

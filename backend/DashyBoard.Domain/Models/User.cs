@@ -28,5 +28,13 @@ namespace DashyBoard.Domain.Models
             City = city;
             CreatedAt = DateTime.UtcNow;
         }
+
+        public void Update(string? username, string? displayName, string? country, string? city)
+        {
+            Username = username;
+            DisplayName = displayName;
+            Country = country;
+            City = city;
+        }
     }
 }
