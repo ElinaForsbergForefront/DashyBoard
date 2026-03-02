@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DashyBoard.Infrastructure.Migrations
 {
     [DbContext(typeof(DashyBoardDbContext))]
-    [Migration("20260224142820_AddUserFields")]
-    partial class AddUserFields
+    [Migration("20260302085524_AddAllEntitysToUserTable")]
+    partial class AddAllEntitysToUserTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,7 @@ namespace DashyBoard.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Username")

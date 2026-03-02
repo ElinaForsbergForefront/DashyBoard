@@ -16,7 +16,7 @@ namespace DashyBoard.Infrastructure
                 entity.HasKey(u => u.Id);
 
                 entity.Property(u => u.AuthSub).IsRequired();
-                entity.Property(u => u.Email).IsRequired(false);
+                entity.Property(u => u.Email).IsRequired();
 
                 entity.Property(u => u.Username).IsRequired(false);
                 entity.Property(u => u.DisplayName).IsRequired(false);

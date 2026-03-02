@@ -6,19 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DashyBoard.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserFields : Migration
+    public partial class AddAllEntitysToUserTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "Email",
-                table: "Users",
-                type: "text",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text");
-
             migrationBuilder.AddColumn<string>(
                 name: "AuthSub",
                 table: "Users",
@@ -84,16 +76,6 @@ namespace DashyBoard.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "Username",
                 table: "Users");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Email",
-                table: "Users",
-                type: "text",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
         }
     }
 }
