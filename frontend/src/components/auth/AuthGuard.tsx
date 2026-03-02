@@ -1,12 +1,11 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { LoginModal } from './LoginModal';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export const AuthGuard = ({ children }: AuthGuardProps) => {
-  const { isLoading, isAuthenticated } = useAuth0();
+  const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
 
   if (isLoading) {
     return (
@@ -22,7 +21,8 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
   }
 
   if (!isAuthenticated) {
-    return <LoginModal />;
+    loginWithRedirect();
+    return null;
   }
 
   return <>{children}</>;
