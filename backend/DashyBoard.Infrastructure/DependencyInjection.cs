@@ -1,6 +1,6 @@
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
-using DashyBoard.Application.Interfaces;         
+using DashyBoard.Application.Interfaces;
 using DashyBoard.Infrastructure.External;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -13,72 +13,78 @@ namespace DashyBoard.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration config)
-    {
+	public static IServiceCollection AddInfrastructure(
+		this IServiceCollection services,
+		IConfiguration config)
+	{
 
-        // Gold API
-        services.AddHttpClient<IGoldApiClient, GoldApiClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://api.gold-api.com/");
-        });
+		// Gold API
+		services.AddHttpClient<IGoldApiClient, GoldApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://api.gold-api.com/");
+		});
 
-        //EF Core
-        var cs = config.GetConnectionString("DefaultConnection")
-                 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+		// World Time API
+		services.AddHttpClient<IWorldTimeApiClient, WorldTimeApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://timeapi.io/");
+		});
 
-        services.AddDbContext<DashyBoardDbContext>(options =>
-            options.UseNpgsql(cs));
+		//EF Core
+		var cs = config.GetConnectionString("DefaultConnection")
+				 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
 
-        // MongoDB
-        services.Configure<MongoDbSettings>(
-            config.GetSection(MongoDbSettings.SectionName));
+		services.AddDbContext<DashyBoardDbContext>(options =>
+			options.UseNpgsql(cs));
 
-        services.AddSingleton<IMongoClient>(sp =>
-        {
-            var settings = config
-                .GetSection(MongoDbSettings.SectionName)
-                .Get<MongoDbSettings>()
-                ?? throw new InvalidOperationException("MongoDb settings not configured");
-            return new MongoClient(settings.ConnectionString);
-        });
-        services.AddScoped<IMongoDatabase>(sp =>
-        {
-            var settings = config
-                .GetSection(MongoDbSettings.SectionName)
-                .Get<MongoDbSettings>()
-                ?? throw new InvalidOperationException("MongoDb settings not configured");
-            var client = sp.GetRequiredService<IMongoClient>();
-            return client.GetDatabase(settings.DatabaseName);
-        });
+		// MongoDB
+		services.Configure<MongoDbSettings>(
+			config.GetSection(MongoDbSettings.SectionName));
 
-        // Configure Auth0 JWT Authentication
-        services.Configure<Auth0Settings>(
-            config.GetSection(Auth0Settings.SectionName));
+		services.AddSingleton<IMongoClient>(sp =>
+		{
+			var settings = config
+				.GetSection(MongoDbSettings.SectionName)
+				.Get<MongoDbSettings>()
+				?? throw new InvalidOperationException("MongoDb settings not configured");
+			return new MongoClient(settings.ConnectionString);
+		});
+		services.AddScoped<IMongoDatabase>(sp =>
+		{
+			var settings = config
+				.GetSection(MongoDbSettings.SectionName)
+				.Get<MongoDbSettings>()
+				?? throw new InvalidOperationException("MongoDb settings not configured");
+			var client = sp.GetRequiredService<IMongoClient>();
+			return client.GetDatabase(settings.DatabaseName);
+		});
 
-        var auth0Settings = config
-            .GetSection(Auth0Settings.SectionName)
-            .Get<Auth0Settings>()
-            ?? throw new InvalidOperationException("Auth0 settings not configured");
+		// Configure Auth0 JWT Authentication
+		services.Configure<Auth0Settings>(
+			config.GetSection(Auth0Settings.SectionName));
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.Authority = $"https://{auth0Settings.Domain}/";
-                options.Audience = auth0Settings.Audience;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = $"https://{auth0Settings.Domain}/",
-                    ValidateAudience = true,
-                    ValidAudience = auth0Settings.Audience,
-                    ValidateLifetime = true,
-                };
-            });
+		var auth0Settings = config
+			.GetSection(Auth0Settings.SectionName)
+			.Get<Auth0Settings>()
+			?? throw new InvalidOperationException("Auth0 settings not configured");
 
-        services.AddAuthorization();
+		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			.AddJwtBearer(options =>
+			{
+				options.Authority = $"https://{auth0Settings.Domain}/";
+				options.Audience = auth0Settings.Audience;
+				options.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = true,
+					ValidIssuer = $"https://{auth0Settings.Domain}/",
+					ValidateAudience = true,
+					ValidAudience = auth0Settings.Audience,
+					ValidateLifetime = true,
+				};
+			});
 
-        return services;
-    }
+		services.AddAuthorization();
+
+		return services;
+	}
 }
