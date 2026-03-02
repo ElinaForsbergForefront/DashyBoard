@@ -2,12 +2,14 @@ using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
 using DashyBoard.Application.Interfaces;         
 using DashyBoard.Infrastructure.External;
+using DashyBoard.Infrastructure.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+
 
 namespace DashyBoard.Infrastructure;
 
@@ -23,6 +25,8 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri("https://api.gold-api.com/");
         });
+
+        services.AddScoped<IUserClient, UserClient>();
 
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
