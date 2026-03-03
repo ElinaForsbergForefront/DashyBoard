@@ -32,6 +32,12 @@ public static class DependencyInjection
 			client.BaseAddress = new Uri("https://timeapi.io/");
 		});
 
+		// Weather API
+		services.AddHttpClient<IWeatherApiClient, WeatherApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/");
+		});
+
         services.AddScoped<IUserRepository, UserRepository>();
 
         //EF Core
