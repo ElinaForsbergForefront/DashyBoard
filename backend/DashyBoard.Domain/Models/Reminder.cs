@@ -6,7 +6,6 @@ namespace DashyBoard.Domain.Models
 {
     public class Reminder
     {
-        //TODO: SKAPA MIGRATION FÖR DENNA ENTITY OCH LÄGG TILL EN REMINDER TABLE I DATABASEN
         public Guid Id { get; private set; }
         public Guid UserId { get; private set; }
 
