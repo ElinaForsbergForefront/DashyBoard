@@ -38,8 +38,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");        // ? CORS först
-app.UseHttpsRedirection();           // ? sedan redirect
+app.UseCors("AllowFrontend");
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseUserSync();

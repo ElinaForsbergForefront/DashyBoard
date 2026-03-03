@@ -1,7 +1,4 @@
 ﻿using DashyBoard.Application.Queries.User.Dto;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DashyBoard.Application.Interfaces
 {
