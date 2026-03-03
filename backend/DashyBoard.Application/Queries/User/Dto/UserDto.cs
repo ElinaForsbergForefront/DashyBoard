@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DashyBoard.Application.Queries.User.Dto
+﻿namespace DashyBoard.Application.Queries.User.Dto
 {
     public sealed record UserDto
     {

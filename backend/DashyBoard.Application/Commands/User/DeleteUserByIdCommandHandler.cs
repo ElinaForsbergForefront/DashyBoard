@@ -1,7 +1,4 @@
 ﻿using DashyBoard.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using MediatR;
 
 namespace DashyBoard.Application.Commands.User

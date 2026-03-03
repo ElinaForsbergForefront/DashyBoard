@@ -29,7 +29,15 @@ public class UserSyncMiddleware
 
             if (!string.IsNullOrEmpty(sub) && !string.IsNullOrEmpty(email))
             {
-                await SyncUserAsync(sub, email);
+                try
+                {
+                    await SyncUserAsync(sub, email);
+                }
+                catch (Exception ex)
+                {
+                    // Logga felet men låt requesten fortsätta — sync-fel ska inte blockera användaren
+                    _logger.LogError(ex, "Failed to sync user with sub {Sub}", sub);
+                }
             }
         }
 

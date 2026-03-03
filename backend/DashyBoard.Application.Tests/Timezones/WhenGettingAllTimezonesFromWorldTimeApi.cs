@@ -3,7 +3,7 @@ using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.WorldTime;
 using DashyBoard.Application.Queries.WorldTime.Dto;
 
-namespace DashyBoard.Application.Tests;
+namespace DashyBoard.Application.Tests.Timezones;
 
 public class WhenGettingAllTimezonesFromWorldTimeApi
 {
