@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+using DashyBoard.Infrastructure.Repositories;
+
 
 namespace DashyBoard.Infrastructure;
 
@@ -30,8 +32,10 @@ public static class DependencyInjection
 			client.BaseAddress = new Uri("https://timeapi.io/");
 		});
 
-		//EF Core
-		var cs = config.GetConnectionString("DefaultConnection")
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        //EF Core
+        var cs = config.GetConnectionString("DefaultConnection")
 				 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
 
 		services.AddDbContext<DashyBoardDbContext>(options =>

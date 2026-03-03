@@ -17,7 +17,7 @@ namespace DashyBoard.Domain.Models
 
         private User() { }
 
-        public User(string authSub, string email, string username, string displayName, string country, string city)
+        public User(string authSub, string email, string? username = null, string? displayName = null, string? country = null, string? city = null)
         {
             Id = Guid.NewGuid();
             AuthSub = authSub;
@@ -27,6 +27,14 @@ namespace DashyBoard.Domain.Models
             Country = country;
             City = city;
             CreatedAt = DateTime.UtcNow;
+        }
+
+        public void Update(string? username, string? displayName, string? country, string? city)
+        {
+            Username = username;
+            DisplayName = displayName;
+            Country = country;
+            City = city;
         }
     }
 }
