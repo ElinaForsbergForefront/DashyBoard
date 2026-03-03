@@ -1,0 +1,248 @@
+@import 'tailwindcss';
+
+@layer base {
+  /* Smooth transitions for theme changes */
+  * {
+    @apply transition-colors duration-300;
+  }
+
+  /* Exclude animations and transitions that shouldn't be affected */
+  *,
+  *::before,
+  *::after {
+    @apply transition-colors duration-300;
+  }
+}
+
+@theme {
+  /* Typography */
+  --font-family-base: 'Inter', system-ui, sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Font sizes */
+  --font-size-xs: 14px;
+  --font-size-sm: 16px;
+  --font-size-base: 19px;
+  --font-size-lg: 23px;
+  --font-size-xl: 28px;
+  --font-size-2xl: 33px;
+  --font-size-3xl: 40px;
+  --font-size-4xl: 48px;
+
+  /* Line heights */
+  --line-height-xs: 20px;
+  --line-height-sm: 24px;
+  --line-height-base: 28px;
+  --line-height-lg: 32px;
+  --line-height-xl: 36px;
+  --line-height-2xl: 40px;
+  --line-height-3xl: 48px;
+  --line-height-4xl: 56px;
+
+  /* Letter spacing */
+  --tracking-tight: -0.01em;
+  --tracking-slightly-tight: -0.005em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.01em;
+
+  /* Colors - Dark mode (default) */
+  --color-background: #000000;
+  --color-card: #0f0f0f;
+  --color-popover: #0f0f0f;
+  --color-surface: #1a1a1a;
+  --color-elevated: #141414;
+  --color-overlay: rgba(255, 255, 255, 0.05);
+  --color-glass: rgba(255, 255, 255, 0.08);
+
+  --color-foreground: #f2f2f2;
+  --color-foreground-secondary: #cfcfcf;
+  --color-muted: #a6a6a6;
+  --color-inverse: #000000;
+
+  --color-border: #262626;
+  --color-border-subtle: #1c1c1c;
+  --color-ring: #3399ff;
+
+  --color-primary: #3399ff;
+  --color-primary-hover: #2b85e6;
+  --color-primary-active: #1f6fcc;
+  --color-accent: #308ce8;
+  --color-accent-hover: #2677c7;
+  --color-link: #3399ff;
+  --color-link-hover: #66b2ff;
+  --color-disabled: #404040;
+
+  --color-input: #262626;
+  --color-placeholder: #9ca3af;
+
+  --color-destructive: #dc2828;
+  --color-destructive-hover: #b91c1c;
+  --color-destructive-subtle: #2a0d0d;
+  --color-success: #22c55e;
+  --color-success-hover: #16a34a;
+  --color-success-subtle: #0d2618;
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-subtle: #2a1a05;
+  --color-info: #0ea5e9;
+  --color-info-hover: #0284c7;
+
+  --color-on-primary: #ffffff;
+  --color-on-accent: #ffffff;
+  --color-on-destructive: #ffffff;
+  --color-on-success: #ffffff;
+  --color-on-warning: #000000;
+  --color-on-info: #ffffff;
+}
+
+/* Light mode overrides */
+.light {
+  --color-background: #ffffff;
+  --color-card: #f8f8f8;
+  --color-popover: #ffffff;
+  --color-surface: #f0f0f0;
+  --color-elevated: #ffffff;
+  --color-overlay: rgba(0, 0, 0, 0.05);
+  --color-glass: rgba(0, 0, 0, 0.08);
+
+  --color-foreground: #171717;
+  --color-foreground-secondary: #404040;
+  --color-muted: #737373;
+  --color-inverse: #ffffff;
+
+  --color-border: #e5e5e5;
+  --color-border-subtle: #f0f0f0;
+  --color-ring: #2563eb;
+
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1e40af;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-link: #2563eb;
+  --color-link-hover: #1d4ed8;
+  --color-disabled: #d4d4d4;
+
+  --color-input: #ffffff;
+  --color-placeholder: #9ca3af;
+
+  --color-destructive: #dc2626;
+  --color-destructive-hover: #b91c1c;
+  --color-destructive-subtle: #fef2f2;
+  --color-success: #16a34a;
+  --color-success-hover: #15803d;
+  --color-success-subtle: #f0fdf4;
+  --color-warning: #d97706;
+  --color-warning-hover: #b45309;
+  --color-warning-subtle: #fffbeb;
+  --color-info: #0284c7;
+  --color-info-hover: #0369a1;
+
+  --color-on-primary: #ffffff;
+  --color-on-accent: #ffffff;
+  --color-on-destructive: #ffffff;
+  --color-on-success: #ffffff;
+  --color-on-warning: #000000;
+  --color-on-info: #ffffff;
+}
+
+/* Base styles */
+@layer base {
+  html {
+    font-family: var(--font-family-base);
+  }
+
+  h1 {
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-4xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  h2 {
+    font-size: var(--font-size-3xl);
+    line-height: var(--line-height-3xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-slightly-tight);
+  }
+
+  h3 {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-2xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  h4 {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-xl);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  h5 {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-lg);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  h6 {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  body {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-sm);
+    font-weight: var(--font-weight-regular);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  small,
+  .text-small {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-xs);
+    font-weight: var(--font-weight-regular);
+    letter-spacing: var(--tracking-wide);
+  }
+}
+
+/* Glass effect utilities */
+@layer components {
+  .glass-base {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-active {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg;
+  }
+
+  .glass-hover {
+    @apply hover:bg-white/5;
+  }
+
+  .glass-smooth {
+    @apply transition-all duration-300;
+  }
+}
+
+/* Light mode glass adjustments */
+.light {
+  .glass-base {
+    @apply bg-black/5 border-black/10;
+  }
+
+  .glass-active {
+    @apply bg-black/10 border-black/20;
+  }
+
+  .glass-hover {
+    @apply hover:bg-black/5;
+  }
+}
