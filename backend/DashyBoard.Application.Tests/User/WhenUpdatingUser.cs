@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Moq;
-using NUnit.Framework;
+﻿using Moq;
 using DashyBoard.Application.Commands.User;
 using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.User.Dto;

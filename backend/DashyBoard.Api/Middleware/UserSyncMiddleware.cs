@@ -29,7 +29,7 @@ public class UserSyncMiddleware
 
             if (!string.IsNullOrEmpty(sub) && !string.IsNullOrEmpty(email))
             {
-                await SyncUserAsync(sub, email); // ✅ anropar nu SyncUserAsync
+                    await SyncUserAsync(sub, email);
             }
         }
 

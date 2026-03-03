@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DashyBoard.Application.Queries.User.Dto;
+﻿using DashyBoard.Application.Queries.User.Dto;
 using Moq;
 using DashyBoard.Application.Interfaces;    
 using DashyBoard.Application.Queries.User;

@@ -15,7 +15,7 @@ function App() {
       try {
         const token = await getAccessTokenSilently({
           authorizationParams: {
-            audience: import.meta.env.VITE_AUTH0_AUDIENCE, // ✅ audience specificerat
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE, // audience specificerat
           },
         });
         await fetch(`${import.meta.env.VITE_API_URL}/api/user/me`, {

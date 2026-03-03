@@ -1,9 +1,6 @@
 ﻿using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.User.Dto;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DashyBoard.Application.Commands.User
 {
