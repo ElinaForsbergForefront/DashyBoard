@@ -43,6 +43,14 @@ namespace DashyBoard.Api.Controllers
             return Ok(userProfile);
         }
 
+        [HttpGet("allUsernames")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllUsernames()
+        {
+            var usernames = await _mediator.Send(new GetAllUsernamesQuery());
+            return Ok(usernames);
+        }
+
         [HttpDelete("me")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DeleteCurrentUser(CancellationToken ct)
