@@ -12,8 +12,7 @@ namespace DashyBoard.Infrastructure.External
 
         public async Task<WeatherSymbolDto>GetWeatherSymbolAsync(string longi, string lati, CancellationToken ct)
         {
-            var result = await _http.GetFromJsonAsync<WeatherSymbolDto>($"geotype/point/lon/{longi}/lat/{lati}/data.json?timeseries=1&parameters/air_temperature,wind_speed,symbol_code", ct);
-            Console.WriteLine(result);
+            var result = await _http.GetFromJsonAsync<WeatherSymbolDto>($"geotype/point/lon/{longi}/lat/{lati}/data.json?timeseries=1", ct);
             return result ?? throw new InvalidOperationException("Empty response from Weather API.");
         }
     }
