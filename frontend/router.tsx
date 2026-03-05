@@ -1,6 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 import App from './src/App';
 import { ColorPalette } from './src/ColorPalette';
+import { Form } from './src/components/layout/Form';
+import { Dashboard } from './src/pages/Dashboard';
 
 export const router = createBrowserRouter([
   {
@@ -10,7 +12,15 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <div>Welcome to the Dashboard!</div>,
+        element: <Dashboard />,
+      },
+      {
+        path: '/dashboard',
+        element: <Dashboard />,
+      },
+      {
+        path: '/complete-profile',
+        element: <Form />,
       },
       {
         path: '/style-guide',

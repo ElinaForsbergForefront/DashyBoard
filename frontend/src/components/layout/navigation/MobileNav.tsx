@@ -4,10 +4,11 @@ import { usePermissions } from '../../../hooks/usePermissions';
 
 interface MobileNavProps {
   isOpen: boolean;
+  disabled?: boolean;
   onClose: () => void;
 }
 
-export const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
+export const MobileNav = ({ isOpen, disabled = false, onClose }: MobileNavProps) => {
   const { hasPermission } = usePermissions();
   return (
     <nav
@@ -28,13 +29,15 @@ export const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
               <NavLink
                 to={to}
                 role="menuitem"
-                onClick={onClose}
+                aria-disabled={disabled}
+                tabIndex={disabled ? -1 : undefined}
+                onClick={disabled ? (event) => event.preventDefault() : onClose}
                 className={({ isActive }) =>
                   `block w-full px-4 py-3 text-base font-medium rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     isActive
                       ? 'bg-overlay text-foreground'
                       : 'text-muted hover:text-foreground hover:bg-overlay'
-                  }`
+                  } ${disabled ? 'pointer-events-none opacity-50' : ''}`
                 }
               >
                 {label}

@@ -1,14 +1,16 @@
 interface MenuButtonProps {
   isOpen: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
-export const MenuButton = ({ isOpen, onClick }: MenuButtonProps) => {
+export const MenuButton = ({ isOpen, disabled = false, onClick }: MenuButtonProps) => {
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClick}
-      className="inline-flex items-center justify-center size-10 rounded-md md:hidden text-muted hover:text-foreground hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="inline-flex items-center justify-center size-10 rounded-md md:hidden text-muted hover:text-foreground hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       aria-expanded={isOpen}
       aria-controls="mobile-menu"
       aria-label={isOpen ? 'Close main menu' : 'Open main menu'}

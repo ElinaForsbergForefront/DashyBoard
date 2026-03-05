@@ -1,35 +1,89 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from './components/layout/Navigation';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { getCurrentUser } from './api/users';
 
+const REQUIRED_PROFILE_FIELDS = ['username', 'displayName', 'country', 'city'] as const;
 
 function App() {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isCheckingProfile, setIsCheckingProfile] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
+  const shouldShowNavigation = isAuthenticated;
+  const isProfileFormRoute = location.pathname === '/complete-profile';
+
+  useEffect(() => {
+    const onProfileCompleted = () => setIsProfileComplete(true);
+    window.addEventListener('profile-completed', onProfileCompleted);
+
+    return () => {
+      window.removeEventListener('profile-completed', onProfileCompleted);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const syncUser = async () => {
+    const loadCurrentUser = async () => {
+      setIsCheckingProfile(true);
       try {
         const token = await getAccessTokenSilently({
           authorizationParams: {
-            audience: import.meta.env.VITE_AUTH0_AUDIENCE, // audience specificerat
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
           },
         });
-        await fetch(`${import.meta.env.VITE_API_URL}/api/user/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+
+        const currentUser = await getCurrentUser(token);
+        const hasMissingFields = REQUIRED_PROFILE_FIELDS.some((field) => {
+          const value = currentUser[field];
+          return value == null || !value.trim();
         });
+
+        setIsProfileComplete(!hasMissingFields);
       } catch (error) {
-        console.error('Failed to sync user:', error);
+        console.error('Failed to load current user:', error);
+        setIsProfileComplete(false);
+      } finally {
+        setIsCheckingProfile(false);
       }
     };
 
-    syncUser();
+    loadCurrentUser();
   }, [isAuthenticated, getAccessTokenSilently]);
+
+  useEffect(() => {
+    if (!isAuthenticated || isCheckingProfile || isProfileComplete === null) return;
+
+    const isFormRoute = location.pathname === '/complete-profile';
+
+    if (!isProfileComplete && !isFormRoute) {
+      navigate('/complete-profile', { replace: true });
+      return;
+    }
+
+    if (isProfileComplete && isFormRoute) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, isCheckingProfile, isProfileComplete, location.pathname, navigate]);
+
+  if (isAuthenticated && (isCheckingProfile || isProfileComplete === null)) {
+    return (
+      <AuthGuard>
+        <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+          <div className="text-center">
+            <div className="mb-4 inline-block">
+              <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+            <p className="text-lg">Loading profile...</p>
+          </div>
+        </div>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard>
@@ -40,7 +94,7 @@ function App() {
         >
           Skip to main content
         </a>
-        {isAuthenticated && <Navigation />}
+        {shouldShowNavigation && <Navigation disableInteractions={isProfileFormRoute} />}
         <main id="main-content">
           <Outlet />
         </main>
