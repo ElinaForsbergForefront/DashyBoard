@@ -7,6 +7,9 @@ using DashyBoard.Application.Queries.User.Dto;
 
 namespace DashyBoard.Api.Controllers
 {
+    public sealed record UpdateUserRequest(string? Username, string? DisplayName, string? Country, string? City);
+
+
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -75,7 +78,7 @@ namespace DashyBoard.Api.Controllers
 
         [HttpPut("me")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserBySubCommand command, CancellationToken ct)
+        public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserRequest request, CancellationToken ct)
         {
             var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? User.FindFirst("sub")?.Value;
@@ -83,15 +86,18 @@ namespace DashyBoard.Api.Controllers
             if (string.IsNullOrEmpty(sub))
                 return Unauthorized();
 
-            var result = await _mediator.Send(command with { sub = sub }, ct);
+            var command = new UpdateUserBySubCommand(sub, request.Username, request.DisplayName, request.Country, request.City);
+            var result = await _mediator.Send(command, ct);
             return Ok(result);
         }
 
+
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateUserById(Guid id, [FromBody] UpdateUserByIdCommand command, CancellationToken ct)
+        public async Task<IActionResult> UpdateUserById(Guid id, [FromBody] UpdateUserRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(command with { Id = id }, ct);
+            var command = new UpdateUserByIdCommand(id, request.Username, request.DisplayName, request.Country, request.City);
+            var result = await _mediator.Send(command, ct);
             return Ok(result);
         }
     }
