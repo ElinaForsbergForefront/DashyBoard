@@ -32,6 +32,12 @@ public static class DependencyInjection
 			client.BaseAddress = new Uri("https://timeapi.io/");
 		});
 
+        // TrafikLab Realtime API
+        services.AddHttpClient<ITrafficApiClient, TrafficApiClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://realtime-api.trafiklab.se/v1/");
+        });
+
         services.AddScoped<IUserRepository, UserRepository>();
 
         //EF Core
