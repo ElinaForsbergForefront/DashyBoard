@@ -63,32 +63,6 @@ public static class DependencyInjection
 			return client.GetDatabase(settings.DatabaseName);
 		});
 
-		// Configure Auth0 JWT Authentication
-		services.Configure<Auth0Settings>(
-			config.GetSection(Auth0Settings.SectionName));
-
-		var auth0Settings = config
-			.GetSection(Auth0Settings.SectionName)
-			.Get<Auth0Settings>()
-			?? throw new InvalidOperationException("Auth0 settings not configured");
-
-		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-			.AddJwtBearer(options =>
-			{
-				options.Authority = $"https://{auth0Settings.Domain}/";
-				options.Audience = auth0Settings.Audience;
-				options.TokenValidationParameters = new TokenValidationParameters
-				{
-					ValidateIssuer = true,
-					ValidIssuer = $"https://{auth0Settings.Domain}/",
-					ValidateAudience = true,
-					ValidAudience = auth0Settings.Audience,
-					ValidateLifetime = true,
-				};
-			});
-
-		services.AddAuthorization();
-
 		return services;
 	}
 }
