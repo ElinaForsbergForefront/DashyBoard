@@ -41,6 +41,21 @@ public static class DependencyInjection
         // Users
 		services.AddScoped<IUserRepository, UserRepository>();
 
+        // TrafikLab Realtime API
+        services.AddHttpClient<ITrafficApiClient, TrafficApiClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://realtime-api.trafiklab.se/v1/");
+        });
+
+        // Mirror
+        services.AddScoped<IMirrorRepository, MirrorRepository>();
+
+        //Reminders
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+
+        // Users
+		services.AddScoped<IUserRepository, UserRepository>();
+
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
