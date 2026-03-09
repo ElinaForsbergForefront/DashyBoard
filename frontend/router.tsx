@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import App from './src/App';
 import { ColorPalette } from './src/ColorPalette';
+import { Dashboard } from './src/pages/Dashboard';
 
 export const router = createBrowserRouter([
   {
@@ -10,7 +11,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <div>Welcome to the Dashboard!</div>,
+        element: <Dashboard />,
       },
       {
         path: '/style-guide',
