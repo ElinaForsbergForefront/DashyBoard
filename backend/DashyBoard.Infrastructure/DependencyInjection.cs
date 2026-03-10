@@ -35,7 +35,7 @@ public static class DependencyInjection
 		// Weather API
 		services.AddHttpClient<IWeatherApiClient, WeatherApiClient>(client =>
 		{
-			client.BaseAddress = new Uri("https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/");
+			client.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
 		});
 
         services.AddScoped<IUserRepository, UserRepository>();

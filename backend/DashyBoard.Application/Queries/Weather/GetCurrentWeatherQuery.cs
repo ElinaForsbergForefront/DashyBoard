@@ -3,5 +3,5 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Weather
 {
-    public sealed record GetWeatherSymbolQuery(string longi, string lati) : IRequest<WeatherSymbolDto>;
+    public sealed record GetCurrentWeatherQuery(string longi, string lati) : IRequest<CurrentWeatherDto>;
 }

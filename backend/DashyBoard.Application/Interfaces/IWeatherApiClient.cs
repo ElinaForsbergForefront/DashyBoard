@@ -5,6 +5,7 @@ namespace DashyBoard.Application.Interfaces
 {
     public interface IWeatherApiClient
     {
-        Task<WeatherSymbolDto> GetWeatherSymbolAsync(string longi, string lati, CancellationToken ct);
+        Task<CurrentWeatherDto> GetCurrentWeatherAsync(string longi, string lati, CancellationToken ct);
+        Task<WeatherForecastDto> GetWeatherForecastAsync(string longi, string lati, CancellationToken ct);
     }
 }
