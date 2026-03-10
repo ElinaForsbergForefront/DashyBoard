@@ -2,34 +2,12 @@ import { Outlet } from 'react-router-dom';
 import { Navigation } from './components/layout/Navigation';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect } from 'react';
-
+import { useGetCurrentUserQuery } from './api/endpoints/user';
 
 function App() {
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated } = useAuth0();
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const syncUser = async () => {
-      try {
-        const token = await getAccessTokenSilently({
-          authorizationParams: {
-            audience: import.meta.env.VITE_AUTH0_AUDIENCE, // audience specificerat
-          },
-        });
-        await fetch(`${import.meta.env.VITE_API_URL}/api/user/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } catch (error) {
-        console.error('Failed to sync user:', error);
-      }
-    };
-
-    syncUser();
-  }, [isAuthenticated, getAccessTokenSilently]);
+  useGetCurrentUserQuery(undefined, { skip: !isAuthenticated });
 
   return (
     <AuthGuard>
@@ -51,5 +29,3 @@ function App() {
 }
 
 export default App;
-
-
