@@ -1,4 +1,5 @@
 ﻿using DashyBoard.Application.Interfaces;
+using DashyBoard.Application.Mappers.Weather;
 using DashyBoard.Application.Queries.Weather.Dto;
 using MediatR;
 
@@ -15,7 +16,20 @@ namespace DashyBoard.Application.Queries.Weather
 
         public async Task<WeatherForecastDto> Handle(GetWeatherForecastQuery request, CancellationToken cancellationToken)
         {
-            return await _weatherClient.GetWeatherForecastAsync(request.longi, request.lati, cancellationToken);
+            var raw = await _weatherClient.GetWeatherForecastAsync(request.longi, request.lati, cancellationToken);
+
+            return new WeatherForecastDto(
+                raw.latitude,
+                raw.longitude,
+                new Forecast(
+                    raw.hourly.Time,
+                    raw.hourly.Temperature,
+                    raw.hourly.WeatherCode.Select(WeatherCodeMapper.ToWeatherType).ToList(),
+                    raw.hourly.WindSpeed,
+                    raw.hourly.Precipitation,
+                    raw.hourly.PrecipitationProbability
+                )
+            );
         }
     }
 }
