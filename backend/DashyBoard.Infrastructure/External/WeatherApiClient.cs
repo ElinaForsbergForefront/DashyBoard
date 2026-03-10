@@ -13,7 +13,7 @@ namespace DashyBoard.Infrastructure.External
 
         public async Task<RawCurrentWeatherDto> GetCurrentWeatherAsync(string longi, string lati, CancellationToken ct)
         {
-            var result = await _http.GetFromJsonAsync<RawCurrentWeatherDto>($"forecast?latitude={lati}&longitude={longi}&current=temperature_2m,weather_code,precipitation,wind_speed_10m,precipitation_probability", ct);
+            var result = await _http.GetFromJsonAsync<RawCurrentWeatherDto>($"forecast?latitude={lati}&longitude={longi}&current=temperature_2m,weather_code,precipitation,wind_speed_10m,precipitation_probability,apparent_temperature", ct);
             return result ?? throw new InvalidOperationException("Empty response from Weather API.");
         }
 

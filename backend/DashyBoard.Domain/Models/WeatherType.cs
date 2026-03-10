@@ -20,6 +20,7 @@ namespace DashyBoard.Domain.Models
         SnowFall,
         SnowShowers,
         Thunderstorm,
-        ThunderstormWithHail
+        ThunderstormWithHail,
+        Unknown
     }
 }

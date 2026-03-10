@@ -19,15 +19,15 @@ namespace DashyBoard.Application.Queries.Weather
             var raw = await _weatherClient.GetWeatherForecastAsync(request.longi, request.lati, cancellationToken);
 
             return new WeatherForecastDto(
-                raw.latitude,
-                raw.longitude,
+                raw.Latitude,
+                raw.Longitude,
                 new Forecast(
-                    raw.hourly.Time,
-                    raw.hourly.Temperature,
-                    raw.hourly.WeatherCode.Select(WeatherCodeMapper.ToWeatherType).ToList(),
-                    raw.hourly.WindSpeed,
-                    raw.hourly.Precipitation,
-                    raw.hourly.PrecipitationProbability
+                    raw.Hourly.Time,
+                    raw.Hourly.Temperature,
+                    raw.Hourly.WeatherCode.Select(WeatherCodeMapper.ToWeatherType).ToList(),
+                    raw.Hourly.WindSpeed,
+                    raw.Hourly.Precipitation,
+                    raw.Hourly.PrecipitationProbability
                 )
             );
         }

@@ -17,6 +17,7 @@ namespace DashyBoard.Api.Controllers
 
         [HttpGet("CurrentWeather/{longi}/{lati}")]
         [ProducesResponseType(typeof(CurrentWeatherDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeatherSymbol(string longi, string lati, CancellationToken cancellation)
         {
             var weather = await _mediator.Send(new GetCurrentWeatherQuery(longi, lati), cancellation);
@@ -25,6 +26,7 @@ namespace DashyBoard.Api.Controllers
 
         [HttpGet("WeatherForecast/{longi}/{lati}")]
         [ProducesResponseType(typeof(WeatherForecastDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetCurrentWeather(string longi, string lati, CancellationToken cancellation)
         {
             var weather = await _mediator.Send(new GetWeatherForecastQuery(longi, lati), cancellation);
