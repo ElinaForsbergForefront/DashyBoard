@@ -4,16 +4,17 @@ using DashyBoard.Domain.Models;
 namespace DashyBoard.Application.Queries.Weather.Dto
 {
     public sealed record CurrentWeatherDto(
-    double latitude,
-    double longitude,
-    WeatherData current
+    double Latitude,
+    double Longitude,
+    WeatherData Current
     );
 
     public sealed record WeatherData(
-     [property: JsonPropertyName("temperature_2m")] double air_temperature,
-     [property: JsonPropertyName("wind_speed")] double wind_speed,
-     [property: JsonPropertyName("weather_code")] WeatherType weather_code,
-     [property: JsonPropertyName("precipitation")] double precipitation,
-     [property: JsonPropertyName("precipitation_probability")] double precipitation_probability
+     [property: JsonPropertyName("temperature_2m")] double AirTemperature,
+     [property: JsonPropertyName("apparent_temperature")] double ApperentTemperature,
+     [property: JsonPropertyName("wind_speed")] double WindSpeed,
+     [property: JsonPropertyName("weather_code")] WeatherType WeatherCode,
+     [property: JsonPropertyName("precipitation")] double Precipitation,
+     [property: JsonPropertyName("precipitation_probability")] double PrecipitationProbability
     );
 }

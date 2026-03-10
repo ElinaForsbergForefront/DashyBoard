@@ -18,7 +18,7 @@ namespace DashyBoard.Application.Mappers.Weather
             85 or 86 => WeatherType.SnowShowers,
             95 => WeatherType.Thunderstorm,
             96 or 99 => WeatherType.ThunderstormWithHail,
-            _ => WeatherType.Overcast
+            _ => WeatherType.Unknown
         };
     }
 }
