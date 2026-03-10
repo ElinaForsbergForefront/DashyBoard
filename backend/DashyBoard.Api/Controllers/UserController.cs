@@ -22,7 +22,8 @@ namespace DashyBoard.Api.Controllers
 
         private string? GetCurrentSub()
         {
-            return User.Identity?.Name;
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
         }
 
         [HttpGet("profile/{userId}")]
