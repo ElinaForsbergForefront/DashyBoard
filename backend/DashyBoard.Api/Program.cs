@@ -2,6 +2,7 @@ using DashyBoard.Api.Middleware;
 using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using DashyBoard.Application;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,11 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
