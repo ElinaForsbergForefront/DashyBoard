@@ -101,4 +101,86 @@ public sealed class TrafficApiClient : ITrafficApiClient
             })
             .ToList() ?? [];
     }
+
+
+    public async Task<IReadOnlyList<DepartureDto>> GetDeparturesSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
+    {
+        var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}?key={_apiKey}", ct);
+        return doc?.RootElement
+            .GetProperty("departures")
+            .EnumerateArray()
+            .Select(d =>
+            {
+                var route = d.GetProperty("route");
+                var platform = d.GetProperty("realtime_platform");
+
+                return new DepartureDto(
+                    d.GetProperty("scheduled").GetDateTime(),
+                    d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
+                    d.GetProperty("delay").GetInt32(),
+                    d.GetProperty("canceled").GetBoolean(),
+                    route.GetProperty("designation").GetString()!,
+                    route.GetProperty("direction").GetString()!,
+                    route.GetProperty("transport_mode").GetString()!,
+                    platform.GetProperty("designation").GetString()!
+                );
+            })
+            .ToList() ?? [];
+    }
+
+
+
+
+    public async Task<IReadOnlyList<ArrivalDto>> GetArrivalsAsync(string siteId, CancellationToken ct = default)
+    {
+        var doc = await _http.GetFromJsonAsync<JsonDocument>($"arrivals/{siteId}?key={_apiKey}", ct);
+        return doc?.RootElement
+            .GetProperty("arrivals")
+            .EnumerateArray()
+            .Select(d =>
+            {
+                var route = d.GetProperty("route");
+                var platform = d.GetProperty("realtime_platform");
+
+                return new ArrivalDto(
+                    d.GetProperty("scheduled").GetDateTime(),
+                    d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
+                    d.GetProperty("delay").GetInt32(),
+                    d.GetProperty("canceled").GetBoolean(),
+                    route.GetProperty("designation").GetString()!,
+                    route.GetProperty("direction").GetString()!,
+                    route.GetProperty("transport_mode").GetString()!,
+                    platform.GetProperty("designation").GetString()!
+                );
+            })
+            .ToList() ?? [];
+    }
+
+
+    public async Task<IReadOnlyList<ArrivalDto>> GetArrivalsSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
+    {
+        var doc = await _http.GetFromJsonAsync<JsonDocument>($"arrivals/{siteId}?key={_apiKey}", ct);
+        return doc?.RootElement
+            .GetProperty("arrivals")
+            .EnumerateArray()
+            .Select(d =>
+            {
+                var route = d.GetProperty("route");
+                var platform = d.GetProperty("realtime_platform");
+
+                return new ArrivalDto(
+                    d.GetProperty("scheduled").GetDateTime(),
+                    d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
+                    d.GetProperty("delay").GetInt32(),
+                    d.GetProperty("canceled").GetBoolean(),
+                    route.GetProperty("designation").GetString()!,
+                    route.GetProperty("direction").GetString()!,
+                    route.GetProperty("transport_mode").GetString()!,
+                    platform.GetProperty("designation").GetString()!
+                );
+            })
+            .ToList() ?? [];
+    }
+
+
 }
