@@ -1,24 +1,37 @@
 import { useEditModeContext } from '../../../context/EditModeContext';
 
 export function EditModeToggle() {
-  const { isEditMode, enterEditMode, saveEditMode, discardEditMode } = useEditModeContext();
+  const { isEditMode, enterEditMode, saveEditMode, discardEditMode, toggleSidebar } =
+    useEditModeContext();
 
   if (isEditMode) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <>
+        {/* Mobile: widgets button bottom-left */}
         <button
-          onClick={discardEditMode}
-          className="px-4 py-2 rounded-full text-sm font-medium border border-border bg-surface text-foreground-secondary hover:text-foreground hover:bg-overlay transition-all cursor-pointer"
+          onClick={toggleSidebar}
+          aria-label="Open widgets"
+          className="lg:hidden fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary transition-all duration-200 flex items-center justify-center cursor-pointer"
         >
-          Discard
+          <WidgetsIcon />
         </button>
-        <button
-          onClick={saveEditMode}
-          className="px-4 py-2 rounded-full text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-all cursor-pointer shadow-lg"
-        >
-          Save
-        </button>
-      </div>
+
+        {/* Save / Discard bottom-right */}
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <button
+            onClick={discardEditMode}
+            className="px-4 py-2 rounded-full text-sm font-medium border border-border bg-surface text-foreground-secondary hover:text-foreground hover:bg-overlay transition-all cursor-pointer"
+          >
+            Discard
+          </button>
+          <button
+            onClick={saveEditMode}
+            className="px-4 py-2 rounded-full text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-all cursor-pointer shadow-lg"
+          >
+            Save
+          </button>
+        </div>
+      </>
     );
   }
 
@@ -49,6 +62,27 @@ function PencilIcon() {
     >
       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
       <path d="m15 5 4 4" />
+    </svg>
+  );
+}
+
+function WidgetsIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
     </svg>
   );
 }

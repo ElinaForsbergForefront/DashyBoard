@@ -9,6 +9,7 @@ function getInitialEditMode(): boolean {
 
 export function useEditMode() {
   const [isEditMode, setIsEditMode] = useState<boolean>(getInitialEditMode);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const enterEditMode = () => {
     setIsEditMode(true);
@@ -17,13 +18,17 @@ export function useEditMode() {
 
   const saveEditMode = () => {
     setIsEditMode(false);
+    setIsSidebarOpen(false);
     localStorage.setItem(STORAGE_KEY, 'false');
   };
 
   const discardEditMode = () => {
     setIsEditMode(false);
+    setIsSidebarOpen(false);
     localStorage.setItem(STORAGE_KEY, 'false');
   };
 
-  return { isEditMode, enterEditMode, saveEditMode, discardEditMode };
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+
+  return { isEditMode, enterEditMode, saveEditMode, discardEditMode, isSidebarOpen, toggleSidebar };
 }
