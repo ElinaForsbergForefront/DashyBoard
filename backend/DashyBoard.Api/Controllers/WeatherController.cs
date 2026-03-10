@@ -15,28 +15,21 @@ namespace DashyBoard.Api.Controllers
             _mediator = mediator;
         }
 
-        //[HttpGet("CurrentWeather")]
-        //[ProducesResponseType(typeof(CurrentWeatherDto), StatusCodes.Status200OK)]
-        //public async Task<IActionResult> GetCurrentWeather(CancellationToken cancellation)
-        //{
-        //    var weather = await _mediator.Send(new GetCurrentWeatherQuery(), cancellation);
-        //    return Ok(weather);
-        //
-        //}
         [HttpGet("CurrentWeather/{longi}/{lati}")]
-        [ProducesResponseType(typeof(WeatherSymbolDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CurrentWeatherDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetWeatherSymbol(string longi, string lati, CancellationToken cancellation)
         {
-            var weatherSymbol = await _mediator.Send(new GetWeatherSymbolQuery(longi, lati), cancellation);
-            return Ok(weatherSymbol);
+            var weather = await _mediator.Send(new GetCurrentWeatherQuery(longi, lati), cancellation);
+            return Ok(weather);
+        }
+
+        [HttpGet("WeatherForecast/{longi}/{lati}")]
+        [ProducesResponseType(typeof(WeatherForecastDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetCurrentWeather(string longi, string lati, CancellationToken cancellation)
+        {
+            var weather = await _mediator.Send(new GetWeatherForecastQuery(longi, lati), cancellation);
+            return Ok(weather);
+        
         }
     }
 }
-// Comments for deveolping.
-// https://opendata.smhi.se/metfcst/snow1gv1/parameters
-// We want Weather symbol (symbol_code)
-// We want air temperature (air_temperature)
-
-// We mabye want Percipitation Type (predominant_precipitation_type_at_surface)
-// We mabye want wind speed (wind_speed)
-// We mabye want wind direction (wind_from_direction)
