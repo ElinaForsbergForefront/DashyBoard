@@ -1,6 +1,7 @@
 ﻿using DashyBoard.Application.Queries.Traffic.GetAllStops;
 using DashyBoard.Application.Queries.Traffic.GetStopByName;
 using DashyBoard.Application.Queries.Traffic.GetDepartures;
+using DashyBoard.Application.Queries.Traffic.GetArrivals;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,4 +29,16 @@ public class TrafficController : ControllerBase
     [HttpGet("departures/{siteId}")]
     public async Task<IActionResult> GetDepartures(string siteId, CancellationToken ct)
         => Ok(await _mediator.Send(new GetDeparturesQuery(siteId), ct));
+
+    [HttpGet("departures/{siteId}/{dateTime}")]
+    public async Task<IActionResult> GetDepartures(string siteId, string dateTime, CancellationToken ct)
+    => Ok(await _mediator.Send(new GetDeparturesSpecificTimeQuery(siteId, dateTime), ct));
+
+    [HttpGet("arrivals/{siteId}")]
+    public async Task<IActionResult> GetArrivals(string siteId, CancellationToken ct)
+    => Ok(await _mediator.Send(new GetArrivalsQuery(siteId), ct));
+
+    [HttpGet("arrivals/{siteId}/{dateTime}")]
+    public async Task<IActionResult> GetArrivals(string siteId, string dateTime, CancellationToken ct)
+=> Ok(await _mediator.Send(new GetArrivalsSpecificTimeQuery(siteId, dateTime), ct));
 }
