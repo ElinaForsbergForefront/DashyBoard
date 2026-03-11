@@ -13,10 +13,10 @@ namespace DashyBoard.Application.Tests.Weather
         public async Task ThenValidRequestShouldReturnWeatherForecast()
         {
             // Arrange
-            var expectedForecast = new RawWeatherForecastDto(
+            var expectedForecast = new RawHourlyWeatherForecastDto(
                 59,
                 18,
-                new RawForecastData(
+                new RawHourlyForecastData(
                     ["2024-06-01T00:00:00Z"],
                     [15.5],
                     [0],
@@ -27,14 +27,14 @@ namespace DashyBoard.Application.Tests.Weather
                );
 
             var mockClient = new Mock<IWeatherApiClient>();
-            mockClient.Setup(client => client.GetWeatherForecastAsync("10", "10", It.IsAny<CancellationToken>()))
+            mockClient.Setup(client => client.GetHourlyWeatherForecastAsync("10", "10", It.IsAny<CancellationToken>()))
                       .ReturnsAsync(expectedForecast);
 
-            var handler = new GetWeatherForecastQueryHandler(mockClient.Object);
+            var handler = new GetHourlyWeatherForecastQueryHandler(mockClient.Object);
 
             // Act
             var result = await handler.Handle(
-                new GetWeatherForecastQuery("10", "10"),
+                new GetHourlyWeatherForecastQuery("10", "10"),
                 CancellationToken.None);
 
             // Assert

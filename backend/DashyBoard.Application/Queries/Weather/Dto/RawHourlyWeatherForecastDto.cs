@@ -2,13 +2,13 @@ using System.Text.Json.Serialization;
 
 namespace DashyBoard.Application.Queries.Weather.Dto
 {
-    public sealed record RawWeatherForecastDto(
+    public sealed record RawHourlyWeatherForecastDto(
         double Latitude,
         double Longitude,
-        RawForecastData Hourly
+        RawHourlyForecastData Hourly
     );
 
-    public sealed record RawForecastData(
+    public sealed record RawHourlyForecastData(
         [property: JsonPropertyName("time")] List<string> Time,
         [property: JsonPropertyName("temperature_2m")] List<double> Temperature,
         [property: JsonPropertyName("weather_code")] List<int> WeatherCode,

@@ -3,10 +3,10 @@
 namespace DashyBoard.Application.Queries.Weather.Dto
 {
     public sealed record RawCurrentWeatherDto(
-    double Latitude,
-    double Longitude,
-    RawWeatherData Current
-);
+        double Latitude,
+        double Longitude,
+        RawWeatherData Current
+    );
 
     public sealed record RawWeatherData(
         [property: JsonPropertyName("temperature_2m")] double AirTemperature,

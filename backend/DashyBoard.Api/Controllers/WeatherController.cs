@@ -18,20 +18,32 @@ namespace DashyBoard.Api.Controllers
         [HttpGet("CurrentWeather/{longi}/{lati}")]
         [ProducesResponseType(typeof(CurrentWeatherDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeatherSymbol(string longi, string lati, CancellationToken cancellation)
+        public async Task<IActionResult> GetCurrentWeather(string longi, string lati, CancellationToken cancellation)
         {
             var weather = await _mediator.Send(new GetCurrentWeatherQuery(longi, lati), cancellation);
             return Ok(weather);
         }
 
-        [HttpGet("WeatherForecast/{longi}/{lati}")]
-        [ProducesResponseType(typeof(WeatherForecastDto), StatusCodes.Status200OK)]
+        [HttpGet("HourlyWeatherForecast/{longi}/{lati}")]
+        [ProducesResponseType(typeof(HourlyWeatherForecastDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetCurrentWeather(string longi, string lati, CancellationToken cancellation)
+        public async Task<IActionResult> GetHourlyWeatherForecast(string longi, string lati, CancellationToken cancellation)
         {
-            var weather = await _mediator.Send(new GetWeatherForecastQuery(longi, lati), cancellation);
+            var weather = await _mediator.Send(new GetHourlyWeatherForecastQuery(longi, lati), cancellation);
             return Ok(weather);
-        
+
         }
+
+        [HttpGet("DailyWeatherForecast/{longi}/{lati}")]
+        [ProducesResponseType(typeof(DailyWeatherForecastDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetDailyWeatherForecast(string longi, string lati, CancellationToken cancellation)
+        {
+            var weather = await _mediator.Send(new GetDailyWeatherForecastQuery(longi, lati), cancellation);
+            return Ok(weather);
+
+        }
+
+
     }
 }

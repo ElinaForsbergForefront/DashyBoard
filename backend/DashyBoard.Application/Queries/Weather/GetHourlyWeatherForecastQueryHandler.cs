@@ -5,23 +5,23 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Weather
 {
-    public sealed class GetWeatherForecastQueryHandler : IRequestHandler<GetWeatherForecastQuery, WeatherForecastDto>
+    public sealed class GetHourlyWeatherForecastQueryHandler : IRequestHandler<GetHourlyWeatherForecastQuery, HourlyWeatherForecastDto>
     {
         private readonly IWeatherApiClient _weatherClient;
 
-        public GetWeatherForecastQueryHandler(IWeatherApiClient weatherClient)
+        public GetHourlyWeatherForecastQueryHandler(IWeatherApiClient weatherClient)
         {
             _weatherClient = weatherClient;
         }
 
-        public async Task<WeatherForecastDto> Handle(GetWeatherForecastQuery request, CancellationToken cancellationToken)
+        public async Task<HourlyWeatherForecastDto> Handle(GetHourlyWeatherForecastQuery request, CancellationToken cancellationToken)
         {
-            var raw = await _weatherClient.GetWeatherForecastAsync(request.longi, request.lati, cancellationToken);
+            var raw = await _weatherClient.GetHourlyWeatherForecastAsync(request.longi, request.lati, cancellationToken);
 
-            return new WeatherForecastDto(
+            return new HourlyWeatherForecastDto(
                 raw.Latitude,
                 raw.Longitude,
-                new Forecast(
+                new HourlyForecastData(
                     raw.Hourly.Time,
                     raw.Hourly.Temperature,
                     raw.Hourly.WeatherCode.Select(WeatherCodeMapper.ToWeatherType).ToList(),
