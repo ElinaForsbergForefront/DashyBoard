@@ -1,6 +1,9 @@
 import { GlassFormTest } from '../components/forms/GlassFormTest';
 import { WeatherWidgetTest } from '../components/widgets/WeatherWidgetTest';
 
+
+//Detta är bara en test sida för att se hur glass-komponenten ser ut och fungerar, både som widget och formulär. Du hittar den på http://localhost:5173/glass-test
+//TODO: Ta bort denna sida när vi är klara med att testa och implementera glass-komponenten i riktiga widgets och formulär.
 export function GlassTestPage() {
   return (
     <div className="min-h-screen bg-background px-6 py-10 text-foreground">

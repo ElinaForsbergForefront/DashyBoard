@@ -1,5 +1,8 @@
 import { GlassCard } from '../ui/glass-card';
 
+
+////detta är ett exempel på hur man skriver en formulär-widget och du ser den i glass-test sidan, alltså http://localhost:5173/glass-test
+//TODO: Ta bort denna widget när vi är klara med att testa och implementera glass-komponenten i riktiga widgets och formulär.
 export function GlassFormTest() {
   return (
     <GlassCard className="glass-form w-full max-w-md">

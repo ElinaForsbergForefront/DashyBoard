@@ -101,6 +101,7 @@
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-highlight: rgba(255, 255, 255, 0.2);
+  --glass-shimmer: rgba(255, 255, 255, 0.22);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
 }
 
@@ -155,10 +156,11 @@
   --color-on-info: #ffffff;
 
   /* Glass - Light mode */
-  --glass-bg: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.45);
-  --glass-highlight: rgba(255, 255, 255, 0.65);
-  --glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(229, 235, 242, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-highlight: rgba(255, 255, 255, 0.78);
+  --glass-shimmer: rgba(255, 255, 255, 0.86);
+  --glass-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
 }
 
 /* Base styles */
@@ -254,14 +256,6 @@
   .glass-content {
     position: relative;
     z-index: 1;
-  }
-
-  .glass-hover {
-    @apply transition-all duration-300;
-  }
-
-  .glass-hover:hover {
-    transform: translateY(-2px);
   }
 
   .glass-widget {
