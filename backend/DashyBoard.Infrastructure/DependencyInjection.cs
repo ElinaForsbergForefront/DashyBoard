@@ -33,6 +33,7 @@ public static class DependencyInjection
 		});
 
         services.AddScoped<IUserRepository, UserRepository>();
+		services.AddScoped<IMirrorRepository, MirrorRepository>();
 
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
@@ -42,6 +43,8 @@ public static class DependencyInjection
 			options.UseNpgsql(cs));
 
 		// MongoDB
+		MongoDbConfigurator.Configure();
+
 		services.Configure<MongoDbSettings>(
 			config.GetSection(MongoDbSettings.SectionName));
 
