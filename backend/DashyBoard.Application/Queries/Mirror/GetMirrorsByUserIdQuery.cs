@@ -3,4 +3,4 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Mirror;
 
-public record GetMirrorsByUserIdQuery(string  UserId) : IRequest<IEnumerable<MirrorDto>>;
+public record GetMirrorsByUserSubQuery(string  UserSub) : IRequest<IEnumerable<MirrorDto>>;

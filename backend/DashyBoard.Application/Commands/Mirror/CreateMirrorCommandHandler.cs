@@ -15,6 +15,6 @@ public class CreateMirrorCommandHandler : IRequestHandler<CreateMirrorCommand, M
 
     public async Task<MirrorDto> Handle(CreateMirrorCommand command, CancellationToken cancellationToken)
     {
-        return await _repository.CreateMirrorAsync(command.UserId, command.Name, command.WidthCm, command.HeightCm, cancellationToken);
+        return await _repository.CreateMirrorAsync(command.UserSub, command.Name, command.WidthCm, command.HeightCm, cancellationToken);
     }
 }

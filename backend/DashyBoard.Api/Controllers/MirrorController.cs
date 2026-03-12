@@ -34,7 +34,7 @@ public class MirrorController : ControllerBase
         if (string.IsNullOrWhiteSpace(sub))
             return Unauthorized();
 
-        var result = await _mediator.Send(new GetMirrorsByUserIdQuery(sub), ct);
+        var result = await _mediator.Send(new GetMirrorsByUserSubQuery(sub), ct);
         return Ok(result);
     }
 

@@ -5,10 +5,10 @@ namespace DashyBoard.Domain.Tests.Mirrors;
 public class MirrorTests
 {
     [Test]
-    public void Create_WithValidData_SetsUserId()
+    public void Create_WithValidData_SetsUserSub()
     {
         var mirror = new Mirror("auth0|123", "My Mirror", 100, 50);
-        Assert.That(mirror.UserId, Is.EqualTo("auth0|123"));
+        Assert.That(mirror.UserSub, Is.EqualTo("auth0|123"));
     }
 
     [Test]
@@ -61,11 +61,11 @@ public class MirrorTests
     }
 
     [Test]
-    public void Update_DoesNotChangeUserId()
+    public void Update_DoesNotChangeUserSub()
     {
         var mirror = new Mirror("auth0|123", "My Mirror", 100, 50);
         mirror.Update("Updated Mirror", 200, 75);
-        Assert.That(mirror.UserId, Is.EqualTo("auth0|123"));
+        Assert.That(mirror.UserSub, Is.EqualTo("auth0|123"));
     }
 
     [Test]

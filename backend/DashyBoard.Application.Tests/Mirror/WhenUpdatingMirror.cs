@@ -11,7 +11,7 @@ public class WhenUpdatingMirror
     public async Task ThenShouldUpdateMirror()
     {
         var mirrorId = Guid.NewGuid();
-        var expectedMirror = new MirrorDto { Id = mirrorId, UserId = "auth0|123", Name = "Updated", WidthCm = 200, HeightCm = 75 };
+        var expectedMirror = new MirrorDto { Id = mirrorId, UserSub = "auth0|123", Name = "Updated", WidthCm = 200, HeightCm = 75 };
 
         var mock = new Mock<IMirrorRepository>();
         mock

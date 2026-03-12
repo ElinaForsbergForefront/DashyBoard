@@ -3,4 +3,4 @@ using MediatR;
 
 namespace DashyBoard.Application.Commands.Mirror;
 
-public sealed record CreateMirrorCommand(string UserId, string Name, double WidthCm, double HeightCm) : IRequest<MirrorDto>;
+public sealed record CreateMirrorCommand(string UserSub, string Name, double WidthCm, double HeightCm) : IRequest<MirrorDto>;

@@ -2,7 +2,7 @@ namespace DashyBoard.Domain.Models;
 public class Mirror
 {
     public Guid Id { get; private set; }
-    public string UserId { get; private set; } = null!;
+    public string UserSub { get; private set; } = null!;
     public string Name { get; private set; } = null!;
     public double WidthCm { get; private set; }
     public double HeightCm { get; private set; }
@@ -10,10 +10,10 @@ public class Mirror
 
     private Mirror() { }
 
-    public Mirror(string userId, string name, double widthCm, double heightCm)
+    public Mirror(string userSub, string name, double widthCm, double heightCm)
     {
         Id = Guid.NewGuid();
-        UserId = userId;
+        UserSub = userSub;
         Name = name;
         WidthCm = widthCm;
         HeightCm = heightCm;

@@ -16,7 +16,10 @@ export const MirrorCanvas = ({ mirror }: MirrorCanvasProps) => {
 
   if (!mirror) {
     return (
-      <div ref={containerRef} className="flex-1 flex items-center justify-center">
+      <div
+        ref={containerRef}
+        className="flex-1 flex flex-col items-center justify-center gap-3 overflow-hidden p-8 min-h-0"
+      >
         <p className="text-muted text-sm">Select a mirror to start editing</p>
       </div>
     );

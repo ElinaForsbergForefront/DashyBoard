@@ -11,7 +11,7 @@ public class WhenGettingMirror
     public async Task ThenShouldReturnMirrorById()
     {
         var mirrorId = Guid.NewGuid();
-        var expectedMirror = new MirrorDto { Id = mirrorId, UserId = "auth0|123", Name = "My Mirror", WidthCm = 100, HeightCm = 50 };
+        var expectedMirror = new MirrorDto { Id = mirrorId, UserSub = "auth0|123", Name = "My Mirror", WidthCm = 100, HeightCm = 50 };
 
         var mock = new Mock<IMirrorRepository>();
         mock
@@ -26,23 +26,23 @@ public class WhenGettingMirror
     }
 
     [Test]
-    public async Task ThenShouldReturnMirrorsByUserId()
+    public async Task ThenShouldReturnMirrorsByUserSub()
     {
         var mirrors = new List<MirrorDto>
         {
-            new MirrorDto { Id = Guid.NewGuid(), UserId = "auth0|123", Name = "Mirror 1", WidthCm = 100, HeightCm = 50 },
-            new MirrorDto { Id = Guid.NewGuid(), UserId = "auth0|123", Name = "Mirror 2", WidthCm = 75, HeightCm = 25 }
+            new MirrorDto { Id = Guid.NewGuid(), UserSub = "auth0|123", Name = "Mirror 1", WidthCm = 100, HeightCm = 50 },
+            new MirrorDto { Id = Guid.NewGuid(), UserSub = "auth0|123", Name = "Mirror 2", WidthCm = 75, HeightCm = 25 }
         };
 
         var mock = new Mock<IMirrorRepository>();
         mock
-            .Setup(x => x.GetMirrorsByUserIdAsync("auth0|123", It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetMirrorsByUserSubAsync("auth0|123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(mirrors);
 
-        var handler = new GetMirrorsByUserIdQueryHandler(mock.Object);
+        var handler = new GetMirrorsByUserSubQueryHandler(mock.Object);
 
-        var result = await handler.Handle(new GetMirrorsByUserIdQuery("auth0|123"), CancellationToken.None);
+        var result = await handler.Handle(new GetMirrorsByUserSubQuery("auth0|123"), CancellationToken.None);
 
-        mock.Verify(x => x.GetMirrorsByUserIdAsync("auth0|123", It.IsAny<CancellationToken>()), Times.Once);
+        mock.Verify(x => x.GetMirrorsByUserSubAsync("auth0|123", It.IsAny<CancellationToken>()), Times.Once);
     }
 }

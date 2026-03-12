@@ -24,18 +24,18 @@ public sealed class MirrorRepository : IMirrorRepository
         return MapToDto(mirror);
     }
 
-    public async Task<IEnumerable<MirrorDto>> GetMirrorsByUserIdAsync(string userId, CancellationToken ct)
+    public async Task<IEnumerable<MirrorDto>> GetMirrorsByUserSubAsync(string userSub, CancellationToken ct)
     {
         var mirrors = await _collection
-            .Find(m => m.UserId == userId)
+            .Find(m => m.UserSub == userSub)
             .ToListAsync(ct);
 
         return mirrors.Select(MapToDto);
     }
 
-    public async Task<MirrorDto> CreateMirrorAsync(string userId, string name, double widthCm, double heightCm, CancellationToken ct)
+    public async Task<MirrorDto> CreateMirrorAsync(string userSub, string name, double widthCm, double heightCm, CancellationToken ct)
     {
-        var mirror = new Mirror(userId, name, widthCm, heightCm);
+        var mirror = new Mirror(userSub, name, widthCm, heightCm);
         await _collection.InsertOneAsync(mirror, cancellationToken: ct);
         return MapToDto(mirror);
     }
@@ -62,7 +62,7 @@ public sealed class MirrorRepository : IMirrorRepository
     private static MirrorDto MapToDto(Mirror mirror) => new()
     {
         Id = mirror.Id,
-        UserId = mirror.UserId,
+        UserSub = mirror.UserSub,
         Name = mirror.Name,
         WidthCm = mirror.WidthCm,
         HeightCm = mirror.HeightCm,

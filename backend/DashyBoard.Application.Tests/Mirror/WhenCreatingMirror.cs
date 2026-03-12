@@ -13,7 +13,7 @@ public class WhenCreatingMirror
         var expectedMirror = new MirrorDto
         {
             Id = Guid.NewGuid(),
-            UserId = "auth0|123",
+            UserSub = "auth0|123",
             Name = "My Mirror",
             WidthCm = 100,
             HeightCm = 50,

@@ -1,6 +1,6 @@
 export interface MirrorDto {
   id: string;
-  userId: string;
+  userSub: string;
   name: string;
   widthCm: number;
   heightCm: number;

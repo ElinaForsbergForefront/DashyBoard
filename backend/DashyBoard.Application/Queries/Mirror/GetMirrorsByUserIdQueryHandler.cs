@@ -4,17 +4,17 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Mirror;
 
-public class GetMirrorsByUserIdQueryHandler : IRequestHandler<GetMirrorsByUserIdQuery, IEnumerable<MirrorDto>>
+public class GetMirrorsByUserSubQueryHandler : IRequestHandler<GetMirrorsByUserSubQuery, IEnumerable<MirrorDto>>
 {
     private readonly IMirrorRepository _repository;
 
-    public GetMirrorsByUserIdQueryHandler(IMirrorRepository repository)
+    public GetMirrorsByUserSubQueryHandler(IMirrorRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<IEnumerable<MirrorDto>> Handle(GetMirrorsByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<MirrorDto>> Handle(GetMirrorsByUserSubQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetMirrorsByUserIdAsync(request.UserId, cancellationToken);
+        return await _repository.GetMirrorsByUserSubAsync(request.UserSub, cancellationToken);
     }
 }
