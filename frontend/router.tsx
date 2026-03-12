@@ -1,3 +1,4 @@
+import { GlassTestPage } from './src/app/GlassTestPage';
 import { createBrowserRouter } from 'react-router-dom';
 import App from './src/App';
 import { ColorPalette } from './src/ColorPalette';
@@ -16,6 +17,10 @@ export const router = createBrowserRouter([
       {
         path: '/style-guide',
         element: <ColorPalette />,
+      },
+      {
+        path: '/glass-test',
+        element: <GlassTestPage />,
       },
     ],
   },
