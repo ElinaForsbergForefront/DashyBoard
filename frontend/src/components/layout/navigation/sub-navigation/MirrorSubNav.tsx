@@ -30,7 +30,7 @@ export const MirrorSubNav = ({ activeMirrorId, onSelectMirror, onAddMirror }: Mi
       <button
         type="button"
         onClick={onAddMirror}
-        className="px-3 py-1.5 text-sm font-medium rounded-md border border-dashed border-border text-muted hover:text-foreground hover:border-primary transition-all duration-200 whitespace-nowrap cursor-pointer"
+        className="ml-auto px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-on-primary hover:bg-primary/90 transition-all duration-200 whitespace-nowrap cursor-pointer"
       >
         + Add Mirror
       </button>
