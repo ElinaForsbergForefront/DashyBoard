@@ -1,3 +1,4 @@
+import { GlassTestPage } from './src/app/GlassTestPage';
 import { createBrowserRouter } from 'react-router-dom';
 import App from './src/App';
 import { StyleGuide } from './src/pages/StyleGuide';
@@ -16,6 +17,10 @@ export const router = createBrowserRouter([
       {
         path: '/style-guide',
         element: <StyleGuide />,
+      },
+      {
+        path: '/glass-test',
+        element: <GlassTestPage />,
       },
     ],
   },
