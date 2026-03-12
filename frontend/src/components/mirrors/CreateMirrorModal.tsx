@@ -52,8 +52,11 @@ export const CreateMirrorModal = ({ onClose }: CreateMirrorModalProps) => {
                 min={1}
                 value={widthCm}
                 onChange={(e) => setWidthCm(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className={`w-full px-3 py-2 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
+                  widthCm <= 0 ? 'border-red-500' : 'border-border'
+                }`}
               />
+              {widthCm <= 0 && <p className="text-xs text-red-500">Must be greater than 0</p>}
             </div>
 
             <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -67,8 +70,11 @@ export const CreateMirrorModal = ({ onClose }: CreateMirrorModalProps) => {
                 min={1}
                 value={heightCm}
                 onChange={(e) => setHeightCm(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className={`w-full px-3 py-2 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
+                  heightCm <= 0 ? 'border-red-500' : 'border-border'
+                }`}
               />
+              {heightCm <= 0 && <p className="text-xs text-red-500">Must be greater than 0</p>}
             </div>
           </div>
 
