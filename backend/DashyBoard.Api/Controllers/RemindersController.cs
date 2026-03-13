@@ -1,13 +1,19 @@
 ﻿using DashyBoard.Application.Commands.Reminders;
 using DashyBoard.Application.Queries.Reminders;
 using DashyBoard.Application.Queries.Reminders.Dto;
-using DashyBoard.Domain.Models;
+using DashyBoard.Application.Queries.User;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
+using System.Security.Claims;
 
 namespace DashyBoard.Api.Controllers
 {
+    public sealed record CreateReminderRequest(string Title, DateTime DueAtUtc, string? Note = null);
+    public sealed record UpdateReminderRequest(string Title, DateTime DueAtUtc, string? Note = null);
+
+
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class RemindersController : ControllerBase
@@ -19,46 +25,91 @@ namespace DashyBoard.Api.Controllers
             _mediator = mediator;
         }
 
+        private string? GetCurrentSub()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+        }
+
+        private async Task<Guid?> GetCurrentUserIdAsync(CancellationToken ct)
+        {
+            var sub = GetCurrentSub();
+            if (string.IsNullOrWhiteSpace(sub))
+                return null;
+
+            var user = await _mediator.Send(new GetUserBySubQuery(sub), ct);
+            return user.Id;
+        }
+
+
+
         [HttpPost("create")]
         [ProducesResponseType(typeof(ReminderDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreateReminder([FromBody] CreateReminderCommand command, CancellationToken ct)
+        public async Task<IActionResult> CreateReminder([FromBody] CreateReminderRequest request, CancellationToken ct)
         {
-            var reminder = await _mediator.Send(command, ct);
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            var reminder = await _mediator.Send(
+                new CreateReminderCommand(userId.Value, request.Title, request.DueAtUtc, request.Note), ct);
+
             return Ok(reminder);
         }
 
-        [HttpPost("update")]
-        public async Task<IActionResult> UpdateReminder([FromBody] UpdateReminderCommand command, CancellationToken ct)
+        [HttpPut("{reminderId:guid}")]
+        [ProducesResponseType(typeof(ReminderDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateReminder(Guid reminderId, [FromBody] UpdateReminderRequest request, CancellationToken ct)
         {
-            var reminder = await _mediator.Send(command, ct);
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            var reminder = await _mediator.Send(
+                new UpdateReminderCommand(reminderId, userId.Value, request.Title, request.DueAtUtc, request.Note), ct);
+
             return Ok(reminder);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetReminder(Guid id, CancellationToken ct)
+        [HttpGet("me")]
+        [ProducesResponseType(typeof(IReadOnlyList<ReminderDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetMyReminders(CancellationToken ct)
         {
-            var reminders = await _mediator.Send(new GetMyRemindersQuery(id), ct);
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            var reminders = await _mediator.Send(new GetMyRemindersQuery(userId.Value), ct);
             return Ok(reminders);
         }
 
-        [HttpPost("{reminderId}/{userId}/complete")]
-        public async Task<IActionResult> CompleteReminder(Guid reminderId, Guid userId, CancellationToken ct)
+        [HttpPost("{reminderId:guid}/complete")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> CompleteReminder(Guid reminderId, CancellationToken ct)
         {
-            await _mediator.Send(new MarkReminderCompletedCommand(reminderId, userId), ct);
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            await _mediator.Send(new MarkReminderCompletedCommand(reminderId, userId.Value), ct);
             return NoContent();
         }
 
-        [HttpPost("{reminderId}/{userId}/Uncomplete")]
-        public async Task<IActionResult> UncompleteReminder(Guid reminderId, Guid userId, CancellationToken ct)
+        [HttpPost("{reminderId:guid}/uncomplete")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> UncompleteReminder(Guid reminderId, CancellationToken ct)
         {
-            await _mediator.Send(new MarkReminderUncompletedCommand(reminderId, userId), ct);
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            await _mediator.Send(new MarkReminderUncompletedCommand(reminderId, userId.Value), ct);
             return NoContent();
         }
 
-        [HttpDelete("{reminderId}/{userId}/delete")]
-        public async Task<IActionResult> DeleteReminder(Guid reminderId, Guid userId, CancellationToken ct)
+        [HttpDelete("{reminderId:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DeleteReminder(Guid reminderId, CancellationToken ct)
         {
-            await _mediator.Send(new DeleteReminderCommand(reminderId, userId), ct);
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            await _mediator.Send(new DeleteReminderCommand(reminderId, userId.Value), ct);
             return NoContent();
         }
     }

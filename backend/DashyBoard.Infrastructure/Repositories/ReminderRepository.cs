@@ -2,9 +2,6 @@
 using DashyBoard.Application.Queries.Reminders.Dto;
 using DashyBoard.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DashyBoard.Infrastructure.Repositories
 {
