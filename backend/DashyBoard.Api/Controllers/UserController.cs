@@ -1,15 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using DashyBoard.Application.Commands.User;
-using DashyBoard.Application.Queries.User; 
+using DashyBoard.Application.Queries.User;
 using DashyBoard.Application.Queries.User.Dto;
 
 namespace DashyBoard.Api.Controllers
 {
     public sealed record UpdateUserRequest(string? Username, string? DisplayName, string? Country, string? City);
-
-
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -19,6 +19,12 @@ namespace DashyBoard.Api.Controllers
         public UserController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        private string? GetCurrentSub()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
         }
 
         [HttpGet("profile/{userId}")]
@@ -35,14 +41,14 @@ namespace DashyBoard.Api.Controllers
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? User.FindFirst("sub")?.Value;
+            var sub = GetCurrentSub();
 
-            if (string.IsNullOrEmpty(sub))
+            if (string.IsNullOrWhiteSpace(sub))
                 return Unauthorized();
 
             var query = new GetUserBySubQuery(sub);
             var userProfile = await _mediator.Send(query);
+
             return Ok(userProfile);
         }
 
@@ -58,10 +64,9 @@ namespace DashyBoard.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DeleteCurrentUser(CancellationToken ct)
         {
-            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                 ?? User.FindFirst("sub")?.Value;
+            var sub = GetCurrentSub();
 
-            if (string.IsNullOrEmpty(sub))
+            if (string.IsNullOrWhiteSpace(sub))
                 return Unauthorized();
 
             await _mediator.Send(new DeleteUserBySubCommand(sub), ct);

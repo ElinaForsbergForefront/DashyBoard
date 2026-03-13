@@ -2,7 +2,7 @@
 
 @layer base {
   /* Smooth transitions for theme changes */
-  * {
+    * {
     @apply transition-colors duration-300;
   }
 
@@ -96,6 +96,13 @@
   --color-on-success: #ffffff;
   --color-on-warning: #000000;
   --color-on-info: #ffffff;
+
+  /* Glass - Dark mode */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.2);
+  --glass-shimmer: rgba(255, 255, 255, 0.22);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
 }
 
 /* Light mode overrides */
@@ -147,6 +154,13 @@
   --color-on-success: #ffffff;
   --color-on-warning: #000000;
   --color-on-info: #ffffff;
+
+  /* Glass - Light mode */
+  --glass-bg: rgba(229, 235, 242, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-highlight: rgba(255, 255, 255, 0.78);
+  --glass-shimmer: rgba(255, 255, 255, 0.86);
+  --glass-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
 }
 
 /* Base styles */
@@ -215,34 +229,51 @@
 
 /* Glass effect utilities */
 @layer components {
-  .glass-base {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  .glass {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
-  .glass-active {
-    @apply bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg;
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      135deg,
+      var(--glass-highlight),
+      transparent 55%
+    );
+    opacity: 0.8;
   }
 
-  .glass-hover {
-    @apply hover:bg-white/5;
+  .glass-content {
+    position: relative;
+    z-index: 1;
   }
 
-  .glass-smooth {
-    @apply transition-all duration-300;
-  }
-}
-
-/* Light mode glass adjustments */
-.light {
-  .glass-base {
-    @apply bg-black/5 border-black/10;
+  .glass-widget {
+    @apply p-5;
+    min-height: 12rem;
   }
 
-  .glass-active {
-    @apply bg-black/10 border-black/20;
+  .glass-form {
+    @apply p-6;
   }
 
-  .glass-hover {
-    @apply hover:bg-black/5;
+  .glass-subtle {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-strong {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 }
