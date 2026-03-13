@@ -28,6 +28,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers();
 
+builder.Services.AddSwaggerGen();
 builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddApiSwagger(builder.Configuration);
 
