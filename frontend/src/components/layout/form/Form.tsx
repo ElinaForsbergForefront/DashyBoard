@@ -4,7 +4,7 @@ import { FORM_FIELDS } from '../../../hooks/types/form-fields';
 import { FormField } from './FormField';
 
 export const Form = () => {
-  const { values, errors, isSubmitDisabled, handleChange, handleSubmit } = useUserForm();
+  const { values, errors, isSubmitDisabled, isLoading, handleChange, handleSubmit } = useUserForm();
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -25,10 +25,10 @@ export const Form = () => {
           <div className="flex justify-end mt-2">
             <button
               type="submit"
-              disabled={isSubmitDisabled}
+              disabled={isSubmitDisabled || isLoading}
               className="px-4 py-2 text-sm font-medium rounded-md bg-primary text-on-primary hover:bg-primary/90 transition-all cursor-pointer disabled:opacity-50"
             >
-              Submit
+              {isLoading ? 'Saving...' : 'Submit'}
             </button>
           </div>
         </form>

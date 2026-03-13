@@ -31,14 +31,11 @@ namespace DashyBoard.Infrastructure.Repositories
             return MapToDto(user);
         }
 
-        public async Task<IEnumerable<string>> GetAllUsernamesAsync(CancellationToken ct)
+        public async Task<bool> IsUsernameTakenAsync(string username, CancellationToken ct)
         {
             return await _context.Users
-                .Where(u => u.Username != null)
-                .Select(u => u.Username!)
-                .ToListAsync(ct);
+                .AnyAsync(u => u.Username != null && u.Username.ToLower() == username.ToLower(), ct);
         }
-
         public async Task DeleteUserBySubAsync(string sub, CancellationToken ct)
         {
             var user = await _context.Users

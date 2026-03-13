@@ -6,7 +6,7 @@ namespace DashyBoard.Application.Interfaces
     {
         Task<UserDto> GetUserByIdAsync(Guid userId, CancellationToken ct);
         Task<UserDto> GetUserBySubAsync(string sub, CancellationToken ct);
-        Task<IEnumerable<string>> GetAllUsernamesAsync(CancellationToken ct);
+        Task<bool> IsUsernameTakenAsync(string username, CancellationToken ct);
         Task DeleteUserBySubAsync(string sub, CancellationToken ct);
         Task DeleteUserByIdAsync(Guid userId, CancellationToken ct);
         Task<UserDto> UpdateUserBySubAsync(string sub, string? username, string? displayName, string? country, string? city, CancellationToken ct);

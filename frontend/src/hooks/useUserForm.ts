@@ -1,32 +1,27 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useGetAllUsernamesQuery, useUpdateCurrentUserMutation } from '../api/endpoints/user';
+import { useLazyCheckUsernameQuery, useUpdateCurrentUserMutation } from '../api/endpoints/user';
 import { FORM_FIELDS } from './types/form-fields';
 
 export const useUserForm = () => {
-  const navigate = useNavigate();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: allUsernames = [] } = useGetAllUsernamesQuery();
-  const [updateCurrentUser] = useUpdateCurrentUserMutation();
+  const [checkUsername] = useLazyCheckUsernameQuery();
+  const [updateCurrentUser, { isLoading }] = useUpdateCurrentUserMutation();
 
   const [values, setValues] = useState<Record<string, string>>(
     Object.fromEntries(FORM_FIELDS.map((f) => [f.id, ''])),
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const checkUsername = (username: string) => {
+  const validateUsername = async (username: string) => {
     if (!username) {
       setErrors((prev) => ({ ...prev, username: '' }));
       return;
     }
-
-    const taken = allUsernames.some(
-      (u) => u.toLowerCase().trim() === username.toLowerCase().trim(),
-    );
+    const isTaken = await checkUsername(username).unwrap();
     setErrors((prev) => ({
       ...prev,
-      username: taken ? 'Username is already taken' : '',
+      username: isTaken ? 'Username is already taken' : '',
     }));
   };
 
@@ -34,7 +29,7 @@ export const useUserForm = () => {
     setValues((prev) => ({ ...prev, [id]: value }));
     if (id === 'username') {
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => checkUsername(value), 300);
+      debounceRef.current = setTimeout(() => validateUsername(value), 300);
     }
   };
 
@@ -47,7 +42,6 @@ export const useUserForm = () => {
         country: values.country,
         city: values.city,
       }).unwrap();
-      navigate('/');
     } catch (err) {
       console.error('Failed to update user', err);
     }
@@ -55,5 +49,5 @@ export const useUserForm = () => {
 
   const isSubmitDisabled = !!errors.username || FORM_FIELDS.some((f) => !values[f.id]?.trim());
 
-  return { values, errors, isSubmitDisabled, handleChange, handleSubmit };
+  return { values, errors, isSubmitDisabled, isLoading, handleChange, handleSubmit };
 };

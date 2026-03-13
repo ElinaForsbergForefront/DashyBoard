@@ -52,12 +52,15 @@ namespace DashyBoard.Api.Controllers
             return Ok(userProfile);
         }
 
-        [HttpGet("allUsernames")]
-        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllUsernames()
+        [HttpGet("check-username")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CheckUsername([FromQuery] string username, CancellationToken ct)
         {
-            var usernames = await _mediator.Send(new GetAllUsernamesQuery());
-            return Ok(usernames);
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest("Username is required.");
+
+            var isTaken = await _mediator.Send(new CheckUsernameQuery(username), ct);
+            return Ok(isTaken);
         }
 
         [HttpDelete("me")]
