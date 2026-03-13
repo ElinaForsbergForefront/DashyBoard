@@ -1,4 +1,5 @@
 import { GlassFormTest } from '../components/forms/GlassFormTest';
+import { ReminderWidget } from '../components/widgets/ReminderWidget';
 import { WeatherWidgetTest } from '../components/widgets/WeatherWidgetTest';
 
 
@@ -18,6 +19,7 @@ export function GlassTestPage() {
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <WeatherWidgetTest />
           <GlassFormTest />
+          <ReminderWidget />
         </div>
       </div>
     </div>
