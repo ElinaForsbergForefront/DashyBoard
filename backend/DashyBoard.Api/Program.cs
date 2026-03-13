@@ -1,4 +1,5 @@
 using DashyBoard.Api.Middleware;
+using DashyBoard.Api.Extensions;
 using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using DashyBoard.Application;
@@ -24,10 +25,12 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers();
 
-builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
+builder.Services.AddApiAuthentication(builder.Configuration);
+builder.Services.AddApiSwagger(builder.Configuration);
+
 
 var app = builder.Build();
 
@@ -35,7 +38,16 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.OAuthClientId(builder.Configuration["Auth0:SwaggerClientId"]);
+        options.OAuthUsePkce();
+
+        options.OAuthAdditionalQueryStringParams(new Dictionary<string, string>
+        {
+            ["audience"] = builder.Configuration["Auth0:Audience"]!
+        });
+    });
 }
 
 app.UseCors("AllowFrontend");
