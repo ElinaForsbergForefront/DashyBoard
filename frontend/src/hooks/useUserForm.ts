@@ -1,15 +1,10 @@
 import { useRef, useState } from 'react';
-import {
-  useLazyCheckUsernameQuery,
-  useGetCurrentUserQuery,
-  useUpdateCurrentUserMutation,
-} from '../api/endpoints/user';
+import { useLazyCheckUsernameQuery, useUpdateCurrentUserMutation } from '../api/endpoints/user';
 import { FORM_FIELDS } from './types/form-fields';
 
 export const useUserForm = () => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { refetch } = useGetCurrentUserQuery();
   const [checkUsername] = useLazyCheckUsernameQuery();
   const [updateCurrentUser, { isLoading }] = useUpdateCurrentUserMutation();
 
@@ -43,11 +38,10 @@ export const useUserForm = () => {
     try {
       await updateCurrentUser({
         username: values.username,
-        displayName: values.displayname,
+        displayName: values.displayName,
         country: values.country,
         city: values.city,
       }).unwrap();
-      await refetch();
     } catch (err) {
       console.error('Failed to update user', err);
     }
