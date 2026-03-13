@@ -5,12 +5,11 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard' },
+  { to: '/', label: 'Mirrors' },
   {
     to: '/style-guide',
     label: 'Style Guide',
     requiredPermissions: ['view:style-guide', 'admin:access'],
   },
   { to: '/widgets', label: 'Widgets' },
-  { to: '/settings', label: 'Settings' },
 ];

@@ -4,27 +4,27 @@ import type { UpdateUserByIdCommand, UpdateUserBySubCommand, UserDto } from '../
 const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCurrentUser: builder.query<UserDto, void>({
-      query: () => '/User/me',
+      query: () => '/user/me',
       providesTags: [{ type: 'User', id: 'ME' }],
     }),
     getUserProfile: builder.query<UserDto, string>({
-      query: (userId) => `/User/profile/${userId}`,
+      query: (userId) => `/user/profile/${userId}`,
       providesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
     updateCurrentUser: builder.mutation<UserDto, UpdateUserBySubCommand>({
-      query: (body) => ({ url: `/User/me`, method: 'PUT', body }),
+      query: (body) => ({ url: `/user/me`, method: 'PUT', body }),
       invalidatesTags: [{ type: 'User', id: 'ME' }],
     }),
     deleteCurrentUser: builder.mutation<void, void>({
-      query: () => ({ url: `/User/me`, method: 'DELETE' }),
+      query: () => ({ url: `/user/me`, method: 'DELETE' }),
       invalidatesTags: [{ type: 'User' }],
     }),
     updateUserById: builder.mutation<UserDto, UpdateUserByIdCommand>({
-      query: ({ id, ...body }) => ({ url: `/User/${id}`, method: 'PUT', body }),
+      query: ({ id, ...body }) => ({ url: `/user/${id}`, method: 'PUT', body }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'User', id }],
     }),
     deleteUserById: builder.mutation<void, string>({
-      query: (id) => ({ url: `/User/${id}`, method: 'DELETE' }),
+      query: (id) => ({ url: `/user/${id}`, method: 'DELETE' }),
       invalidatesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
   }),

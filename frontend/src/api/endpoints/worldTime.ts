@@ -4,11 +4,11 @@ import type { WorldTimeDto, TimezoneDto } from '../types/worldTime';
 const worldTimeApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getTimezones: builder.query<TimezoneDto[], void>({
-      query: () => '/WorldTime/timezones',
+      query: () => '/worldtime/timezones',
     }),
     getTime: builder.query<WorldTimeDto, string>({
       query: (timezone) => ({
-        url: '/WorldTime/time',
+        url: '/worldtime/time',
         params: { timezone },
       }),
     }),

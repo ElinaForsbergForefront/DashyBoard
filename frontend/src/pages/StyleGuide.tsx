@@ -1,6 +1,4 @@
-/* filepath: src/ColorPalette.tsx */
-
-export function ColorPalette() {
+export function StyleGuide() {
   const colorGroups = {
     Background: [
       { name: 'Background', class: 'bg-background' },
