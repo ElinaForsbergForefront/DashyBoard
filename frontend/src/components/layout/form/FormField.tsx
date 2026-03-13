@@ -1,4 +1,4 @@
-import type { FormField as FormFieldType } from './form-fields';
+import type { FormField as FormFieldType } from '../../../hooks/types/form-fields';
 
 interface FormFieldProps {
   field: FormFieldType;
@@ -9,8 +9,8 @@ interface FormFieldProps {
 
 export const FormField = ({ field, value, onChange, error }: FormFieldProps) => {
   return (
-    <div className="mb-4">
-      <label htmlFor={field.id} className="block text-sm font-medium mb-1">
+    <div className="flex flex-col gap-1">
+      <label htmlFor={field.id} className="text-sm text-muted">
         {field.label}
       </label>
       <input
@@ -18,12 +18,12 @@ export const FormField = ({ field, value, onChange, error }: FormFieldProps) => 
         id={field.id}
         value={value}
         onChange={(e) => onChange(field.id, e.target.value)}
-        className={`w-full px-3 py-2 border ${
-          error ? 'border-red-500' : 'border-border'
-        } rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
         placeholder={field.placeholder}
+        className={`px-3 py-2 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
+          error ? 'border-destructive' : 'border-border'
+        }`}
       />
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 };

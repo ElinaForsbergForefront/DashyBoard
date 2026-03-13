@@ -1,35 +1,33 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
-import { getAllUsernames, updateUserMe } from '../../../api/users';
-import { FORM_FIELDS } from './form-fields';
+import { useGetAllUsernamesQuery, useUpdateCurrentUserMutation } from '../api/endpoints/user';
+import { FORM_FIELDS } from './types/form-fields';
 
 export const useUserForm = () => {
-  const { getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const { data: allUsernames = [] } = useGetAllUsernamesQuery();
+  const [updateCurrentUser] = useUpdateCurrentUserMutation();
+
   const [values, setValues] = useState<Record<string, string>>(
-    Object.fromEntries(FORM_FIELDS.map((f) => [f.id, '']))
+    Object.fromEntries(FORM_FIELDS.map((f) => [f.id, ''])),
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const checkUsername = async (username: string) => {
+  const checkUsername = (username: string) => {
     if (!username) {
       setErrors((prev) => ({ ...prev, username: '' }));
       return;
     }
-    try {
-      const token = await getAccessTokenSilently();
-      const usernames = await getAllUsernames(token);
-      const taken = usernames.some((u) => u.toLowerCase() === username.toLowerCase());
-      setErrors((prev) => ({
-        ...prev,
-        username: taken ? 'Username is already taken' : '',
-      }));
-    } catch (err) {
-      console.error('Failed to check username', err);
-    }
+
+    const taken = allUsernames.some(
+      (u) => u.toLowerCase().trim() === username.toLowerCase().trim(),
+    );
+    setErrors((prev) => ({
+      ...prev,
+      username: taken ? 'Username is already taken' : '',
+    }));
   };
 
   const handleChange = (id: string, value: string) => {
@@ -43,22 +41,19 @@ export const useUserForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = await getAccessTokenSilently();
-      await updateUserMe(token, {
+      await updateCurrentUser({
         username: values.username,
         displayName: values.displayname,
         country: values.country,
         city: values.city,
-      });
-      window.dispatchEvent(new Event('profile-completed'));
+      }).unwrap();
       navigate('/');
     } catch (err) {
       console.error('Failed to update user', err);
     }
   };
 
-  const isSubmitDisabled =
-    !!errors.username || FORM_FIELDS.some((f) => !values[f.id]?.trim());
+  const isSubmitDisabled = !!errors.username || FORM_FIELDS.some((f) => !values[f.id]?.trim());
 
   return { values, errors, isSubmitDisabled, handleChange, handleSubmit };
 };

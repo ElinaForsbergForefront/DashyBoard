@@ -11,6 +11,10 @@ const userApi = api.injectEndpoints({
       query: (userId) => `/user/profile/${userId}`,
       providesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
+    getAllUsernames: builder.query<string[], void>({
+      query: () => '/user/allusernames',
+      providesTags: [{ type: 'User', id: 'USERNAMES' }],
+    }),
     updateCurrentUser: builder.mutation<UserDto, UpdateUserBySubCommand>({
       query: (body) => ({ url: `/user/me`, method: 'PUT', body }),
       invalidatesTags: [{ type: 'User', id: 'ME' }],
@@ -33,6 +37,7 @@ const userApi = api.injectEndpoints({
 export const {
   useGetCurrentUserQuery,
   useGetUserProfileQuery,
+  useGetAllUsernamesQuery,
   useUpdateCurrentUserMutation,
   useDeleteCurrentUserMutation,
   useUpdateUserByIdMutation,
