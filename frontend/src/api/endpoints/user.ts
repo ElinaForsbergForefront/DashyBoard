@@ -16,6 +16,10 @@ const userApi = api.injectEndpoints({
     }),
     updateCurrentUser: builder.mutation<UserDto, UpdateUserBySubCommand>({
       query: (body) => ({ url: `/user/me`, method: 'PUT', body }),
+      async onQueryStarted(_body, { dispatch, queryFulfilled }) {
+        const { data: updatedUser } = await queryFulfilled;
+        dispatch(userApi.util.updateQueryData('getCurrentUser', undefined, () => updatedUser));
+      },
       invalidatesTags: [{ type: 'User', id: 'ME' }],
     }),
     deleteCurrentUser: builder.mutation<void, void>({
