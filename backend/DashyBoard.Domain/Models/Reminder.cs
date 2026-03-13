@@ -44,6 +44,15 @@ namespace DashyBoard.Domain.Models
             DueAtUtc = dueAtUtc;
         }
 
+        public bool TryAutoComplete(DateTime utcNow)
+        {
+            if (IsCompleted) return false;
+            if (DueAtUtc > utcNow) return false;
+
+            MarkCompleted();
+            return true;
+        }
+
         public void MarkCompleted()
         {
             if (IsCompleted) return;
