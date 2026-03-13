@@ -66,8 +66,25 @@ namespace DashyBoard.Infrastructure.Repositories
             );
         }
 
+        private async Task AutoCompleteOverdueRemindersAsync(Guid userId, CancellationToken ct)
+        {
+            var now = DateTime.UtcNow;
+            var overdueReminders = await _db.Reminders
+                .Where(r => r.UserId == userId && !r.IsCompleted && r.DueAtUtc <= now)
+                .ToListAsync(ct);
+
+            if (overdueReminders.Count == 0)
+                return;
+
+            foreach (var reminder in overdueReminders)
+                reminder.TryAutoComplete(now);
+
+            await _db.SaveChangesAsync(ct);
+        }
+
         public async Task<IReadOnlyList<ReminderDto>> GetMyRemindersAsync(Guid userId, CancellationToken ct)
         {
+            await AutoCompleteOverdueRemindersAsync(userId, ct);
             return await _db.Reminders
                 .AsNoTracking()
                 .Where(r => r.UserId == userId)
@@ -83,6 +100,7 @@ namespace DashyBoard.Infrastructure.Repositories
                     CompletedAtUtc: r.CompletedAtUtc
                 ))
                 .ToListAsync(ct);
+
         }
 
         public async Task MarkCompletedAsync(Guid reminderId, Guid userId, CancellationToken ct)
