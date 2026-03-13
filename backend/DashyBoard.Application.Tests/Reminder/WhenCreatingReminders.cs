@@ -15,17 +15,17 @@ namespace DashyBoard.Application.Tests.Reminder
         public async Task ThenValidRequestShouldCreateReminder()
         {
             // Arrange
-            var expectedReminder = new ReminderDto(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "gym",
-                "legday",
-                DateTime.UtcNow.AddDays(1),
-                false,
-                DateTime.UtcNow,
-                null
-            );
-
+            var expectedReminder = new ReminderDto
+            {
+                Id = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                Title = "gym",
+                Note = "legday",
+                DueAtUtc = DateTime.UtcNow.AddDays(1),
+                IsCompleted = false,
+                CreatedAtUtc = DateTime.UtcNow,
+                CompletedAtUtc = null
+            };
             var mock = new Mock<IReminderRepository>();
 
             mock

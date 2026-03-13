@@ -26,16 +26,17 @@ namespace DashyBoard.Infrastructure.Repositories
             _db.Reminders.Add(reminder);
             await _db.SaveChangesAsync(ct);
 
-            return new ReminderDto(
-                Id: reminder.Id,
-                UserId: reminder.UserId,
-                Title: reminder.Title,
-                Note: reminder.Note ?? string.Empty,
-                DueAtUtc: reminder.DueAtUtc,
-                IsCompleted: reminder.IsCompleted,
-                CreatedAtUtc: reminder.CreatedAtUtc,
-                CompletedAtUtc: reminder.CompletedAtUtc
-            );
+            return new ReminderDto
+            {
+                Id = reminder.Id,
+                UserId = reminder.UserId,
+                Title = reminder.Title,
+                Note = reminder.Note,
+                DueAtUtc = reminder.DueAtUtc,
+                IsCompleted = reminder.IsCompleted,
+                CreatedAtUtc = reminder.CreatedAtUtc,
+                CompletedAtUtc = reminder.CompletedAtUtc
+            };
         }
 
         public async Task<ReminderDto> UpdateReminderAsync(
@@ -54,16 +55,17 @@ namespace DashyBoard.Infrastructure.Repositories
             reminder.Update(title, dueAtUtc, note);
             await _db.SaveChangesAsync(ct);
 
-            return new ReminderDto(
-                Id: reminder.Id,
-                UserId: reminder.UserId,
-                Title: reminder.Title,
-                Note: reminder.Note ?? string.Empty,
-                DueAtUtc: reminder.DueAtUtc,
-                IsCompleted: reminder.IsCompleted,
-                CreatedAtUtc: reminder.CreatedAtUtc,
-                CompletedAtUtc: reminder.CompletedAtUtc
-            );
+            return new ReminderDto
+            {
+                Id = reminder.Id,
+                UserId = reminder.UserId,
+                Title = reminder.Title,
+                Note = reminder.Note,
+                DueAtUtc = reminder.DueAtUtc,
+                IsCompleted = reminder.IsCompleted,
+                CreatedAtUtc = reminder.CreatedAtUtc,
+                CompletedAtUtc = reminder.CompletedAtUtc
+            };
         }
 
         private async Task AutoCompleteOverdueRemindersAsync(Guid userId, CancellationToken ct)
@@ -85,22 +87,23 @@ namespace DashyBoard.Infrastructure.Repositories
         public async Task<IReadOnlyList<ReminderDto>> GetMyRemindersAsync(Guid userId, CancellationToken ct)
         {
             await AutoCompleteOverdueRemindersAsync(userId, ct);
+
             return await _db.Reminders
                 .AsNoTracking()
                 .Where(r => r.UserId == userId)
                 .OrderBy(r => r.DueAtUtc)
-                .Select(r => new ReminderDto(
-                    Id: r.Id,
-                    UserId: r.UserId,
-                    Title: r.Title,
-                    Note: r.Note ?? string.Empty,
-                    DueAtUtc: r.DueAtUtc,
-                    IsCompleted: r.IsCompleted,
-                    CreatedAtUtc: r.CreatedAtUtc,
-                    CompletedAtUtc: r.CompletedAtUtc
-                ))
+                .Select(r => new ReminderDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    Title = r.Title,
+                    Note = r.Note,
+                    DueAtUtc = r.DueAtUtc,
+                    IsCompleted = r.IsCompleted,
+                    CreatedAtUtc = r.CreatedAtUtc,
+                    CompletedAtUtc = r.CompletedAtUtc
+                })
                 .ToListAsync(ct);
-
         }
 
         public async Task MarkCompletedAsync(Guid reminderId, Guid userId, CancellationToken ct)
