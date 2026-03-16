@@ -35,6 +35,14 @@ function MirrorContent() {
     });
   };
 
+  const handleRemoveWidget = (widget: WidgetType) => {
+    if (!activeMirrorId) return;
+    setWidgetsByMirrorId((prev) => ({
+      ...prev,
+      [activeMirrorId]: (prev[activeMirrorId] ?? []).filter((w) => w !== widget),
+    }));
+  };
+
   return (
     <div className="flex flex-col flex-1">
       <MirrorSubNav
@@ -49,7 +57,7 @@ function MirrorContent() {
         {isEditMode && (
           <WidgetSidebar onAddWidget={handleAddWidget} canAddWidget={Boolean(activeMirrorId)} />
         )}
-        <MirrorCanvas mirror={activeMirror} widgets={activeWidgets} />
+        <MirrorCanvas mirror={activeMirror} widgets={activeWidgets} onRemoveWidget={handleRemoveWidget} />
         <EditModeToggle />
       </div>
     </div>

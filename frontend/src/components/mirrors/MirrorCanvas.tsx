@@ -1,21 +1,17 @@
-import type { ComponentType } from 'react';
 import { useEditModeContext } from '../../context/EditModeContext';
 import { useMirrorScale } from '../../hooks/useMirrorScale';
 import { MirrorGrid } from './MirrorGrid';
 import type { MirrorDto } from '../../api/types/mirror';
 import type { WidgetType } from '../layout/dashboard/widgetSidebar/types.ts';
-import { ReminderWidget } from '../widgets/ReminderWidget';
-
-const widgetComponentMap: Partial<Record<WidgetType, ComponentType>> = {
-  reminder: ReminderWidget,
-};
+import { widgetRegistry } from '../widgets/widgetRegistry';
 
 interface MirrorCanvasProps {
   mirror: MirrorDto | null;
   widgets: WidgetType[];
+  onRemoveWidget: (widget: WidgetType) => void;
 }
 
-export const MirrorCanvas = ({ mirror, widgets }: MirrorCanvasProps) => {
+export const MirrorCanvas = ({ mirror, widgets, onRemoveWidget }: MirrorCanvasProps) => {
   const { isEditMode } = useEditModeContext();
   const { containerRef, scale, canvasWidth, canvasHeight } = useMirrorScale(
     mirror?.widthCm ?? 0,
@@ -24,13 +20,28 @@ export const MirrorCanvas = ({ mirror, widgets }: MirrorCanvasProps) => {
 
   const renderedWidgets = widgets
     .map((widget) => {
-      const WidgetComponent = widgetComponentMap[widget];
+      const definition = widgetRegistry.find((w) => w.id === widget);
 
-      if (!WidgetComponent) {
-        return null;
-      }
+      if (!definition) return null;
 
-      return <WidgetComponent key={widget} />;
+      const WidgetComponent = definition.component;
+      return (
+        <div key={widget} className="relative group">
+          <WidgetComponent />
+          {isEditMode && (
+            <button
+              type="button"
+              onClick={() => onRemoveWidget(widget)}
+              aria-label={`Ta bort ${definition.name}`}
+              className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white opacity-0 shadow group-hover:opacity-100 transition-opacity"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+        </div>
+      );
     })
     .filter(Boolean);
 

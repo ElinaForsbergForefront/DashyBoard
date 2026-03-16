@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { ReminderWidgetForm } from './ReminderWidgetForm.tsx';
-import { widgetOptions } from './types.ts';
+import { widgetRegistry } from '../../../widgets/widgetRegistry';
 import type { WidgetType } from './types.ts';
 
 interface WidgetFormPanelProps {
@@ -9,7 +8,7 @@ interface WidgetFormPanelProps {
 
 export function WidgetFormPanel({ selectedWidget }: WidgetFormPanelProps) {
   const activeWidget = useMemo(
-    () => widgetOptions.find((widget) => widget.id === selectedWidget) ?? null,
+    () => widgetRegistry.find((w) => w.id === selectedWidget) ?? null,
     [selectedWidget],
   );
 
@@ -21,14 +20,14 @@ export function WidgetFormPanel({ selectedWidget }: WidgetFormPanelProps) {
     );
   }
 
-  if (activeWidget.id === 'reminder') {
-    return <ReminderWidgetForm />;
+  if (!activeWidget.configForm) {
+    return (
+      <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted">
+        <p>Den här widgeten behöver ingen konfiguration.</p>
+      </div>
+    );
   }
 
-  return (
-    <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted">
-      <p className="font-medium text-foreground mb-1">2. Formulär</p>
-      <p>Den här widgeten behöver inget formulär ännu.</p>
-    </div>
-  );
+  const ConfigForm = activeWidget.configForm;
+  return <ConfigForm />;
 }
