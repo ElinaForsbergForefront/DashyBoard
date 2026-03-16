@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using DashyBoard.Application.Commands.User;
-using DashyBoard.Application.Queries.User; 
+using DashyBoard.Application.Queries.User;
 using DashyBoard.Application.Queries.User.Dto;
 
 namespace DashyBoard.Api.Controllers
 {
     public sealed record UpdateUserRequest(string? Username, string? DisplayName, string? Country, string? City);
-
-
+  
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -54,6 +53,17 @@ namespace DashyBoard.Api.Controllers
             return Ok(userProfile);
         }
 
+        [HttpGet("check-username")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CheckUsername([FromQuery] string username, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest("Username is required.");
+
+            var isTaken = await _mediator.Send(new CheckUsernameQuery(username), ct);
+            return Ok(isTaken);
+        }
+
         [HttpDelete("me")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DeleteCurrentUser(CancellationToken ct)
@@ -88,11 +98,13 @@ namespace DashyBoard.Api.Controllers
             return Ok(result);
         }
 
+
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateUserById(Guid id, [FromBody] UpdateUserByIdCommand command, CancellationToken ct)
+        public async Task<IActionResult> UpdateUserById(Guid id, [FromBody] UpdateUserRequest request, CancellationToken ct)
         {
-            var result = await _mediator.Send(command with { Id = id }, ct);
+            var command = new UpdateUserByIdCommand(id, request.Username, request.DisplayName, request.Country, request.City);
+            var result = await _mediator.Send(command, ct);
             return Ok(result);
         }
     }

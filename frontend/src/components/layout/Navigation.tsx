@@ -6,7 +6,11 @@ import { MobileNav } from './navigation/MobileNav';
 import { ThemeToggle } from './navigation/ThemeToggle';
 import { LogoutButton } from '../auth/LogoutButton';
 
-export const Navigation = () => {
+interface NavigationProps {
+  disableInteractions?: boolean;
+}
+
+export const Navigation = ({ disableInteractions = false }: NavigationProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -17,14 +21,15 @@ export const Navigation = () => {
           <Logo />
 
           {/* Desktop Navigation */}
-          <DesktopNav />
+          <DesktopNav disabled={disableInteractions} />
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-2">
             <ThemeToggle />
             <button
               type="button"
-              className="px-3 py-2 text-sm font-medium rounded-md border border-border text-muted hover:text-foreground hover:bg-overlay cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              disabled={disableInteractions}
+              className="px-3 py-2 text-sm font-medium rounded-md border border-border text-muted hover:text-foreground hover:bg-overlay cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               Preview
             </button>
@@ -32,12 +37,20 @@ export const Navigation = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <MenuButton isOpen={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <MenuButton
+            isOpen={mobileMenuOpen}
+            disabled={disableInteractions}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          />
         </div>
       </header>
 
       {/* Mobile Navigation - Outside header */}
-      <MobileNav isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <MobileNav
+        isOpen={mobileMenuOpen}
+        disabled={disableInteractions}
+        onClose={() => setMobileMenuOpen(false)}
+      />
     </>
   );
 };
