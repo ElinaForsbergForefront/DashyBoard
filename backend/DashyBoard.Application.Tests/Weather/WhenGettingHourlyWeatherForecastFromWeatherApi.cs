@@ -1,12 +1,11 @@
 ﻿using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.Weather;
 using DashyBoard.Application.Queries.Weather.Dto;
-using DashyBoard.Domain.Models;
 using Moq;
 
 namespace DashyBoard.Application.Tests.Weather
 {
-    public class WhenGettingWeatherForecastFromWeatherApi
+    public class WhenGettingHourlyWeatherForecastFromWeatherApi
     {
         [Test]
 
@@ -24,7 +23,7 @@ namespace DashyBoard.Application.Tests.Weather
                     [5.0],
                     [1]
                 )
-               );
+            );
 
             var mockClient = new Mock<IWeatherApiClient>();
             mockClient.Setup(client => client.GetHourlyWeatherForecastAsync("10", "10", It.IsAny<CancellationToken>()))

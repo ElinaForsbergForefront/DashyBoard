@@ -5,16 +5,16 @@ namespace DashyBoard.Application.Queries.Weather.Dto
     public sealed record RawDailyWeatherForecastDto(
         double Latitude,
         double Longitude,
-        RawDailyForecastDataDto Daily
+        RawDailyForecastData Daily
     );
 
-    public sealed record RawDailyForecastDataDto(
+    public sealed record RawDailyForecastData(
         [property: JsonPropertyName("time")] List<string> Time,
         [property: JsonPropertyName("weather_code")] List<int> WeatherCode,
         [property: JsonPropertyName("temperature_2m_max")] List<double> TemperatureMax,
         [property: JsonPropertyName("temperature_2m_min")] List<double> TemperatureMin
     );
-    
 
-    
+
+
 }

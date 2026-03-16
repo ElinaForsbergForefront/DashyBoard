@@ -26,23 +26,23 @@ public static class DependencyInjection
 			client.BaseAddress = new Uri("https://api.gold-api.com/");
 		});
 
-		// World Time API
-		services.AddHttpClient<IWorldTimeApiClient, WorldTimeApiClient>(client =>
-		{
-			client.BaseAddress = new Uri("https://timeapi.io/");
-		});
-
 		// Weather API
 		services.AddHttpClient<IWeatherApiClient, WeatherApiClient>(client =>
 		{
 			client.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
 		});
 
-        services.AddScoped<IUserRepository, UserRepository>();
+		// World Time API
+		services.AddHttpClient<IWorldTimeApiClient, WorldTimeApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://timeapi.io/");
+		});
 
-        //EF Core
-        var cs = config.GetConnectionString("DefaultConnection")
-				 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+		services.AddScoped<IUserRepository, UserRepository>();
+
+		//EF Core
+		var cs = config.GetConnectionString("DefaultConnection")
+		 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
 
 		services.AddDbContext<DashyBoardDbContext>(options =>
 			options.UseNpgsql(cs));
@@ -68,32 +68,6 @@ public static class DependencyInjection
 			var client = sp.GetRequiredService<IMongoClient>();
 			return client.GetDatabase(settings.DatabaseName);
 		});
-
-		// Configure Auth0 JWT Authentication
-		services.Configure<Auth0Settings>(
-			config.GetSection(Auth0Settings.SectionName));
-
-		var auth0Settings = config
-			.GetSection(Auth0Settings.SectionName)
-			.Get<Auth0Settings>()
-			?? throw new InvalidOperationException("Auth0 settings not configured");
-
-		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-			.AddJwtBearer(options =>
-			{
-				options.Authority = $"https://{auth0Settings.Domain}/";
-				options.Audience = auth0Settings.Audience;
-				options.TokenValidationParameters = new TokenValidationParameters
-				{
-					ValidateIssuer = true,
-					ValidIssuer = $"https://{auth0Settings.Domain}/",
-					ValidateAudience = true,
-					ValidAudience = auth0Settings.Audience,
-					ValidateLifetime = true,
-				};
-			});
-
-		services.AddAuthorization();
 
 		return services;
 	}
