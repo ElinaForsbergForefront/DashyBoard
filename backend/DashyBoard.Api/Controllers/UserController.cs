@@ -9,6 +9,7 @@ using DashyBoard.Application.Queries.User.Dto;
 namespace DashyBoard.Api.Controllers
 {
     public sealed record UpdateUserRequest(string? Username, string? DisplayName, string? Country, string? City);
+  
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -88,10 +89,8 @@ namespace DashyBoard.Api.Controllers
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserRequest request, CancellationToken ct)
         {
-            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrEmpty(sub))
+            var sub = GetCurrentSub();
+            if (string.IsNullOrWhiteSpace(sub))
                 return Unauthorized();
 
             var command = new UpdateUserBySubCommand(sub, request.Username, request.DisplayName, request.Country, request.City);
