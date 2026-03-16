@@ -2,5 +2,5 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.User
 {
-    public record CheckUsernameQuery(string Username) : IRequest<bool>;
+    public sealed record CheckUsernameQuery(string Username) : IRequest<bool>;
 }
