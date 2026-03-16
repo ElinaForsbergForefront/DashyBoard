@@ -3,4 +3,4 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Traffic.GetDepartures;
 
-public sealed record GetDeparturesQuery(string SiteId) : IRequest<IReadOnlyList<DepartureDto>>;
+public sealed record GetDeparturesQuery(string SiteId) : IRequest<IReadOnlyList<TimetableEntryDto>>;

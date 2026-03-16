@@ -1,7 +1,7 @@
 namespace DashyBoard.Application.Queries.Traffic.Dto;
 
-/// <summary>A single arrival row shown in the timetable widget.</summary>
-public record ArrivalDto(
+/// <summary>A single timetable row (departure or arrival) shown in the timetable widget.</summary>
+public record TimetableEntryDto(
     DateTime Scheduled,
     DateTime? Realtime,
     int Delay,

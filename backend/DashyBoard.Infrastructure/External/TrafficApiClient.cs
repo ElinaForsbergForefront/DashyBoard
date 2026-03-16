@@ -77,7 +77,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
             .ToList() ?? [];
     }
 
-    public async Task<IReadOnlyList<DepartureDto>> GetDeparturesAsync(string siteId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TimetableEntryDto>> GetDeparturesAsync(string siteId, CancellationToken ct = default)
     {
         var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}?key={_apiKey}", ct);
         return doc?.RootElement
@@ -88,7 +88,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
                 var route = d.GetProperty("route");
                 var platform = d.GetProperty("realtime_platform");
 
-                return new DepartureDto(
+                return new TimetableEntryDto(
                     d.GetProperty("scheduled").GetDateTime(),
                     d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
                     d.GetProperty("delay").GetInt32(),
@@ -103,7 +103,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
     }
 
 
-    public async Task<IReadOnlyList<DepartureDto>> GetDeparturesSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TimetableEntryDto>> GetDeparturesSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
     {
         var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}?key={_apiKey}", ct);
         return doc?.RootElement
@@ -114,7 +114,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
                 var route = d.GetProperty("route");
                 var platform = d.GetProperty("realtime_platform");
 
-                return new DepartureDto(
+                return new TimetableEntryDto(
                     d.GetProperty("scheduled").GetDateTime(),
                     d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
                     d.GetProperty("delay").GetInt32(),
@@ -131,7 +131,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
 
 
-    public async Task<IReadOnlyList<ArrivalDto>> GetArrivalsAsync(string siteId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TimetableEntryDto>> GetArrivalsAsync(string siteId, CancellationToken ct = default)
     {
         var doc = await _http.GetFromJsonAsync<JsonDocument>($"arrivals/{siteId}?key={_apiKey}", ct);
         return doc?.RootElement
@@ -142,7 +142,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
                 var route = d.GetProperty("route");
                 var platform = d.GetProperty("realtime_platform");
 
-                return new ArrivalDto(
+                return new TimetableEntryDto(
                     d.GetProperty("scheduled").GetDateTime(),
                     d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
                     d.GetProperty("delay").GetInt32(),
@@ -157,7 +157,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
     }
 
 
-    public async Task<IReadOnlyList<ArrivalDto>> GetArrivalsSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TimetableEntryDto>> GetArrivalsSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
     {
         var doc = await _http.GetFromJsonAsync<JsonDocument>($"arrivals/{siteId}?key={_apiKey}", ct);
         return doc?.RootElement
@@ -168,7 +168,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
                 var route = d.GetProperty("route");
                 var platform = d.GetProperty("realtime_platform");
 
-                return new ArrivalDto(
+                return new TimetableEntryDto(
                     d.GetProperty("scheduled").GetDateTime(),
                     d.TryGetProperty("realtime", out var rt) ? rt.GetDateTime() : null,
                     d.GetProperty("delay").GetInt32(),

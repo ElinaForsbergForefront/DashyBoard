@@ -4,7 +4,7 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Traffic.GetDepartures;
 
-public sealed class GetDeparturesQueryHandler : IRequestHandler<GetDeparturesQuery, IReadOnlyList<DepartureDto>>
+public sealed class GetDeparturesQueryHandler : IRequestHandler<GetDeparturesQuery, IReadOnlyList<TimetableEntryDto>>
 {
     private readonly ITrafficApiClient _trafficApiClient;
 
@@ -13,6 +13,6 @@ public sealed class GetDeparturesQueryHandler : IRequestHandler<GetDeparturesQue
         _trafficApiClient = trafficApiClient;
     }
 
-    public async Task<IReadOnlyList<DepartureDto>> Handle(GetDeparturesQuery request, CancellationToken ct)
+    public async Task<IReadOnlyList<TimetableEntryDto>> Handle(GetDeparturesQuery request, CancellationToken ct)
         => await _trafficApiClient.GetDeparturesAsync(request.SiteId, ct);
 }

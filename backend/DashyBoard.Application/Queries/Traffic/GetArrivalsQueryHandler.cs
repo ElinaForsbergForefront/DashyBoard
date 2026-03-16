@@ -6,7 +6,7 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.Traffic;
 
-public sealed class GetArrivalsQueryHandler : IRequestHandler<GetArrivalsQuery, IReadOnlyList<ArrivalDto>>
+public sealed class GetArrivalsQueryHandler : IRequestHandler<GetArrivalsQuery, IReadOnlyList<TimetableEntryDto>>
 {
     private readonly ITrafficApiClient _trafficApiClient;
 
@@ -15,6 +15,6 @@ public sealed class GetArrivalsQueryHandler : IRequestHandler<GetArrivalsQuery, 
         _trafficApiClient = trafficApiClient;
     }
 
-    public async Task<IReadOnlyList<ArrivalDto>> Handle(GetArrivalsQuery request, CancellationToken ct)
+    public async Task<IReadOnlyList<TimetableEntryDto>> Handle(GetArrivalsQuery request, CancellationToken ct)
         => await _trafficApiClient.GetArrivalsAsync(request.SiteId, ct);
 }
