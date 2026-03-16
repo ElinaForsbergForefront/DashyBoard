@@ -16,5 +16,8 @@ public sealed class GetArrivalsSpecificTimeQueryHandler : IRequestHandler<GetArr
     }
 
     public async Task<IReadOnlyList<TimetableEntryDto>> Handle(GetArrivalsSpecificTimeQuery request, CancellationToken ct)
-        => await _trafficApiClient.GetArrivalsSpecificTimeAsync(request.SiteId, request.DateTime, ct);
+    {
+        return await _trafficApiClient.GetArrivalsSpecificTimeAsync(request.SiteId, request.DateTime, ct);
+    }
+        
 }

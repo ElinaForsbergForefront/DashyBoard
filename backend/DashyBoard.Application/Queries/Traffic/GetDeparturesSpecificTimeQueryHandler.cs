@@ -14,5 +14,7 @@ public sealed class GetDeparturesSpecificTimeQueryHandler : IRequestHandler<GetD
     }
 
     public async Task<IReadOnlyList<TimetableEntryDto>> Handle(GetDeparturesSpecificTimeQuery request, CancellationToken ct)
-        => await _trafficApiClient.GetDeparturesSpecificTimeAsync(request.SiteId, request.DateTime, ct);
+    {
+        return await _trafficApiClient.GetDeparturesSpecificTimeAsync(request.SiteId, request.DateTime, ct);
+    }
 }

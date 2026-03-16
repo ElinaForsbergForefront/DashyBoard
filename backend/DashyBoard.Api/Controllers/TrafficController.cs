@@ -20,25 +20,44 @@ public class TrafficController : ControllerBase
 
     [HttpGet("stops/list")]
     public async Task<IActionResult> GetAllStops(CancellationToken ct)
-        => Ok(await _mediator.Send(new GetAllStopsQuery(), ct));
+    {
+        var stops = await _mediator.Send(new GetAllStopsQuery(), ct);
+        return Ok(stops);
+    }
+       
 
     [HttpGet("stops/name/{name}")]
     public async Task<IActionResult> GetStopByName(string name, CancellationToken ct)
-        => Ok(await _mediator.Send(new GetStopByNameQuery(name), ct));
+    {
+        var stop = await _mediator.Send(new GetStopByNameQuery(name), ct);
+        return Ok(stop);
+    }
 
     [HttpGet("departures/{siteId}")]
     public async Task<IActionResult> GetDepartures(string siteId, CancellationToken ct)
-        => Ok(await _mediator.Send(new GetDeparturesQuery(siteId), ct));
+    {
+        var departures = await _mediator.Send(new GetDeparturesQuery(siteId), ct);
+        return Ok(departures);
+    }
 
     [HttpGet("departures/{siteId}/{dateTime}")]
     public async Task<IActionResult> GetDepartures(string siteId, string dateTime, CancellationToken ct)
-    => Ok(await _mediator.Send(new GetDeparturesSpecificTimeQuery(siteId, dateTime), ct));
+    {
+        var departures = await _mediator.Send(new GetDeparturesSpecificTimeQuery(siteId, dateTime), ct);
+        return Ok(departures);
+    }
 
     [HttpGet("arrivals/{siteId}")]
     public async Task<IActionResult> GetArrivals(string siteId, CancellationToken ct)
-    => Ok(await _mediator.Send(new GetArrivalsQuery(siteId), ct));
+    {
+        var arrivals = await _mediator.Send(new GetArrivalsQuery(siteId), ct);
+        return Ok(arrivals);
+    }
 
     [HttpGet("arrivals/{siteId}/{dateTime}")]
     public async Task<IActionResult> GetArrivals(string siteId, string dateTime, CancellationToken ct)
-=> Ok(await _mediator.Send(new GetArrivalsSpecificTimeQuery(siteId, dateTime), ct));
+    {
+        var arrivals = await _mediator.Send(new GetArrivalsSpecificTimeQuery(siteId, dateTime), ct);
+        return Ok(arrivals);
+    }
 }

@@ -15,6 +15,8 @@ public sealed class GetAllStopsQueryHandler // : IRequestHandler<GetAllStopsQuer
 
     /*
     public async Task<IReadOnlyList<StationDto>> Handle(GetAllStopsQuery request, CancellationToken ct)
-        => await _trafficApiClient.GetAllStopsAsync(ct);
+        {
+        return await _trafficApiClient.GetAllStopsAsync(ct);
+        }
     */
 }
