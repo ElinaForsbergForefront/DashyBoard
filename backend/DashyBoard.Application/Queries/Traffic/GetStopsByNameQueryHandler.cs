@@ -14,5 +14,7 @@ public sealed class GetStopByNameQueryHandler : IRequestHandler<GetStopByNameQue
     }
 
     public async Task<IReadOnlyList<StationDto>> Handle(GetStopByNameQuery request, CancellationToken ct)
-        => await _trafficApiClient.GetStopByNameAsync(request.Name, ct);
+    {
+        return await _trafficApiClient.GetStopByNameAsync(request.Name, ct);
+    }
 }
