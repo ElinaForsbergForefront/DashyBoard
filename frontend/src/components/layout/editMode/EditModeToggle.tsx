@@ -1,6 +1,11 @@
+import { LayoutGrid, Pencil } from 'lucide-react';
 import { useEditModeContext } from '../../../context/EditModeContext';
 
-export function EditModeToggle() {
+interface EditModeToggleProps {
+  disabled?: boolean;
+}
+
+export function EditModeToggle({ disabled = false }: EditModeToggleProps) {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode, toggleSidebar } =
     useEditModeContext();
 
@@ -13,7 +18,7 @@ export function EditModeToggle() {
           aria-label="Open widgets"
           className="lg:hidden fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary transition-all duration-200 flex items-center justify-center cursor-pointer"
         >
-          <WidgetsIcon />
+          <LayoutGrid size={18} />
         </button>
 
         {/* Save / Discard bottom-right */}
@@ -38,51 +43,11 @@ export function EditModeToggle() {
   return (
     <button
       onClick={enterEditMode}
+      disabled={disabled}
       aria-label="Enter edit mode"
-      className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary hover:shadow-[0_0_0_3px_rgba(51,153,255,0.15)] transition-all duration-200 flex items-center justify-center cursor-pointer group"
+      className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary hover:shadow-[0_0_0_3px_rgba(51,153,255,0.15)] transition-all duration-200 flex items-center justify-center cursor-pointer group disabled:opacity-40 disabled:pointer-events-none"
     >
-      <PencilIcon />
+      <Pencil size={18} className="group-hover:rotate-12 transition-transform duration-200" />
     </button>
-  );
-}
-
-function PencilIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="group-hover:rotate-12 transition-transform duration-200"
-    >
-      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-      <path d="m15 5 4 4" />
-    </svg>
-  );
-}
-
-function WidgetsIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
   );
 }
