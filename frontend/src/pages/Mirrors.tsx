@@ -6,14 +6,34 @@ import { MirrorSubNav } from '../components/layout/navigation/sub-navigation/Mir
 import { CreateMirrorModal } from '../components/mirrors/CreateMirrorModal';
 import { useGetMyMirrorsQuery } from '../api/endpoints/mirror';
 import { MirrorCanvas } from '../components/mirrors/MirrorCanvas';
+import type { WidgetType } from '../components/layout/dashboard/widgetSidebar/types.ts';
 
 function MirrorContent() {
   const { isEditMode } = useEditModeContext();
   const [activeMirrorId, setActiveMirrorId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [widgetsByMirrorId, setWidgetsByMirrorId] = useState<Record<string, WidgetType[]>>({});
   const { data: mirrors = [] } = useGetMyMirrorsQuery();
 
   const activeMirror = mirrors.find((m) => m.id === activeMirrorId) ?? null;
+  const activeWidgets = activeMirrorId ? widgetsByMirrorId[activeMirrorId] ?? [] : [];
+
+  const handleAddWidget = (widget: WidgetType) => {
+    if (!activeMirrorId) return;
+
+    setWidgetsByMirrorId((prev) => {
+      const current = prev[activeMirrorId] ?? [];
+
+      if (current.includes(widget)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [activeMirrorId]: [...current, widget],
+      };
+    });
+  };
 
   return (
     <div className="flex flex-col flex-1">
@@ -26,8 +46,10 @@ function MirrorContent() {
       {showCreateModal && <CreateMirrorModal onClose={() => setShowCreateModal(false)} />}
 
       <div className="flex flex-1 overflow-hidden">
-        {isEditMode && <WidgetSidebar />}
-        <MirrorCanvas mirror={activeMirror} />
+        {isEditMode && (
+          <WidgetSidebar onAddWidget={handleAddWidget} canAddWidget={Boolean(activeMirrorId)} />
+        )}
+        <MirrorCanvas mirror={activeMirror} widgets={activeWidgets} />
         <EditModeToggle />
       </div>
     </div>
