@@ -1,14 +1,14 @@
+using DashyBoard.Application.Interfaces;         
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
-using DashyBoard.Application.Interfaces;
 using DashyBoard.Infrastructure.External;
+using DashyBoard.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
-using DashyBoard.Infrastructure.Repositories;
 
 
 namespace DashyBoard.Infrastructure;
@@ -32,12 +32,18 @@ public static class DependencyInjection
 			client.BaseAddress = new Uri("https://timeapi.io/");
 		});
 
-        services.AddScoped<IUserRepository, UserRepository>();
-		services.AddScoped<IMirrorRepository, MirrorRepository>();
+        // Mirror
+        services.AddScoped<IMirrorRepository, MirrorRepository>();
+
+        //Reminders
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+
+        // Users
+		services.AddScoped<IUserRepository, UserRepository>();
 
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
-				 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+            ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
 
 		services.AddDbContext<DashyBoardDbContext>(options =>
 			options.UseNpgsql(cs));

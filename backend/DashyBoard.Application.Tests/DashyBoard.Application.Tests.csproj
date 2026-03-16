@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DashyBoard.Application\DashyBoard.Application.csproj" />
+    <ProjectReference Include="..\DashyBoard.Domain\DashyBoard.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
