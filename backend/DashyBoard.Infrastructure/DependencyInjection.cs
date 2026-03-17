@@ -1,14 +1,14 @@
+using DashyBoard.Application.Interfaces;         
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
-using DashyBoard.Application.Interfaces;
 using DashyBoard.Infrastructure.External;
+using DashyBoard.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
-using DashyBoard.Infrastructure.Repositories;
 
 
 namespace DashyBoard.Infrastructure;
@@ -26,28 +26,52 @@ public static class DependencyInjection
 			client.BaseAddress = new Uri("https://api.gold-api.com/");
 		});
 
-		// Weather API
-		services.AddHttpClient<IWeatherApiClient, WeatherApiClient>(client =>
-		{
-			client.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
-		});
-
 		// World Time API
 		services.AddHttpClient<IWorldTimeApiClient, WorldTimeApiClient>(client =>
 		{
 			client.BaseAddress = new Uri("https://timeapi.io/");
 		});
+    
+    // Weather API
+		services.AddHttpClient<IWeatherApiClient, WeatherApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
+		});
 
+        // Mirror
+        services.AddScoped<IMirrorRepository, MirrorRepository>();
+
+        //Reminders
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+
+        // Users
 		services.AddScoped<IUserRepository, UserRepository>();
 
-		//EF Core
-		var cs = config.GetConnectionString("DefaultConnection")
-		 ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+        // TrafikLab Realtime API
+        services.AddHttpClient<ITrafficApiClient, TrafficApiClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://realtime-api.trafiklab.se/v1/");
+        });
+
+        // Mirror
+        services.AddScoped<IMirrorRepository, MirrorRepository>();
+
+        //Reminders
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+
+        // Users
+		services.AddScoped<IUserRepository, UserRepository>();
+
+        //EF Core
+        var cs = config.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
 
 		services.AddDbContext<DashyBoardDbContext>(options =>
 			options.UseNpgsql(cs));
 
 		// MongoDB
+		MongoDbConfigurator.Configure();
+
 		services.Configure<MongoDbSettings>(
 			config.GetSection(MongoDbSettings.SectionName));
 

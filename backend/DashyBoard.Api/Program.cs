@@ -31,7 +31,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddSwaggerGen();
 builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddApiSwagger(builder.Configuration);
 

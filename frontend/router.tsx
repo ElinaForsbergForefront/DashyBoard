@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import App from './src/App';
-import { ColorPalette } from './src/ColorPalette';
-import { Dashboard } from './src/pages/Dashboard';
+import { StyleGuide } from './src/pages/StyleGuide';
+import { Mirrors } from './src/pages/Mirrors';
 
 export const router = createBrowserRouter([
   {
@@ -11,11 +11,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Dashboard />,
+        element: <Mirrors />,
       },
       {
         path: '/style-guide',
-        element: <ColorPalette />,
+        element: <StyleGuide />,
       },
     ],
   },
