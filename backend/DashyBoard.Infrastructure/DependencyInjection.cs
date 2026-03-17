@@ -31,6 +31,12 @@ public static class DependencyInjection
 		{
 			client.BaseAddress = new Uri("https://timeapi.io/");
 		});
+    
+    // Weather API
+		services.AddHttpClient<IWeatherApiClient, WeatherApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
+		});
 
         // Mirror
         services.AddScoped<IMirrorRepository, MirrorRepository>();
