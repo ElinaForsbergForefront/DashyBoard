@@ -11,6 +11,9 @@ const userApi = api.injectEndpoints({
       query: (userId) => `/user/profile/${userId}`,
       providesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
+    checkUsername: builder.query<boolean, string>({
+      query: (username) => `/user/check-username?username=${encodeURIComponent(username)}`,
+    }),
     updateCurrentUser: builder.mutation<UserDto, UpdateUserBySubCommand>({
       query: (body) => ({ url: `/user/me`, method: 'PUT', body }),
       invalidatesTags: [{ type: 'User', id: 'ME' }],
@@ -33,6 +36,7 @@ const userApi = api.injectEndpoints({
 export const {
   useGetCurrentUserQuery,
   useGetUserProfileQuery,
+  useLazyCheckUsernameQuery,
   useUpdateCurrentUserMutation,
   useDeleteCurrentUserMutation,
   useUpdateUserByIdMutation,

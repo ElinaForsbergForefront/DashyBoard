@@ -1,6 +1,6 @@
 @DashyBoard.Api_HostAddress = http://localhost:5251
 
-GET {{DashyBoard.Api_HostAddress}}/weatherforecast/
+GET {{DashyBoard.Api_HostAddress}}/HourlyWeatherForecast/
 Accept: application/json
 
 ###
