@@ -24,7 +24,7 @@ const mirrorApi = api.injectEndpoints({
     }),
     deleteMirror: builder.mutation<void, string>({
       query: (id) => ({ url: `/mirror/${id}`, method: 'DELETE' }),
-      invalidatesTags: [{ type: 'Mirror', id: 'LIST ' }],
+      invalidatesTags: [{ type: 'Mirror', id: 'LIST' }],
     }),
   }),
 });

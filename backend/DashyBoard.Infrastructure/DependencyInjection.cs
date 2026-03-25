@@ -51,6 +51,14 @@ public static class DependencyInjection
             client.BaseAddress = new Uri("https://api.geoapify.com/v1/");
         });
 
+		// Nominatim Geocoding API
+		services.AddHttpClient<IGeocodingApiClient, NominatimApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
+			client.DefaultRequestHeaders.Add("User-Agent", "DashyBoard/1.0");
+			client.Timeout = TimeSpan.FromSeconds(10);
+		});
+
         // Mirror
         services.AddScoped<IMirrorRepository, MirrorRepository>();
 
