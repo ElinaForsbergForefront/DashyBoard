@@ -10,4 +10,8 @@ public interface ICurrencyApiClient
         long endTimestamp,
         string interval,
         CancellationToken ct);
+
+    Task<CurrencySearchDto> SearchCurrenciesAsync(
+        string query,
+        CancellationToken ct);
 }

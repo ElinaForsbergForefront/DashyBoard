@@ -48,4 +48,23 @@ public sealed class CurrencyApiClient : ICurrencyApiClient
 
         return response!.Chart.Result[0];
     }
+
+    public async Task<CurrencySearchDto> SearchCurrenciesAsync(string query, CancellationToken ct)
+    {
+        ValidateSearchQuery(query);
+
+        var url = BuildSearchUrl(query);
+        var response = await _http.GetFromJsonAsync<CurrencySearchDto>(url, ct);
+
+        return response ?? new CurrencySearchDto(0, []);
+    }
+
+    private static void ValidateSearchQuery(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            throw new ArgumentException("Search query cannot be empty.", nameof(query));
+    }
+
+    private static string BuildSearchUrl(string query) =>
+        $"v1/finance/search?q={Uri.EscapeDataString(query)}&enableLogoUrl=true";
 }
