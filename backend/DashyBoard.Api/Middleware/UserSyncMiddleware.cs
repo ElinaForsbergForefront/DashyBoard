@@ -53,7 +53,7 @@ public class UserSyncMiddleware
     }
 }
 
-public static class UserSyndMiddlewareExtensions
+public static class UserSyncMiddlewareExtensions
 {
     public static IApplicationBuilder UseUserSync(this IApplicationBuilder builder)
     {
