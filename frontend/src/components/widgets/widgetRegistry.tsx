@@ -28,7 +28,7 @@ export interface WidgetDefinition {
 export const widgetRegistry: WidgetDefinition[] = [
     {
         id: 'clock',
-        name: 'Klocka',
+        name: 'Clock',
         description: 'Visar aktuell tid baserat på vald tidszon.',
         component: ClockWidget,
     },
