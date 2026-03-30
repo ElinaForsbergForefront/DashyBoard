@@ -4,7 +4,8 @@ import { FORM_FIELDS } from '../../../hooks/types/form-fields';
 import { FormField } from './FormField';
 
 export const Form = () => {
-  const { values, errors, isSubmitDisabled, isLoading, handleChange, handleSubmit } = useUserForm();
+  const { values, errors, isSubmitDisabled, isLoading, fieldExtras, handleChange, handleSubmit } =
+    useUserForm();
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -19,6 +20,7 @@ export const Form = () => {
               value={values[field.id]}
               onChange={handleChange}
               error={errors[field.id]}
+              {...(fieldExtras[field.id] ?? {})}
             />
           ))}
 
