@@ -22,6 +22,10 @@ export const router = createBrowserRouter([
         path: '/style-guide',
         element: <StyleGuide />,
       },
+      {
+        path: '/currency-test',
+        element: <CurrencyTest />,
+      },
     ],
   },
 ]);
