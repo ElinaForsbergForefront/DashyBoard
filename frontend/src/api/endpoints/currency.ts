@@ -10,7 +10,9 @@ const currencyApi = api.injectEndpoints({
     getCurrencyChart: builder.query<CurrencyChartDataDto, GetCurrencyChartParams>({
       query: ({ symbol, start, end, interval }) => ({
         url: `/currency/chart/${encodeURIComponent(symbol)}`,
-        params: { start, end, interval },
+        params: Object.fromEntries(
+          Object.entries({ start, end, interval }).filter(([, v]) => v !== undefined),
+        ),
       }),
       providesTags: (_result, _error, { symbol }) => [{ type: 'Currency', id: symbol }],
     }),
