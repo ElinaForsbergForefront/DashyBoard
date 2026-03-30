@@ -4,6 +4,17 @@ import { baseQuery } from './BaseQuery';
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['User', 'Gold', 'WorldTime', 'Mirror', 'Reminder', 'Geocoding', 'Countries', 'Cities', 'Weather' ,'Currency'],
+  tagTypes: [
+    'User',
+    'Gold',
+    'WorldTime',
+    'Mirror',
+    'Reminder',
+    'Geocoding',
+    'Countries',
+    'Cities',
+    'Currency',
+    'Weather',
+  ],
   endpoints: () => ({}),
 });
