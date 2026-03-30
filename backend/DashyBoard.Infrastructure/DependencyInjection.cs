@@ -54,15 +54,6 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(15);
         });
 
-        // Mirror
-        services.AddScoped<IMirrorRepository, MirrorRepository>();
-
-        //Reminders
-        services.AddScoped<IReminderRepository, ReminderRepository>();
-
-        // Users
-		services.AddScoped<IUserRepository, UserRepository>();
-
         // TrafikLab Realtime API
         services.AddHttpClient<ITrafficApiClient, TrafficApiClient>(client =>
         {

@@ -23,6 +23,6 @@ public sealed class SearchCurrenciesQueryHandler : IRequestHandler<SearchCurrenc
     private static void ValidateQuery(string query)
     {
         if (string.IsNullOrWhiteSpace(query))
-            throw new ArgumentException("Searc query cannot be empty.", nameof(query));
+            throw new ArgumentException("Search query cannot be empty.", nameof(query));
     }
 }
