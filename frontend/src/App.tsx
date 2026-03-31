@@ -4,7 +4,7 @@ import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useGetCurrentUserQuery } from './api/endpoints/user';
 import { useProfileGuard } from './hooks/useProfileGuard';
-import { Form } from './components/layout/form/Form';
+import { Form } from './components/layout/newUserForm/Form';
 
 function App() {
   const { isAuthenticated } = useAuth0();
