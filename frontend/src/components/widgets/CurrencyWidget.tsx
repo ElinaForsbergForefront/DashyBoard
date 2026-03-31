@@ -183,7 +183,7 @@ export function CurrencyWidget() {
               key={preset.label}
               type="button"
               onClick={() => setActivePreset(preset)}
-              className={`flex-1 rounded-lg py-1 text-xs font-medium transition
+              className={`cursor-pointer flex-1 rounded-lg py-1 text-xs font-medium transition
                 ${
                   activePreset.label === preset.label
                     ? 'bg-primary/15 text-primary'

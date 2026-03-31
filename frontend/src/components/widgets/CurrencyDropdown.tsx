@@ -45,7 +45,7 @@ export function CurrencyDropdown({ currentSymbol, currentName, onSelect }: Curre
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1 rounded-md transition hover:bg-overlay px-1 -ml-1"
+        className="flex items-center gap-1 rounded-md transition hover:bg-overlay px-1 -ml-1 cursor-pointer"
       >
         <div className="text-left">
           <h3 className="text-sm font-medium text-foreground-secondary">
@@ -76,7 +76,7 @@ export function CurrencyDropdown({ currentSymbol, currentName, onSelect }: Curre
                     <button
                       type="button"
                       onClick={() => handleSelect(item.symbol)}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition hover:bg-overlay
+                      className={`cursor-pointer flex w-full items-center gap-2.5 px-3 py-2 text-left transition hover:bg-overlay
                         ${item.symbol === currentSymbol ? 'text-primary' : 'text-foreground'}`}
                     >
                       <span className="text-xs font-medium">{item.symbol}</span>
@@ -89,7 +89,7 @@ export function CurrencyDropdown({ currentSymbol, currentName, onSelect }: Curre
                 <button
                   type="button"
                   onClick={() => setIsSearching(true)}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-xs font-medium text-primary transition hover:bg-overlay"
+                  className="flex w-full items-center gap-2 px-3 py-2.5 text-xs font-medium text-primary transition hover:bg-overlay cursor-pointer"
                 >
                   <Plus size={12} />
                   Add new
@@ -146,7 +146,7 @@ function SearchPanel({
               key={item.symbol}
               type="button"
               onClick={() => onSelect(item.symbol)}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition hover:bg-overlay"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition hover:bg-overlay cursor-pointer"
             >
               {item.logoUrl && <img src={item.logoUrl} alt="" className="h-4 w-4 rounded" />}
               <div className="min-w-0 flex-1">
@@ -168,7 +168,7 @@ function SearchPanel({
         <button
           type="button"
           onClick={onBack}
-          className="w-full px-3 py-2 text-left text-xs text-muted transition hover:bg-overlay hover:text-foreground-secondary"
+          className="w-full px-3 py-2 text-left text-xs text-muted transition hover:bg-overlay hover:text-foreground-secondary cursor-pointer"
         >
           ← Back
         </button>
