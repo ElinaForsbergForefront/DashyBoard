@@ -19,9 +19,20 @@ export interface FormFieldProps {
 }
 
 export const FormField = ({ field, value, onChange, error, options, disabled, helperText, listId }: FormFieldProps) => {
-  const className = `px-3 py-2 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
-    error ? 'border-destructive' : 'border-border'
-  } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`;
+  const className = [
+    'w-full px-3 py-2 rounded-md border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary',
+    error ? 'border-destructive' : 'border-border',
+    disabled ? 'cursor-not-allowed opacity-60' : '',
+  ].join(' ');
+
+  const commonFieldProps = {
+    id: field.id,
+    value,
+    placeholder: field.placeholder,
+    disabled,
+    className,
+    onChange: (nextValue: string) => onChange(field.id, nextValue),
+  };
 
   return (
     <div className="flex flex-col gap-1">
@@ -29,26 +40,13 @@ export const FormField = ({ field, value, onChange, error, options, disabled, he
         {field.label}
       </label>
       {field.type === 'select' ? (
-        <SelectField
-          id={field.id}
-          value={value}
-          placeholder={field.placeholder}
-          options={options ?? []}
-          disabled={disabled}
-          className={className}
-          onChange={(v) => onChange(field.id, v)}
-        />
+        <SelectField {...commonFieldProps} options={options ?? []} />
       ) : (
         <InputField
-          id={field.id}
+          {...commonFieldProps}
           type={field.type}
-          value={value}
-          placeholder={field.placeholder}
-          disabled={disabled}
-          className={className}
           listId={listId}
           options={options}
-          onChange={(v) => onChange(field.id, v)}
         />
       )}
       {error && <p className="text-xs text-destructive">{error}</p>}

@@ -1,3 +1,5 @@
+import { InputField } from './InputField';
+
 interface SelectOption {
   value: string;
   label: string;
@@ -14,12 +16,15 @@ interface SelectFieldProps {
 }
 
 export const SelectField = ({ id, value, placeholder, options, disabled, className, onChange }: SelectFieldProps) => (
-  <select id={id} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={className}>
-    <option value="">{placeholder}</option>
-    {options.map((option) => (
-      <option key={option.value} value={option.value}>
-        {option.label}
-      </option>
-    ))}
-  </select>
+  <InputField
+    id={id}
+    type="text"
+    value={value}
+    placeholder={placeholder}
+    disabled={disabled}
+    className={className}
+    listId={`${id}-listbox`}
+    options={options}
+    onChange={onChange}
+  />
 );
