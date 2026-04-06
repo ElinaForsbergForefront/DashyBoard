@@ -5,6 +5,7 @@ import { ReminderWidget } from './ReminderWidget';
 import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
 import { WeatherWidget } from './WeatherWidget';
+import { WeatherWidget } from './WeatherWidget';
 
 /**
  * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
