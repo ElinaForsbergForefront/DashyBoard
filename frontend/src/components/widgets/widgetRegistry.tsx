@@ -7,6 +7,7 @@ import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
 import { TrafficForm } from '../forms/TrafficForm';
 import { TrafficWidget } from './TrafficWidget';
 import { WeatherWidget } from './WeatherWidget';
+import { WeatherWidget } from './WeatherWidget';
 
 /**
  * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
