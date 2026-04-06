@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
+import { WeatherWidget } from './WeatherWidget';
 
 /**
  * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
@@ -35,8 +36,8 @@ export const widgetRegistry: WidgetDefinition[] = [
     {
         id: 'weather',
         name: 'Weather',
-        description: 'Visar aktuellt väder. Ingen konfiguration krävs.',
-        component: ReminderWidget, // TODO: ersätt med WeatherWidget när den finns
+        description: 'Visar aktuellt väder för vald plats.',
+        component: WeatherWidget,
     },
 ];
 

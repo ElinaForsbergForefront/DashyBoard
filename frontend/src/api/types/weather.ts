@@ -1,16 +1,16 @@
 export interface CurrentWeatherDto{
-  Latitude: number;
-  Longitude: number;
-  Current: WeatherData;
+  latitude: number;
+  longitude: number;
+  current: WeatherData;
 }
 
 export interface WeatherData {
-  AirTemperature: number;
-  ApperentTemperature: number;
-  WindSpeed: number;
-  WeatherCode: string;
-  Precipitation: number;
-  PrecipitationProbability: number;
+  temperature_2m: number;
+  apparent_temperature: number;
+  wind_speed_10m: number;
+  weather_code: string;
+  precipitation: number;
+  precipitation_probability: number;
 }
 
 export interface DailyWeatherForecastDto{
