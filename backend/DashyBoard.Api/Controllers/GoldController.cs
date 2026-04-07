@@ -11,6 +11,7 @@ namespace DashyBoard.Api.Controllers
     {
         private readonly IMediator _mediator;
 
+        //HEJ HEJ VI TESTAR EN GREJ
         public GoldController(IMediator mediator)
         {
             _mediator = mediator;
