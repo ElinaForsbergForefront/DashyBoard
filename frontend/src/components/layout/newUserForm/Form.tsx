@@ -10,7 +10,7 @@ export const Form = () => {
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
       <div className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-md p-6">
-        <h2 className="font-semibold text-foreground mb-4">Användarinformation</h2>
+        <h2 className="font-semibold text-foreground mb-4">User information</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {FORM_FIELDS.map((field) => (

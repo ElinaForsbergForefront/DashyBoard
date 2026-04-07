@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useCreateReminderMutation } from '../../api/endpoints/reminder';
 import { DateTimePicker } from '../ui/DateTimePicker';
+import { FormCard } from '../ui/form-card';
 
 interface ReminderFormProps {
     onSuccess?: () => void;
@@ -41,7 +42,7 @@ export function ReminderForm({ onSuccess }: ReminderFormProps = {}) {
     };
 
     return (
-        <form onSubmit={onSubmit} className="rounded-lg border border-border bg-surface p-3 space-y-3">
+        <FormCard onSubmit={onSubmit}>
             <p className="text-sm font-medium text-foreground">Formulär: Reminder</p>
 
             <label className="flex flex-col gap-1 text-xs text-muted">
@@ -81,6 +82,6 @@ export function ReminderForm({ onSuccess }: ReminderFormProps = {}) {
             </button>
 
             {feedback && <p className="text-xs text-muted">{feedback}</p>}
-        </form>
+        </FormCard>
     );
 }
