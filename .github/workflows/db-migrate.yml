@@ -3,7 +3,7 @@ name: Apply EF Migrations (Supabase)
 on:
   pull_request:
     types: [closed]
-    branches: ["main"]
+    branches: ["dev"]
 
 jobs:
   migrate:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     concurrency:
-      group: db-migrations-main
+      group: db-migrations-dev
       cancel-in-progress: false
 
     defaults:
