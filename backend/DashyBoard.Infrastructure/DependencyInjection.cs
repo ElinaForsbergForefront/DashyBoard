@@ -59,14 +59,13 @@ public static class DependencyInjection
 			client.Timeout = TimeSpan.FromSeconds(10);
 		});
 
-        // Mirror
-        services.AddScoped<IMirrorRepository, MirrorRepository>();
-
-        //Reminders
-        services.AddScoped<IReminderRepository, ReminderRepository>();
-
-        // Users
-		services.AddScoped<IUserRepository, UserRepository>();
+		// Yahoo Finance API 
+        services.AddHttpClient<ICurrencyApiClient, CurrencyApiClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://query2.finance.yahoo.com/");
+            client.DefaultRequestHeaders.Add("User-Agent", "DashyBoard/1.0");
+            client.Timeout = TimeSpan.FromSeconds(15);
+        });
 
         // TrafikLab Realtime API
         services.AddHttpClient<ITrafficApiClient, TrafficApiClient>(client =>
