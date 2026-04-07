@@ -88,6 +88,9 @@ namespace DashyBoard.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AuthSub")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 

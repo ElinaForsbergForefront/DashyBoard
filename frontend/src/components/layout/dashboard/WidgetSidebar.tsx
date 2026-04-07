@@ -1,13 +1,21 @@
+import { useState } from 'react';
 import { useEditModeContext } from '../../../context/EditModeContext';
+import { WidgetPicker } from './widgetSidebar/WidgetPicker.tsx';
+import type { WidgetType } from './widgetSidebar/types.ts';
 
-export function WidgetSidebar() {
+interface WidgetSidebarProps {
+  onAddWidget: (widget: WidgetType) => void;
+  canAddWidget: boolean;
+}
+
+export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps) {
   const { isSidebarOpen, toggleSidebar } = useEditModeContext();
 
   return (
     <>
       {/* Desktop: always visible inline */}
       <aside className="hidden lg:flex w-60 min-h-full bg-card border-r border-border flex-col gap-4 p-4 shrink-0">
-        <SidebarContent />
+        <SidebarContent onAddWidget={onAddWidget} canAddWidget={canAddWidget} />
       </aside>
 
       {/* Mobile: slide-in overlay */}
@@ -36,7 +44,14 @@ export function WidgetSidebar() {
               <CloseIcon />
             </button>
           </div>
-          <SidebarContent hideHeading />
+          <SidebarContent
+            hideHeading
+            onAddWidget={(widget) => {
+              onAddWidget(widget);
+              toggleSidebar();
+            }}
+            canAddWidget={canAddWidget}
+          />
         </aside>
       </>
     </>
@@ -47,19 +62,32 @@ function SidebarHeading() {
   return (
     <div>
       <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">Widgets</h2>
-      <p className="text-xs text-muted">Drag to add to your mirror</p>
+      <p className="text-xs text-muted">Klicka för att lägga till i mirror</p>
     </div>
   );
 }
 
-function SidebarContent({ hideHeading = false }: { hideHeading?: boolean }) {
+function SidebarContent({
+  hideHeading = false,
+  onAddWidget,
+  canAddWidget,
+}: {
+  hideHeading?: boolean;
+  onAddWidget: (widget: WidgetType) => void;
+  canAddWidget: boolean;
+}) {
+  const [selectedWidget, setSelectedWidget] = useState<WidgetType | null>(null);
+
   return (
     <>
       {!hideHeading && <SidebarHeading />}
-      <div className="flex flex-col gap-2">
-        <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted text-center">
-          No widgets yet
-        </div>
+      <div className="flex flex-col gap-3">
+        <WidgetPicker
+          selectedWidget={selectedWidget}
+          onSelectWidget={setSelectedWidget}
+          onAddWidget={onAddWidget}
+          canAddWidget={canAddWidget}
+        />
       </div>
     </>
   );
