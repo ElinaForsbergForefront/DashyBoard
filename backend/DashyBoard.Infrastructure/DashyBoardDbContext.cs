@@ -25,6 +25,7 @@ namespace DashyBoard.Infrastructure
                 entity.Property(u => u.City).IsRequired(false);
 
                 entity.Property(u => u.CreatedAt).IsRequired();
+                entity.HasIndex(u => u.AuthSub).IsUnique();
             });
 
             modelBuilder.Entity<Reminder>(entity =>

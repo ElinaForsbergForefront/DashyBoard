@@ -1,6 +1,7 @@
 ﻿using DashyBoard.Domain.Models;
 using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System.Security.Claims;
 
 namespace DashyBoard.Api.Middleware;
@@ -41,15 +42,22 @@ public class UserSyncMiddleware
         await using var scope = _scopeFactory.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DashyBoardDbContext>();
 
-        var exists = await db.Users.AnyAsync(u => u.AuthSub == sub);
+        db.Users.Add(new User(sub, email));
 
-        if (!exists)
+        try
         {
-            var user = new User(sub, email);
-            db.Users.Add(user);
             await db.SaveChangesAsync();
             _logger.LogInformation("New user created: {Sub}", sub);
         }
+        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        {
+            _logger.LogInformation("User already exists: {Sub}", sub);
+        }
+    }
+    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+    {
+        return ex.InnerException is PostgresException postgresEx
+               && postgresEx.SqlState == "23505"; // unique_violation
     }
 }
 
