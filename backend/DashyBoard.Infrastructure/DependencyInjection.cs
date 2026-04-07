@@ -2,6 +2,7 @@ using DashyBoard.Application.Interfaces;
 using DashyBoard.Domain.Configuration;
 using DashyBoard.Infrastructure.Configuration;
 using DashyBoard.Infrastructure.External;
+using DashyBoard.Infrastructure.External.Location;
 using DashyBoard.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,18 @@ public static class DependencyInjection
 		{
 			client.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
 		});
+
+        // Location API
+		services.AddHttpClient<ILocationApiClient, LocationApiClient>(client =>
+		{
+			client.BaseAddress = new Uri("https://restcountries.com/v3.1/");
+		});
+
+        //city API
+        services.AddHttpClient<ICityApiClient, CityApiClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.geoapify.com/v1/");
+        });
 
 		// Nominatim Geocoding API
 		services.AddHttpClient<IGeocodingApiClient, NominatimApiClient>(client =>

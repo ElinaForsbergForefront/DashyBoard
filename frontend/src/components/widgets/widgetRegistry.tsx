@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import { ClockWidget } from './ClockWidget';
 import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
 import { WeatherWidget } from './WeatherWidget';
@@ -26,6 +27,12 @@ export interface WidgetDefinition {
 }
 
 export const widgetRegistry: WidgetDefinition[] = [
+    {
+        id: 'clock',
+        name: 'Clock',
+        description: 'Visar aktuell tid baserat på vald tidszon.',
+        component: ClockWidget,
+    },
     {
         id: 'reminder',
         name: 'Reminder',
