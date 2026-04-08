@@ -11,6 +11,8 @@ public class UserSyncMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<UserSyncMiddleware> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private const string UserSyncedKey = "UserSynced";
+
     public UserSyncMiddleware(RequestDelegate next, ILogger<UserSyncMiddleware> logger, IServiceScopeFactory scopeFactory)
     {
         _next = next;
@@ -31,6 +33,11 @@ public class UserSyncMiddleware
             if (!string.IsNullOrEmpty(sub) && !string.IsNullOrEmpty(email))
             {
                     await SyncUserAsync(sub, email);
+                if (!context.Items.ContainsKey(UserSyncedKey))
+                {
+                    await SyncUserAsync(sub, email);
+                    context.Items[UserSyncedKey] = true;
+                }
             }
         }
 
@@ -41,6 +48,12 @@ public class UserSyncMiddleware
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DashyBoardDbContext>();
+
+        var userExists = await db.Users.AnyAsync(u => u.AuthSub == sub);
+        if (userExists)
+        {
+            return;
+        }
 
         db.Users.Add(new User(sub, email));
 
