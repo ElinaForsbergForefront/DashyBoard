@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DashyBoard.Infrastructure.Migrations
 {
     [DbContext(typeof(DashyBoardDbContext))]
-    [Migration("20260408111317_AddUserRelationshipsAndPokes")]
+    [Migration("20260408113007_AddUserRelationshipsAndPokes")]
     partial class AddUserRelationshipsAndPokes
     {
         /// <inheritdoc />

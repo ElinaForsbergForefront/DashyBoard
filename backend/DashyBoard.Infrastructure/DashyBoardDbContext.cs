@@ -71,7 +71,7 @@ namespace DashyBoard.Infrastructure
 
                 entity.HasIndex(ur => new { ur.User1Id, ur.User2Id }).IsUnique();
 
-                entity.HasCheckConstraint("CK_UserRelationships_DifferentUsers", "\"User1Id\" <> \"User2Id\"");
+                entity.ToTable(t => t.HasCheckConstraint("CK_UserRelationships_DifferentUsers", "\"User1Id\" <> \"User2Id\""));
 
                 entity.HasOne<User>()
                       .WithMany()
