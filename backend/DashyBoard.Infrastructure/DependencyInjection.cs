@@ -82,6 +82,9 @@ public static class DependencyInjection
         // Users
 		services.AddScoped<IUserRepository, UserRepository>();
 
+		// Friends
+		services.AddScoped<IFriendRepository, FriendRepository>();
+
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
