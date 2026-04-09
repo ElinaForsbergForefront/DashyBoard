@@ -9,7 +9,7 @@ namespace DashyBoard.Application.Interfaces
     public interface IFriendRepository
     {
         // UserRelationship Commands
-        Task SendFriendRequestAsync(Guid currentUserId, string receiverUsername, CancellationToken ct);
+        Task<Guid> SendFriendRequestAsync(Guid currentUserId, string receiverUsername, CancellationToken ct);
         Task AcceptFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
         Task RejectFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
         Task RemoveFriendAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);

@@ -40,7 +40,7 @@ namespace DashyBoard.Application.Tests.UserRelation
                 .Setup(x => x.GetFriendListAsync(currentUserId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedFriends);
 
-            var handler = new GetFriendListQuerieHandler(mock.Object);
+            var handler = new GetFriendListQueryHandler(mock.Object);
             var query = new GetFriendListQuery(currentUserId);
 
             // Act

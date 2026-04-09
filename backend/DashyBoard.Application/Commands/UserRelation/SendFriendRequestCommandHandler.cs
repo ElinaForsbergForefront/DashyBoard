@@ -1,11 +1,12 @@
 ﻿using DashyBoard.Application.Interfaces;
 using MediatR;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DashyBoard.Application.Commands.UserRelation
 {
-    public sealed class SendFriendRequestCommandHandler : IRequestHandler<SendFriendRequestCommand>
+    public sealed class SendFriendRequestCommandHandler : IRequestHandler<SendFriendRequestCommand, Guid>
     {
         private readonly IFriendRepository _repository;
 
@@ -14,9 +15,9 @@ namespace DashyBoard.Application.Commands.UserRelation
             _repository = repository;
         }
 
-        public async Task Handle(SendFriendRequestCommand command, CancellationToken ct)
+        public async Task<Guid> Handle(SendFriendRequestCommand command, CancellationToken ct)
         {
-            await _repository.SendFriendRequestAsync(command.CurrentUserId, command.ReceiverUsername, ct);
+            return await _repository.SendFriendRequestAsync(command.CurrentUserId, command.ReceiverUsername, ct);
         }
     }
 }

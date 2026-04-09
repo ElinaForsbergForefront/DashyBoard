@@ -43,14 +43,18 @@ namespace DashyBoard.Api.Controllers
         // ========== FRIEND REQUESTS ==========
 
         [HttpPost("request/{username}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
         public async Task<IActionResult> SendFriendRequest(string username, CancellationToken ct)
         {
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new SendFriendRequestCommand(userId.Value, username), ct);
-            return NoContent();
+            var relationshipId = await _mediator.Send(new SendFriendRequestCommand(userId.Value, username), ct);
+            
+            return CreatedAtAction(
+                nameof(GetFriend), 
+                new { username }, 
+                relationshipId);
         }
 
         [HttpPost("accept/{relationshipId:guid}")]
@@ -200,7 +204,7 @@ namespace DashyBoard.Api.Controllers
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new InActivatePokeCommand(pokeId, userId.Value), ct);
+            await _mediator.Send(new InactivatePokeCommand(pokeId, userId.Value), ct);
             return NoContent();
         }
     }
