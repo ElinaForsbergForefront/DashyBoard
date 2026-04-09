@@ -7,11 +7,11 @@ using MediatR;
 
 namespace DashyBoard.Application.Queries.UserRelation
 {
-    public sealed class GetFriendListQuerieHandler : IRequestHandler<GetFriendListQuery, IReadOnlyList<UserRelationDto>>
+    public sealed class GetFriendListQueryHandler : IRequestHandler<GetFriendListQuery, IReadOnlyList<UserRelationDto>>
     {
         private readonly IFriendRepository _repository;
 
-        public GetFriendListQuerieHandler(IFriendRepository repository)
+        public GetFriendListQueryHandler(IFriendRepository repository)
         {
             _repository = repository;
         }

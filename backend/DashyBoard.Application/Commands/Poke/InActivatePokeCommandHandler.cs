@@ -6,16 +6,16 @@ using MediatR;
 
 namespace DashyBoard.Application.Commands.Poke
 {
-    public sealed class InActivatePokeCommandHandler : IRequestHandler<InActivatePokeCommand>
+    public sealed class InactivatePokeCommandHandler : IRequestHandler<InactivatePokeCommand>
     {
         private readonly IFriendRepository _repository;
 
-        public InActivatePokeCommandHandler(IFriendRepository repository)
+        public InactivatePokeCommandHandler(IFriendRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task Handle(InActivatePokeCommand command, CancellationToken ct)
+        public async Task Handle(InactivatePokeCommand command, CancellationToken ct)
         {
             await _repository.InactivatePokeAsync(command.PokeId, command.CurrentUserId, ct);
         }

@@ -18,8 +18,8 @@ namespace DashyBoard.Application.Tests.Poke
                 .Setup(x => x.InactivatePokeAsync(pokeId, currentUserId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var handler = new InActivatePokeCommandHandler(mock.Object);
-            var command = new InActivatePokeCommand(pokeId, currentUserId);
+            var handler = new InactivatePokeCommandHandler(mock.Object);
+            var command = new InactivatePokeCommand(pokeId, currentUserId);
 
             // Act
             await handler.Handle(command, CancellationToken.None);

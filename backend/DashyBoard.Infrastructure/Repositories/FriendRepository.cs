@@ -22,7 +22,7 @@ namespace DashyBoard.Infrastructure.Repositories
 
         // ========== COMMANDS: UserRelationship ==========
 
-        public async Task SendFriendRequestAsync(Guid currentUserId, string receiverUsername, CancellationToken ct)
+        public async Task<Guid> SendFriendRequestAsync(Guid currentUserId, string receiverUsername, CancellationToken ct)
         {
             var receiver = await _db.Users.FirstOrDefaultAsync(u => u.Username == receiverUsername, ct);
             if (receiver == null)
@@ -47,6 +47,8 @@ namespace DashyBoard.Infrastructure.Repositories
             var relationship = new UserRelationship(currentUserId, receiverId, currentUserId);
             _db.UserRelationships.Add(relationship);
             await _db.SaveChangesAsync(ct);
+            
+            return relationship.Id;
         }
 
         public async Task AcceptFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct)

@@ -12,19 +12,21 @@ namespace DashyBoard.Application.Tests.UserRelation
             // Arrange
             var currentUserId = Guid.NewGuid();
             var receiverUsername = "testuser";
+            var expectedRelationshipId = Guid.NewGuid();
 
             var mock = new Mock<IFriendRepository>();
             mock
                 .Setup(x => x.SendFriendRequestAsync(currentUserId, receiverUsername, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(expectedRelationshipId);
 
             var handler = new SendFriendRequestCommandHandler(mock.Object);
             var command = new SendFriendRequestCommand(currentUserId, receiverUsername);
 
             // Act
-            await handler.Handle(command, CancellationToken.None);
+            var result = await handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.That(result, Is.EqualTo(expectedRelationshipId));
             mock.Verify(x => x.SendFriendRequestAsync(currentUserId, receiverUsername, It.IsAny<CancellationToken>()), Times.Once);
         }
     }

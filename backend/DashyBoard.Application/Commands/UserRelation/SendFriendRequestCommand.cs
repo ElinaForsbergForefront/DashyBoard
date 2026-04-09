@@ -7,5 +7,5 @@ namespace DashyBoard.Application.Commands.UserRelation
     (
         Guid CurrentUserId,
         string ReceiverUsername
-    ) : IRequest;
+    ) : IRequest<Guid>;
 }
