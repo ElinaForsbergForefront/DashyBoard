@@ -1,10 +1,77 @@
 import { useEffect, useState } from 'react';
 import { GlassCard } from '../ui/glass-card';
+import { useTheme } from '../../context/ThemeContext';
 import { useGeocodeAddressQuery } from '../../api/endpoints/geocoding';
 import { useGetCurrentWeatherQuery } from '../../api/endpoints/weather';
 import { WeatherForm } from '../forms/WeatherForm';
+import ClearDayLight from '../../../assets/weather/light/ClearDay.png';
+import ClearNightLight from '../../../assets/weather/light/ClearNight.png';
+import CloudyLight from '../../../assets/weather/light/Cloudy.png';
+import CloudyDayLight from '../../../assets/weather/light/CloudyDay.png';
+import CloudyNightLight from '../../../assets/weather/light/CloudyNight.png';
+import RainLight from '../../../assets/weather/light/Rain.png';
+import RainDayLight from '../../../assets/weather/light/RainDay.png';
+import RainNightLight from '../../../assets/weather/light/RainNight.png';
+import SnowLight from '../../../assets/weather/light/Snow.png';
+import ThunderLight from '../../../assets/weather/light/Thunder.png';
+import ClearDayDark from '../../../assets/weather/dark/ClearDay.png';
+import ClearNightDark from '../../../assets/weather/dark/ClearNight.png';
+import CloudyDark from '../../../assets/weather/dark/Cloudy.png';
+import CloudyDayDark from '../../../assets/weather/dark/CloudyDay.png';
+import CloudyNightDark from '../../../assets/weather/dark/CloudyNight.png';
+import RainDark from '../../../assets/weather/dark/Rain.png';
+import RainDayDark from '../../../assets/weather/dark/RainDay.png';
+import RainNightDark from '../../../assets/weather/dark/RainNight.png';
+import SnowDark from '../../../assets/weather/dark/Snow.png';
+import ThunderDark from '../../../assets/weather/dark/Thunder.png';
 
 const WEATHER_LOCATION_STORAGE_KEY = 'dashyboard.weather.location';
+
+const WEATHER_TYPE_MAP: Record<
+  string,
+  { label: string; icon: { light: string; dark: string } }
+> = {
+  clearsky: { label: 'Clear sky', icon: { light: ClearDayLight, dark: ClearDayDark } },
+  mainlyclear: { label: 'Mainly clear', icon: { light: ClearDayLight, dark: ClearDayDark } },
+  partlycloudy: { label: 'Partly cloudy', icon: { light: CloudyDayLight, dark: CloudyDayLight } },
+  overcast: { label: 'Overcast', icon: { light: CloudyLight, dark: CloudyDark } },
+  fog: { label: 'Fog', icon: { light: CloudyLight, dark: CloudyDark } },
+  drizzle: { label: 'Drizzle', icon: { light: RainDayLight, dark: RainDayDark } },
+  rain: { label: 'Rain', icon: { light: RainLight, dark: RainDark } },
+  snowfall: { label: 'Snow', icon: { light: SnowLight, dark: SnowDark } },
+  rainshowers: { label: 'Rain showers', icon: { light: RainDayLight, dark: RainNightDark } },
+  snowshowers: { label: 'Snow showers', icon: { light: SnowLight, dark: SnowDark } },
+  thunderstorm: { label: 'Thunderstorm', icon: { light: ThunderLight, dark: ThunderDark } },
+  thunderstormwithhail: { label: 'Thunderstorm with hail', icon: { light: ThunderLight, dark: ThunderDark } },
+  unknown: { label: 'Unknown', icon: { light: ClearDayLight, dark: CloudyDark } },
+};
+
+function normalizeWeatherType(type?: string) {
+  return type?.trim().replace(/[-_\s]+/g, '').toLowerCase();
+}
+
+function normalizeWeatherLabel(rawType: string) {
+  return rawType
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[-_]/g, ' ')
+    .trim()
+    .toLowerCase()
+    .replace(/^./, (char) => char.toUpperCase());
+}
+
+function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' | 'dark') {
+  if (!weatherType) {
+    return { label: '', icon: undefined };
+  }
+
+  const normalizedType = normalizeWeatherType(weatherType);
+  const mapped = WEATHER_TYPE_MAP[normalizedType];
+
+  return {
+    label: mapped?.label ?? normalizeWeatherLabel(weatherType),
+    icon: mapped?.icon[theme],
+  };
+}
 
 export function WeatherWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -35,6 +102,10 @@ export function WeatherWidget() {
     { longi: coordinates?.lon.toString() ?? '0', lati: coordinates?.lat.toString() ?? '0' },
     { skip: !coordinates },
   );
+
+  const { theme } = useTheme();
+  const rawWeatherType = currentWeather?.current.weatherType ?? currentWeather?.current.weather_code;
+  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(rawWeatherType, theme);
 
   const isLoading = isGeocoding || isFetchingWeather;
   const hasLocation = searchLocation.trim() !== '';
@@ -74,9 +145,19 @@ export function WeatherWidget() {
 
           {!isLoading && currentWeather && (
             <div className="space-y-2 text-center">
-              <p className="text-sm font-medium text-foreground-secondary">
-                {weatherLocation || searchLocation}
-              </p>
+              <div className="flex flex-col items-center justify-center gap-3">
+                {weatherIcon && (
+                  <img src={weatherIcon} alt={weatherTypeLabel} className="h-32 w-32" />
+                )}
+                <div>
+                  <p className="text-sm font-medium text-foreground-secondary">
+                    {weatherLocation || searchLocation}
+                  </p>
+                  {weatherTypeLabel && (
+                    <p className="text-xs text-muted">{weatherTypeLabel}</p>
+                  )}
+                </div>
+              </div>
               <p className="text-4xl font-semibold text-foreground tracking-tight">
                 {Math.round(currentWeather.current.temperature_2m)}°C
               </p>
@@ -103,6 +184,10 @@ export function WeatherWidget() {
 
           {!isLoading && !currentWeather && !hasLocation && (
             <p className="text-xs text-muted">Ingen plats vald ännu. Klicka på Edit för att lägga till.</p>
+          )}
+
+          {!isLoading && !currentWeather && hasLocation && !errorMessage && (
+            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
           )}
 
           {errorMessage && <p className="text-xs text-muted">{errorMessage}</p>}

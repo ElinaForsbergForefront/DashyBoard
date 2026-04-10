@@ -8,7 +8,8 @@ export interface WeatherData {
   temperature_2m: number;
   apparent_temperature: number;
   wind_speed_10m: number;
-  weather_code: string;
+  weather_code?: string;
+  weatherType?: string;
   precipitation: number;
   precipitation_probability: number;
 }
