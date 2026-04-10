@@ -17,7 +17,7 @@ namespace DashyBoard.Application.Commands.UserRelation
 
         public async Task Handle(BlockUserCommand command, CancellationToken ct)
         {
-            await _repository.BlockUserAsync(command.RelationshipId, command.CurrentUserId, ct);
+            await _repository.BlockUserAsync(command.Username, command.CurrentUserId, ct);
         }
     }
 }

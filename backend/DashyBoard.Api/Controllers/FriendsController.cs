@@ -57,25 +57,25 @@ namespace DashyBoard.Api.Controllers
                 relationshipId);
         }
 
-        [HttpPost("accept/{relationshipId:guid}")]
+        [HttpPost("accept/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> AcceptFriendRequest(Guid relationshipId, CancellationToken ct)
+        public async Task<IActionResult> AcceptFriendRequest(string username, CancellationToken ct)
         {
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new AcceptFriendRequestCommand(relationshipId, userId.Value), ct);
+            await _mediator.Send(new AcceptFriendRequestCommand(username, userId.Value), ct);
             return NoContent();
         }
 
-        [HttpDelete("reject/{relationshipId:guid}")]
+        [HttpDelete("reject/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> RejectFriendRequest(Guid relationshipId, CancellationToken ct)
+        public async Task<IActionResult> RejectFriendRequest(string username, CancellationToken ct)
         {
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new RemoveFriendCommand(relationshipId, userId.Value), ct);
+            await _mediator.Send(new RemoveFriendCommand(username, userId.Value), ct);
             return NoContent();
         }
 
@@ -116,38 +116,38 @@ namespace DashyBoard.Api.Controllers
             return Ok(friend);
         }
 
-        [HttpDelete("{relationshipId:guid}")]
+        [HttpDelete("{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> RemoveFriend(Guid relationshipId, CancellationToken ct)
+        public async Task<IActionResult> RemoveFriend(string username, CancellationToken ct)
         {
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new RemoveFriendCommand(relationshipId, userId.Value), ct);
+            await _mediator.Send(new RemoveFriendCommand(username, userId.Value), ct);
             return NoContent();
         }
 
         // ========== BLOCK ==========
 
-        [HttpPost("block/{relationshipId:guid}")]
+        [HttpPost("block/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> BlockUser(Guid relationshipId, CancellationToken ct)
+        public async Task<IActionResult> BlockUser(string username, CancellationToken ct)
         {
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new BlockUserCommand(relationshipId, userId.Value), ct);
+            await _mediator.Send(new BlockUserCommand(username, userId.Value), ct);
             return NoContent();
         }
 
-        [HttpPost("unblock/{relationshipId:guid}")]
+        [HttpPost("unblock/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> UnblockUser(Guid relationshipId, CancellationToken ct)
+        public async Task<IActionResult> UnblockUser(string username, CancellationToken ct)
         {
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new UnBlockUserCommand(relationshipId, userId.Value), ct);
+            await _mediator.Send(new UnBlockUserCommand(username, userId.Value), ct);
             return NoContent();
         }
 

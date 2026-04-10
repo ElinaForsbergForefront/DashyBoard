@@ -10,22 +10,22 @@ namespace DashyBoard.Application.Tests.UserRelation
         public async Task ThenValidRequestShouldBlockUser()
         {
             // Arrange
-            var relationshipId = Guid.NewGuid();
+            var username = "testuser";
             var currentUserId = Guid.NewGuid();
 
             var mock = new Mock<IFriendRepository>();
             mock
-                .Setup(x => x.BlockUserAsync(relationshipId, currentUserId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.BlockUserAsync(username, currentUserId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             var handler = new BlockUserCommandHandler(mock.Object);
-            var command = new BlockUserCommand(relationshipId, currentUserId);
+            var command = new BlockUserCommand(username, currentUserId);
 
             // Act
             await handler.Handle(command, CancellationToken.None);
 
             // Assert
-            mock.Verify(x => x.BlockUserAsync(relationshipId, currentUserId, It.IsAny<CancellationToken>()), Times.Once);
+            mock.Verify(x => x.BlockUserAsync(username, currentUserId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
