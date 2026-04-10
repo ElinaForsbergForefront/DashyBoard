@@ -1,4 +1,5 @@
 ﻿using DashyBoard.Application.Commands.Mirror;
+using DashyBoard.Application.Commands.Widget;
 using DashyBoard.Application.Queries.Mirror;
 using DashyBoard.Application.Queries.Mirror.Dto;
 using MediatR;
@@ -73,4 +74,32 @@ public class MirrorController : ControllerBase
         await _mediator.Send(new DeleteMirrorCommand(id), ct);
         return NoContent();
     }
+
+    [HttpPost("{mirrorId:guid}/widget")]
+    [ProducesResponseType(typeof(MirrorDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AddWidget(Guid mirrorId, [FromBody] AddWidgetRequest request, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new AddWidgetCommand(mirrorId, request.Type, request.X, request.Y), ct);
+        return Ok(result);
+    }
+
+    [HttpPut("{mirrorId:guid}/widget/{widgetId:guid}")]
+    [ProducesResponseType(typeof(MirrorDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> MoveWidget(Guid mirrorId, Guid widgetId, [FromBody] MoveWidgetRequest request, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new MoveWidgetCommand(mirrorId, widgetId, request.X, request.Y), ct);
+        return Ok(result);
+    }
+
+    [HttpDelete("{mirrorId:guid}/widget/{widgetId:guid}")]
+    [ProducesResponseType(typeof(MirrorDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> RemoveWidget(Guid mirrorId, Guid widgetId, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new RemoveWidgetCommand(mirrorId, widgetId), ct);
+        return Ok(result);
+    }
 }
+
+public record CreateMirrorRequest(string Name, double WidthCm, double HeightCm);
+public record AddWidgetRequest(string Type, double X, double Y);
+public record MoveWidgetRequest(double X, double Y);

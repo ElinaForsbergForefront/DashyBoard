@@ -3,6 +3,7 @@ import { useGetRemindersQuery } from '../../api/endpoints/reminder';
 import type { ReminderDto } from '../../api/types/reminder';
 import { ReminderForm } from '../forms/ReminderForm';
 import { GlassCard } from '../ui/glass-card';
+import { useEditModeContext } from '../../context/EditModeContext';
 
 const dayLabelFormatter = new Intl.DateTimeFormat('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' });
 const timeFormatter = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit' });
@@ -21,6 +22,7 @@ function sortUpcoming(reminders: ReminderDto[]): ReminderDto[] {
 export function ReminderWidget() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const { data: reminders = [], isLoading, isError } = useGetRemindersQuery();
+    const { isEditMode } = useEditModeContext();
 
     const upcoming = useMemo(() => sortUpcoming(reminders), [reminders]);
     const visibleReminders = upcoming.slice(0, 4);
@@ -36,13 +38,15 @@ export function ReminderWidget() {
                             <span className="rounded-full bg-overlay px-2 py-0.5 text-xs text-muted">
                                 {upcoming.length}
                             </span>
-                            <button
-                                type="button"
-                                onClick={() => setIsEditModalOpen(true)}
-                                className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
-                            >
-                                Edit
-                            </button>
+                            {isEditMode && (
+                              <button
+                                  type="button"
+                                  onClick={() => setIsEditModalOpen(true)}
+                                  className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
+                              >
+                                  Edit
+                              </button>
+                            )}
                         </div>
                     </div>
 
