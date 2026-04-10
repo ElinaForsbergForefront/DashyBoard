@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DashyBoard.Application.Interfaces;
+﻿using DashyBoard.Application.Interfaces;
 using MediatR;
 
 namespace DashyBoard.Application.Commands.UserRelation
@@ -17,7 +14,7 @@ namespace DashyBoard.Application.Commands.UserRelation
 
         public async Task Handle(RemoveFriendCommand command, CancellationToken ct)
         {
-            await _repository.RemoveFriendAsync(command.RelationshipId, command.CurrentUserId, ct);
+            await _repository.RemoveFriendAsync(command.Username, command.CurrentUserId, ct);
         }
     }
 }

@@ -51,9 +51,13 @@ namespace DashyBoard.Infrastructure.Repositories
             return relationship.Id;
         }
 
-        public async Task AcceptFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct)
+        public async Task AcceptFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct)
         {
-            var relationship = await _db.UserRelationships.FindAsync(new object[] { relationshipId }, ct);
+            var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
+            if (otherUser == null)
+                throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
                 throw new KeyNotFoundException("Friend request not found.");
@@ -62,9 +66,13 @@ namespace DashyBoard.Infrastructure.Repositories
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task RejectFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct)
+        public async Task RejectFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct)
         {
-            var relationship = await _db.UserRelationships.FindAsync(new object[] { relationshipId }, ct);
+            var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
+            if (otherUser == null)
+                throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
                 throw new KeyNotFoundException("Friend request not found.");
@@ -76,9 +84,13 @@ namespace DashyBoard.Infrastructure.Repositories
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task RemoveFriendAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct)
+        public async Task RemoveFriendAsync(string username, Guid currentUserId, CancellationToken ct)
         {
-            var relationship = await _db.UserRelationships.FindAsync(new object[] { relationshipId }, ct);
+            var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
+            if (otherUser == null)
+                throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
                 throw new KeyNotFoundException("Relationship not found.");
@@ -93,20 +105,36 @@ namespace DashyBoard.Infrastructure.Repositories
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task BlockUserAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct)
+        public async Task BlockUserAsync(string username, Guid currentUserId, CancellationToken ct)
         {
-            var relationship = await _db.UserRelationships.FindAsync(new object[] { relationshipId }, ct);
+            var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
+            if (otherUser == null)
+                throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
-                throw new KeyNotFoundException("Relationship not found.");
-
-            relationship.Block(currentUserId);
+            {
+                // Skapa ny relationship med blocked status
+                var newRelationship = new UserRelationship(currentUserId, otherUser.Id, currentUserId);
+                newRelationship.Block(currentUserId);
+                _db.UserRelationships.Add(newRelationship);
+            }
+            else
+            {
+                relationship.Block(currentUserId);
+            }
+            
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task UnblockUserAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct)
+        public async Task UnblockUserAsync(string username, Guid currentUserId, CancellationToken ct)
         {
-            var relationship = await _db.UserRelationships.FindAsync(new object[] { relationshipId }, ct);
+            var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
+            if (otherUser == null)
+                throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
                 throw new KeyNotFoundException("Relationship not found.");
@@ -318,7 +346,7 @@ namespace DashyBoard.Infrastructure.Repositories
                 throw new KeyNotFoundException("Poke not found.");
 
             if (poke.ToUserId != currentUserId)
-                throw new InvalidOperationException("You can only mark your own pokes as seen.");
+                throw new InvalidOperationException("You can only mark pokes sent to you as seen.");
 
             poke.MarkAsSeen();
             await _db.SaveChangesAsync(ct);
@@ -332,7 +360,7 @@ namespace DashyBoard.Infrastructure.Repositories
                 throw new KeyNotFoundException("Poke not found.");
 
             if (poke.ToUserId != currentUserId)
-                throw new InvalidOperationException("You can only dismiss your own pokes.");
+                throw new InvalidOperationException("You can only dismiss pokes sent to you.");
 
             poke.Deactivate();
             await _db.SaveChangesAsync(ct);

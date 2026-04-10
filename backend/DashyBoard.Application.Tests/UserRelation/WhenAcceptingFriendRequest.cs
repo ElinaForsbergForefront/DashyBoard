@@ -10,22 +10,22 @@ namespace DashyBoard.Application.Tests.UserRelation
         public async Task ThenValidRequestShouldAcceptFriendRequest()
         {
             // Arrange
-            var relationshipId = Guid.NewGuid();
+            var username = "testuser";
             var currentUserId = Guid.NewGuid();
 
             var mock = new Mock<IFriendRepository>();
             mock
-                .Setup(x => x.AcceptFriendRequestAsync(relationshipId, currentUserId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.AcceptFriendRequestAsync(username, currentUserId, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             var handler = new AcceptFriendRequestCommandHandler(mock.Object);
-            var command = new AcceptFriendRequestCommand(relationshipId, currentUserId);
+            var command = new AcceptFriendRequestCommand(username, currentUserId);
 
             // Act
             await handler.Handle(command, CancellationToken.None);
 
             // Assert
-            mock.Verify(x => x.AcceptFriendRequestAsync(relationshipId, currentUserId, It.IsAny<CancellationToken>()), Times.Once);
+            mock.Verify(x => x.AcceptFriendRequestAsync(username, currentUserId, It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

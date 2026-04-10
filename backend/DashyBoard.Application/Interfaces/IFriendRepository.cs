@@ -10,11 +10,11 @@ namespace DashyBoard.Application.Interfaces
     {
         // UserRelationship Commands
         Task<Guid> SendFriendRequestAsync(Guid currentUserId, string receiverUsername, CancellationToken ct);
-        Task AcceptFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
-        Task RejectFriendRequestAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
-        Task RemoveFriendAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
-        Task BlockUserAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
-        Task UnblockUserAsync(Guid relationshipId, Guid currentUserId, CancellationToken ct);
+        Task AcceptFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct);
+        Task RejectFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct);
+        Task RemoveFriendAsync(string username, Guid currentUserId, CancellationToken ct);
+        Task BlockUserAsync(string username, Guid currentUserId, CancellationToken ct);
+        Task UnblockUserAsync(string username, Guid currentUserId, CancellationToken ct);
 
         // UserRelationship Queries
         Task<IReadOnlyList<UserRelationDto>> GetFriendListAsync(Guid currentUserId, CancellationToken ct);
