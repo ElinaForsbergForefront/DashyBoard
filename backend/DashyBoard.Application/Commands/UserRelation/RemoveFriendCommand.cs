@@ -1,10 +1,9 @@
-﻿using System;
-using MediatR;
+﻿using MediatR;
 
 namespace DashyBoard.Application.Commands.UserRelation
 {
     public sealed record RemoveFriendCommand(
-        Guid RelationshipId,
+        string Username,
         Guid CurrentUserId
     ) : IRequest;
 }

@@ -4,7 +4,7 @@ using MediatR;
 namespace DashyBoard.Application.Commands.UserRelation
 {
     public sealed record AcceptFriendRequestCommand(
-        Guid RelationshipId,
+        string Username,
         Guid CurrentUserId
     ) : IRequest;
 }

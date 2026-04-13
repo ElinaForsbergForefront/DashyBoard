@@ -4,7 +4,7 @@ using MediatR;
 namespace DashyBoard.Application.Commands.UserRelation
 {
     public sealed record UnBlockUserCommand(
-        Guid RelationshipId,
+        string Username,
         Guid CurrentUserId
     ) : IRequest;
 }
