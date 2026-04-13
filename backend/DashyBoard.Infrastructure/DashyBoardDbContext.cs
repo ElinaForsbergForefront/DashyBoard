@@ -11,6 +11,7 @@ namespace DashyBoard.Infrastructure
         public DbSet<Reminder> Reminders { get; set; }
         public DbSet<UserRelationship> UserRelationships { get; set; }
         public DbSet<Poke> Pokes { get; set; }
+        public DbSet<SpotifyConnection> SpotifyConnections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -122,6 +123,27 @@ namespace DashyBoard.Infrastructure
                       .WithMany()
                       .HasForeignKey(p => p.ToUserId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<SpotifyConnection>(entity =>
+            {
+                entity.HasKey(sc => sc.Id);
+
+                entity.Property(sc => sc.UserId).IsRequired();
+
+                entity.Property(sc => sc.AccessToken).IsRequired();
+                entity.Property(sc => sc.RefreshToken).IsRequired();
+                entity.Property(sc => sc.ExpiresAtUtc).IsRequired();
+
+                entity.Property(sc => sc.CreatedAtUtc).IsRequired();
+                entity.Property(sc => sc.UpdatedAtUtc).IsRequired();
+
+                entity.HasIndex(sc => sc.UserId).IsUnique();
+
+                entity.HasOne(sc => sc.User)
+                      .WithOne(u => u.SpotifyConnection)
+                      .HasForeignKey<SpotifyConnection>(sc => sc.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
