@@ -85,6 +85,10 @@ public static class DependencyInjection
 		// Friends
 		services.AddScoped<IFriendRepository, FriendRepository>();
 
+        // Spotify
+		services.Configure<SpotifyOptions>(
+		config.GetSection(SpotifyOptions.SectionName));
+
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
