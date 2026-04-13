@@ -1,19 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Högsta tillåtna zoom-faktor så spegeln inte blir orimligt stor
-const MAX_SCALE = 10;
+const MAX_SCALE = 30;
 const PADDING = 32;
 
-// Räknar ut hur stor spegeln ska visas baserat på spegelns verkliga mått (i cm)
-// och hur mycket utrymme som finns i containern
+// Snap scale so that MINOR_GRID_CM (5) * scale is always a whole number,
+// preventing sub-pixel blurriness on grid lines.
+const MINOR_GRID_CM = 5;
+const snapScale = (raw: number): number => Math.floor(raw * MINOR_GRID_CM) / MINOR_GRID_CM;
+
 export const useMirrorScale = (widthCm: number, heightCm: number) => {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Håller koll på containerns nuvarande storlek i pixlar
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    // ResizeObserver lyssnar på storleksförändringar och uppdaterar state
     const observer = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       setContainerSize({ width, height });
@@ -25,8 +24,8 @@ export const useMirrorScale = (widthCm: number, heightCm: number) => {
   const availableWidth = containerSize.width - PADDING;
   const availableHeight = containerSize.height - PADDING;
 
-  // Välj den minsta skalan så spegeln alltid får plats, men aldrig överstiger MAX_SCALE
-  const scale = Math.min(availableWidth / widthCm, availableHeight / heightCm, MAX_SCALE);
+  const rawScale = Math.min(availableWidth / widthCm, availableHeight / heightCm, MAX_SCALE);
+  const scale = snapScale(rawScale);
 
   return {
     containerRef,
