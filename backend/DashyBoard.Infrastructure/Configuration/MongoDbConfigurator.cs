@@ -17,5 +17,14 @@ public static class MongoDbConfigurator
                 cm.MapIdMember(m => m.Id).SetSerializer(new GuidSerializer(BsonType.String));
             });
         }
+
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Widget)))
+        {
+            BsonClassMap.RegisterClassMap<Widget>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapIdMember(w => w.Id).SetSerializer(new GuidSerializer(BsonType.String));
+            });
+        }
     }
 }
