@@ -14,6 +14,7 @@ namespace DashyBoard.Application.Queries.Weather.Dto
         [property: JsonPropertyName("wind_speed_10m")] double WindSpeed,
         [property: JsonPropertyName("weather_code")] int WeatherCode,
         [property: JsonPropertyName("precipitation")] double Precipitation,
-        [property: JsonPropertyName("precipitation_probability")] double PrecipitationProbability
+        [property: JsonPropertyName("precipitation_probability")] double PrecipitationProbability,
+        [property: JsonPropertyName("is_day")] double Day
     );
 }
