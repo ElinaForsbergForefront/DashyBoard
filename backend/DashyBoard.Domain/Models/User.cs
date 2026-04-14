@@ -11,6 +11,8 @@
         public string? City { get; private set; }
         public DateTime CreatedAt { get; private set; } = DateTime.Now;
 
+        public SpotifyConnection? SpotifyConnection { get; private set; }
+
         private User() { }
 
         public User(string authSub, string email, string? username = null, string? displayName = null, string? country = null, string? city = null)
