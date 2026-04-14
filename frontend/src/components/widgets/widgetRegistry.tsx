@@ -62,6 +62,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     name: 'Spotify',
     description: 'Visar vad du lyssnar på just nu.',
     component: SpotifyWidget,
+    isPremium: true,
   }
 ];
 
