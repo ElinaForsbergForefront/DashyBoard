@@ -4,6 +4,7 @@ import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
 import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
+import { SpotifyWidget } from './spotify/SpotifyWidget';
 
 /**
  * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
@@ -53,6 +54,12 @@ export const widgetRegistry: WidgetDefinition[] = [
     name: 'Clock',
     description: 'Visar aktuell tid baserat på vald tidszon.',
     component: ClockWidget,
+  },
+  {
+    id: 'spotify',
+    name: 'Spotify',
+    description: 'Visar vad du lyssnar på just nu.',
+    component: SpotifyWidget,
   }
 ];
 

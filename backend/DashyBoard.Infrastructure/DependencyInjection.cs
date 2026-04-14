@@ -1,5 +1,6 @@
 using DashyBoard.Application.Interfaces;         
 using DashyBoard.Domain.Configuration;
+using DashyBoard.Infrastructure.Clients;
 using DashyBoard.Infrastructure.Configuration;
 using DashyBoard.Infrastructure.External;
 using DashyBoard.Infrastructure.External.Location;
@@ -88,6 +89,11 @@ public static class DependencyInjection
         // Spotify
 		services.Configure<SpotifyOptions>(
 		config.GetSection(SpotifyOptions.SectionName));
+
+        services.AddScoped<ISpotifyConnectionRepository, SpotifyConnectionRepository>();
+
+		services.AddHttpClient<ISpotifyTokenClient, SpotifyTokenClient>();
+        services.AddHttpClient<ISpotifyApiClient, SpotifyApiClient>();
 
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
