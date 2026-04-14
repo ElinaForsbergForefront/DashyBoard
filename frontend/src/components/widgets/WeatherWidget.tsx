@@ -27,19 +27,52 @@ import ThunderDark from '../../../assets/weather/dark/Thunder.png';
 
 const WEATHER_LOCATION_STORAGE_KEY = 'dashyboard.weather.location';
 
-const WEATHER_TYPE_MAP: Record<
-  string,
-  { label: string; icon: { light: string; dark: string } }
-> = {
-  clearsky: { label: 'Clear sky', icon: { light: ClearDayLight, dark: ClearDayDark } },
-  mainlyclear: { label: 'Mainly clear', icon: { light: ClearDayLight, dark: ClearDayDark } },
-  partlycloudy: { label: 'Partly cloudy', icon: { light: CloudyDayLight, dark: CloudyDayLight } },
+type ThemedIcon = { light: string; dark: string };
+
+type WeatherTypeDisplay = {
+  label: string;
+  icon: ThemedIcon;
+  dayIcon?: ThemedIcon;
+  nightIcon?: ThemedIcon;
+};
+
+const WEATHER_TYPE_MAP: Record<string, WeatherTypeDisplay> = {
+  clearsky: {
+    label: 'Clear sky',
+    icon: { light: ClearDayLight, dark: ClearDayDark },
+    nightIcon: { light: ClearNightLight, dark: ClearNightDark },
+  },
+  mainlyclear: {
+    label: 'Mainly clear',
+    icon: { light: ClearDayLight, dark: ClearDayDark },
+    nightIcon: { light: ClearNightLight, dark: ClearNightDark },
+  },
+  partlycloudy: {
+    label: 'Partly cloudy',
+    icon: { light: CloudyDayLight, dark: CloudyDayDark },
+    nightIcon: { light: CloudyNightLight, dark: CloudyNightDark },
+  },
   overcast: { label: 'Overcast', icon: { light: CloudyLight, dark: CloudyDark } },
   fog: { label: 'Fog', icon: { light: CloudyLight, dark: CloudyDark } },
-  drizzle: { label: 'Drizzle', icon: { light: RainDayLight, dark: RainDayDark } },
-  rain: { label: 'Rain', icon: { light: RainLight, dark: RainDark } },
+  drizzle: {
+    label: 'Drizzle',
+    icon: { light: RainLight, dark: RainDark },
+    dayIcon: { light: RainDayLight, dark: RainDayDark },
+    nightIcon: { light: RainNightLight, dark: RainNightDark },
+  },
+  rain: {
+    label: 'Rain',
+    icon: { light: RainLight, dark: RainDark },
+    dayIcon: { light: RainDayLight, dark: RainDayDark },
+    nightIcon: { light: RainNightLight, dark: RainNightDark },
+  },
   snowfall: { label: 'Snow', icon: { light: SnowLight, dark: SnowDark } },
-  rainshowers: { label: 'Rain showers', icon: { light: RainDayLight, dark: RainNightDark } },
+  rainshowers: {
+    label: 'Rain showers',
+    icon: { light: RainLight, dark: RainDark },
+    dayIcon: { light: RainDayLight, dark: RainDayDark },
+    nightIcon: { light: RainNightLight, dark: RainNightDark },
+  },
   snowshowers: { label: 'Snow showers', icon: { light: SnowLight, dark: SnowDark } },
   thunderstorm: { label: 'Thunderstorm', icon: { light: ThunderLight, dark: ThunderDark } },
   thunderstormwithhail: { label: 'Thunderstorm with hail', icon: { light: ThunderLight, dark: ThunderDark } },
@@ -59,17 +92,24 @@ function normalizeWeatherLabel(rawType: string) {
     .replace(/^./, (char) => char.toUpperCase());
 }
 
-function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' | 'dark') {
+function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' | 'dark', isDay?: number) {
   if (!weatherType) {
     return { label: '', icon: undefined };
   }
 
   const normalizedType = normalizeWeatherType(weatherType);
   const mapped = WEATHER_TYPE_MAP[normalizedType];
+  const themedIcon = mapped
+    ? isDay === 0
+      ? mapped.nightIcon ?? mapped.icon
+      : isDay === 1
+        ? mapped.dayIcon ?? mapped.icon
+        : mapped.icon
+    : undefined;
 
   return {
     label: mapped?.label ?? normalizeWeatherLabel(weatherType),
-    icon: mapped?.icon[theme],
+    icon: themedIcon?.[theme],
   };
 }
 
@@ -105,15 +145,19 @@ export function WeatherWidget() {
 
   const { theme } = useTheme();
   const rawWeatherType = currentWeather?.current.weatherType ?? currentWeather?.current.weather_code;
-  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(rawWeatherType, theme);
+  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(
+    rawWeatherType,
+    theme,
+    currentWeather?.current.is_day,
+  );
 
   const isLoading = isGeocoding || isFetchingWeather;
   const hasLocation = searchLocation.trim() !== '';
   const errorMessage = geocodeError
     ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
     : weatherError
-    ? 'Kunde inte hämta vädret för platsen.'
-    : undefined;
+      ? 'Kunde inte hämta vädret för platsen.'
+      : undefined;
 
   const handleLocationSubmit = (newLocation: string) => {
     setLocation(newLocation);

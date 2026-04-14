@@ -12,6 +12,7 @@ export interface WeatherData {
   weatherType?: string;
   precipitation: number;
   precipitation_probability: number;
+  is_day: number;
 }
 
 export interface DailyWeatherForecastDto{
