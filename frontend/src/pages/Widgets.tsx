@@ -19,7 +19,6 @@ function WidgetCard({ widget }: { widget: (typeof widgetRegistry)[number] }) {
     <div className="flex flex-col items-center gap-3">
       <div className="relative">
         {widget.isPremium && <PremiumBadge />}
-        {/* pointer-events-none + select-none = fully read-only preview */}
         <div className="pointer-events-none select-none">
           <Component />
         </div>
