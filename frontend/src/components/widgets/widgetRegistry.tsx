@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+﻿import type { ComponentType } from 'react';
 import { ClockWidget } from './ClockWidget';
 import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
@@ -26,6 +26,7 @@ export interface WidgetDefinition {
   description: string;
   component: ComponentType;
   configForm?: ComponentType;
+  isPremium?: boolean;
 }
 
 export const widgetRegistry: WidgetDefinition[] = [
@@ -48,6 +49,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Track any asset — currencies, crypto, stocks — with a live price chart.',
     component: CurrencyWidget,
     configForm: CurrencyWidgetForm,
+    isPremium: true,
   },
   {
     id: 'clock',
