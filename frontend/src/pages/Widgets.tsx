@@ -1,5 +1,6 @@
 import { widgetRegistry } from '../components/widgets/widgetRegistry';
 import { EditModeProvider } from '../context/EditModeContext';
+import { GRID_UNIT_CM, REFERENCE_SCALE } from '../constants/grid';
 
 const included = widgetRegistry.filter((w) => !w.isPremium);
 const premium = widgetRegistry.filter((w) => w.isPremium);
@@ -14,12 +15,17 @@ function PremiumBadge() {
 
 function WidgetCard({ widget }: { widget: (typeof widgetRegistry)[number] }) {
   const Component = widget.component;
+  const previewWidth = widget.cols * GRID_UNIT_CM * REFERENCE_SCALE;
+  const previewHeight = widget.rows * GRID_UNIT_CM * REFERENCE_SCALE;
 
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="relative">
         {widget.isPremium && <PremiumBadge />}
-        <div className="pointer-events-none select-none">
+        <div
+          className="pointer-events-none select-none"
+          style={{ width: previewWidth, height: previewHeight }}
+        >
           <Component />
         </div>
       </div>

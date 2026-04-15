@@ -160,7 +160,7 @@ function SpotifyNowPlayingState({
   const trackKey = `${trackName}-${artistName}-${albumImageUrl}`;
 
   return (
-    <div className="relative h-[270px] w-[270px] overflow-hidden rounded-[28px] border border-white/10 bg-black/30 backdrop-blur-xl">
+    <div className="relative h-full w-full overflow-hidden rounded-[28px] border border-white/10 bg-black/30 backdrop-blur-xl">
       <AnimatePresence mode="wait">
         <motion.div
           key={trackKey}
