@@ -160,7 +160,7 @@
   --glass-border: rgba(255, 255, 255, 0.75);
   --glass-highlight: rgba(255, 255, 255, 0.78);
   --glass-shimmer: rgba(255, 255, 255, 0.86);
-  --glass-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
+  --glass-shadow: none;
 }
 
 /* Base styles */
