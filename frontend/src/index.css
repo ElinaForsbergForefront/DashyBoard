@@ -2,7 +2,7 @@
 
 @layer base {
   /* Smooth transitions for theme changes */
-    * {
+  * {
     @apply transition-colors duration-300;
   }
 
@@ -90,7 +90,7 @@
   --color-info: #0ea5e9;
   --color-info-hover: #0284c7;
 
-  --color-on-primary: #ffffff;
+  --color-on-primary: #000;
   --color-on-accent: #ffffff;
   --color-on-destructive: #ffffff;
   --color-on-success: #ffffff;
@@ -148,7 +148,7 @@
   --color-info: #0284c7;
   --color-info-hover: #0369a1;
 
-  --color-on-primary: #ffffff;
+  --color-on-primary: #fff;
   --color-on-accent: #ffffff;
   --color-on-destructive: #ffffff;
   --color-on-success: #ffffff;
@@ -245,11 +245,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(
-      135deg,
-      var(--glass-highlight),
-      transparent 55%
-    );
+    background: linear-gradient(135deg, var(--glass-highlight), transparent 55%);
     opacity: 0.8;
   }
 

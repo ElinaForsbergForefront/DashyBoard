@@ -8,4 +8,13 @@ public sealed record MirrorDto
     public double WidthCm { get; set; }
     public double HeightCm { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<WidgetDto> Widgets { get; set; } = new();
+}
+
+public sealed class WidgetDto
+{
+    public Guid Id { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public double X { get; set; }
+    public double Y { get; set; }
 }

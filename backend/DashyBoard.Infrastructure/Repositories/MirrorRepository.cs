@@ -59,6 +59,48 @@ public sealed class MirrorRepository : IMirrorRepository
             throw new KeyNotFoundException($"Mirror with id {id} not found.");
     }
 
+    public async Task<MirrorDto> AddWidgetAsync(Guid mirrorId, string type, double x, double y, CancellationToken ct)
+    {
+        var mirror = await _collection
+            .Find(m => m.Id == mirrorId)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new KeyNotFoundException($"Mirror with id {mirrorId} not found.");
+
+        mirror.AddWidget(type, x, y);
+
+        await _collection.ReplaceOneAsync(m => m.Id == mirrorId, mirror, cancellationToken: ct);
+
+        return MapToDto(mirror);
+    }
+
+    public async Task<MirrorDto> MoveWidgetAsync(Guid mirrorId, Guid widgetId, double x, double y, CancellationToken ct)
+    {
+        var mirror = await _collection
+            .Find(m => m.Id == mirrorId)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new KeyNotFoundException($"Mirror with id {mirrorId} not found.");
+
+        mirror.MoveWidget(widgetId, x, y);
+
+        await _collection.ReplaceOneAsync(m => m.Id == mirrorId, mirror, cancellationToken: ct);
+
+        return MapToDto(mirror);
+    }
+
+    public async Task<MirrorDto> RemoveWidgetAsync(Guid mirrorId, Guid widgetId, CancellationToken ct)
+    {
+        var mirror = await _collection
+            .Find(m => m.Id == mirrorId)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new KeyNotFoundException($"Mirror with id {mirrorId} not found.");
+
+        mirror.RemoveWidget(widgetId);
+
+        await _collection.ReplaceOneAsync(m => m.Id == mirrorId, mirror, cancellationToken: ct);
+
+        return MapToDto(mirror);
+    }
+
     private static MirrorDto MapToDto(Mirror mirror) => new()
     {
         Id = mirror.Id,
@@ -67,5 +109,14 @@ public sealed class MirrorRepository : IMirrorRepository
         WidthCm = mirror.WidthCm,
         HeightCm = mirror.HeightCm,
         CreatedAt = mirror.CreatedAt,
+        Widgets = mirror.Widgets.Select(MapWidgetToDto).ToList()
+    };
+
+    private static WidgetDto MapWidgetToDto(Widget widget) => new()
+    {
+        Id = widget.Id,
+        Type = widget.Type,
+        X = widget.X,
+        Y = widget.Y
     };
 }

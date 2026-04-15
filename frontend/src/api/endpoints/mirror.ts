@@ -1,5 +1,6 @@
 import { api } from '../apiSlice';
-import type { MirrorDto, CreateMirrorRequest, UpdateMirrorRequest } from '../types/mirror';
+import type { MirrorDto, CreateMirrorRequest, UpdateMirrorRequest,   AddWidgetRequest,
+  MoveWidgetRequest, } from '../types/mirror';
 
 const mirrorApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -26,6 +27,49 @@ const mirrorApi = api.injectEndpoints({
       query: (id) => ({ url: `/mirror/${id}`, method: 'DELETE' }),
       invalidatesTags: [{ type: 'Mirror', id: 'LIST' }],
     }),
+     addWidget: builder.mutation<
+      MirrorDto,
+      { mirrorId: string; body: AddWidgetRequest }
+    >({
+      query: ({ mirrorId, body }) => ({
+        url: `/mirror/${mirrorId}/widget`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { mirrorId }) => [
+        { type: 'Mirror', id: mirrorId },
+        { type: 'Mirror', id: 'LIST' },
+      ],
+    }),
+
+    moveWidget: builder.mutation<
+      MirrorDto,
+      { mirrorId: string; widgetId: string; body: MoveWidgetRequest }
+    >({
+      query: ({ mirrorId, widgetId, body }) => ({
+        url: `/mirror/${mirrorId}/widget/${widgetId}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { mirrorId }) => [
+        { type: 'Mirror', id: mirrorId },
+        { type: 'Mirror', id: 'LIST' },
+      ],
+    }),
+
+    removeWidget: builder.mutation<
+      MirrorDto,
+      { mirrorId: string; widgetId: string }
+    >({
+      query: ({ mirrorId, widgetId }) => ({
+        url: `/mirror/${mirrorId}/widget/${widgetId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { mirrorId }) => [
+        { type: 'Mirror', id: mirrorId },
+        { type: 'Mirror', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -35,4 +79,7 @@ export const {
   useCreateMirrorMutation,
   useUpdateMirrorMutation,
   useDeleteMirrorMutation,
+  useAddWidgetMutation,
+  useMoveWidgetMutation,
+  useRemoveWidgetMutation,
 } = mirrorApi;

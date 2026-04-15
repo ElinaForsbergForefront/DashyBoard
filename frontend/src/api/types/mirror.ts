@@ -1,3 +1,10 @@
+export interface WidgetDto {
+  id: string;
+  type: string;
+  x: number;
+  y: number;
+}
+
 export interface MirrorDto {
   id: string;
   userSub: string;
@@ -5,6 +12,7 @@ export interface MirrorDto {
   widthCm: number;
   heightCm: number;
   createdAt: string;
+  widgets: WidgetDto[];
 }
 
 export interface CreateMirrorRequest {
@@ -17,4 +25,15 @@ export interface UpdateMirrorRequest {
   name: string;
   widthCm: number;
   heightCm: number;
+}
+
+export interface AddWidgetRequest {
+  type: string;
+  x: number;
+  y: number;
+}
+
+export interface MoveWidgetRequest {
+  x: number;
+  y: number;
 }

@@ -5,11 +5,13 @@ import { toZonedTime } from 'date-fns-tz';
 import { useClockTimezone } from '../../hooks/useClockTimezone';
 import { ClockTimezoneForm } from '../forms/ClockTimezoneForm';
 import { GlassCard } from '../ui/glass-card';
+import { useEditModeContext } from '../../context/EditModeContext';
 
 export function ClockWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const { selectedTimezone, availableTimezones, handleTimezoneChange } = useClockTimezone();
+  const { isEditMode } = useEditModeContext();
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -22,15 +24,21 @@ export function ClockWidget() {
 
   return (
     <>
-      <GlassCard
-        className="glass-widget w-72 cursor-pointer"
-        onClick={() => setIsEditModalOpen(true)}
-      >
+      <GlassCard className="glass-widget w-72">
         <div className="space-y-2 text-center">
           <p className="text-5xl font-semibold text-foreground tracking-tight">{timeLabel}</p>
           <p className="text-foreground-secondary">{dateLabel}</p>
           <p className="text-small text-muted">{selectedTimezone.replace('_', ' ')}</p>
         </div>
+        {isEditMode && (
+          <button
+            type="button"
+            onClick={() => setIsEditModalOpen(true)}
+            className="mt-3 w-full rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
+          >
+            Ändra tidszon
+          </button>
+        )}
       </GlassCard>
 
       {isEditModalOpen && (
