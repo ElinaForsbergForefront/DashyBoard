@@ -24,7 +24,7 @@ export function ClockWidget() {
 
   return (
     <>
-      <GlassCard className="glass-widget w-72">
+      <GlassCard className="glass-widget w-full h-full">
         <div className="space-y-2 text-center">
           <p className="text-5xl font-semibold text-foreground tracking-tight">{timeLabel}</p>
           <p className="text-foreground-secondary">{dateLabel}</p>

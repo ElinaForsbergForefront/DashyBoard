@@ -15,6 +15,8 @@ import {
 import { MirrorCanvas } from '../components/mirrors/MirrorCanvas';
 import type { WidgetType } from '../components/layout/dashboard/widgetSidebar/types.ts';
 import type { MirrorDto } from '../api/types/mirror';
+import { widgetRegistry } from '../components/widgets/widgetRegistry';
+import { findFirstFreeCell } from '../utils/widgetPlacement';
 
 function MirrorContent() {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode } = useEditModeContext();
@@ -59,13 +61,31 @@ function MirrorContent() {
   };
 
   // All widget mutations only update the local copy – no API calls yet.
-  const handleAddWidget = useCallback((widget: WidgetType) => {
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const handleAddWidget = useCallback((widgetType: WidgetType) => {
     setLocalMirror((prev) => {
       if (!prev) return prev;
+
+      const definition = widgetRegistry.find((w) => w.id === widgetType);
+      if (!definition) return prev;
+
+      // Build an occupancy list from currently placed widgets + their registry sizes.
+      const placed = prev.widgets.map((w) => {
+        const def = widgetRegistry.find((d) => d.id === w.type);
+        return { x: w.x, y: w.y, cols: def?.cols ?? 2, rows: def?.rows ?? 2 };
+      });
+
+      const position = findFirstFreeCell(
+        placed,
+        definition.cols,
+        definition.rows,
+        prev.widthCm,
+        prev.heightCm,
+      );
+
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       return {
         ...prev,
-        widgets: [...prev.widgets, { id: tempId, type: widget, x: 0, y: 0 }],
+        widgets: [...prev.widgets, { id: tempId, type: widgetType, x: position.x, y: position.y }],
       };
     });
   }, []);
