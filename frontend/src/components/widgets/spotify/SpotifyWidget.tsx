@@ -227,14 +227,17 @@ function SpotifyNowPlayingState({
 }
 
 export function SpotifyWidget() {
+  const [notConnected, setNotConnected] = useState(false);
+
   const {
     data,
     isLoading,
     isError,
     error,
+    refetch,
   } = useGetSpotifyNowPlayingQuery(undefined, {
-    pollingInterval: 5000,
-    refetchOnFocus: true,
+    pollingInterval: notConnected ? 0 : 5000,
+    refetchOnFocus: !notConnected,
     refetchOnReconnect: true,
   });
 
@@ -269,16 +272,51 @@ export function SpotifyWidget() {
 
   const handleConnect = async () => {
     const result = await getLoginUrl().unwrap();
-    window.location.href = result.url;
+
+    const popup = window.open(
+      result.url,
+      'spotify-auth',
+      'width=500,height=700,left=' +
+        (window.screenX + (window.innerWidth - 500) / 2) +
+        ',top=' +
+        (window.screenY + (window.innerHeight - 700) / 2),
+    );
+
+    if (!popup) {
+      // Fallback if popup was blocked
+      window.location.href = result.url;
+      return;
+    }
+
+    const onMessage = (event: MessageEvent) => {
+      if (
+        event.origin === window.location.origin &&
+        event.data === 'spotify_connected'
+      ) {
+        window.removeEventListener('message', onMessage);
+        setNotConnected(false);
+        void refetch();
+      }
+    };
+
+    window.addEventListener('message', onMessage);
   };
+
+  const status = (error as { status?: number } | undefined)?.status;
+
+  useEffect(() => {
+    if (isError && (status === 404 || status === 401)) {
+      setNotConnected(true);
+    } else if (!isError) {
+      setNotConnected(false);
+    }
+  }, [isError, status]);
 
   if (isLoading) {
     return <LoadingState />;
   }
 
-  const status = (error as { status?: number } | undefined)?.status;
-
-  if (isError && status !== 204) {
+  if (isError && (status === 404 || status === 401)) {
     return (
       <ConnectState onConnect={handleConnect} isConnecting={isConnecting} />
     );

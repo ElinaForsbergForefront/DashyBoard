@@ -142,11 +142,18 @@ namespace DashyBoard.Api.Controllers
                 return Unauthorized();
             }
 
+            // Check if user has a Spotify connection first
+            var connection = await _spotifyConnectionRepository.GetByUserIdAsync(userId.Value, cancellationToken);
+            if (connection is null)
+            {
+                return NotFound(new { message = "Spotify not connected" });
+            }
+
             var result = await _mediator.Send(new GetSpotifyNowPlayingQuery(userId.Value), cancellationToken);
 
             if (result is null)
             {
-                return NoContent();
+                return NoContent(); // Nothing playing
             }
 
             return Ok(result);
