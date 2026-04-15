@@ -1,6 +1,7 @@
-﻿using MediatR;
+﻿using DashyBoard.Application.Queries.Location;
+using DashyBoard.Application.Queries.Location.Dto;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using DashyBoard.Application.Queries.Location;
 
 namespace DashyBoard.Api.Controllers
 {
@@ -31,9 +32,16 @@ namespace DashyBoard.Api.Controllers
         }
 
         [HttpGet("city")]
-        public async Task<IActionResult> GetCitiesByName([FromQuery] string cityName, [FromQuery] string countryCode, CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(CityValidationResponseDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetCitiesByName(
+        [FromQuery] string cityName,
+        [FromQuery] string countryCode,
+        CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetCityByNameQuery(cityName, countryCode), cancellationToken);
+            var result = await _mediator.Send(
+                new GetCityByNameQuery(cityName, countryCode),
+                cancellationToken);
+
             return Ok(result);
         }
     }
