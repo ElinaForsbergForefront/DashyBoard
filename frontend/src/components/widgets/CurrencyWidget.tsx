@@ -35,7 +35,7 @@ export function CurrencyWidget() {
   const accentColor = isPositive ? 'var(--color-success)' : 'var(--color-destructive)';
 
   return (
-    <GlassCard className="glass-widget w-80">
+    <GlassCard className="glass-widget w-full h-full">
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between">
           <CurrencyDropdown
