@@ -146,8 +146,8 @@ function TrafficEditModal({
     onSuccess,
 }: {
     onClose: () => void;
-    onSuccess: (config: { siteId: string; stationName: string; dateTime?: string }) => void;
-}) {
+    onSuccess: (config: { siteId: string; stationName: string; dateTime?: string; transportModes: string[] }) => void;
+}){
     return (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
             <div
