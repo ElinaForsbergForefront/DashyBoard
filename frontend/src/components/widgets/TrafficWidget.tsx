@@ -11,7 +11,6 @@ import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIco
 
 export function TrafficWidget() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const { isEditMode } = useEditModeContext();
     
     const [siteId, setSiteId] = useState<string | null>(null);
     const [stationName, setStationName] = useState<string | null>(null);
