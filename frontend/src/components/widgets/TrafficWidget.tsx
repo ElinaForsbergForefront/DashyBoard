@@ -6,34 +6,6 @@ import { useState } from 'react';
 
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
 
-
-
-export function TrafficWidget() {
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    
-    const [siteId, setSiteId] = useState<string | null>(null);
-    const [stationName, setStationName] = useState<string | null>(null);
-    const [dateTime, setDateTime] = useState<string | null>(null);
-    const [transportModes, setTransportModes] = useState<string[]>(['BUS', 'TRAM', 'TRAIN']);
-
-    const { data: departures = [], isLoading, isError } = useGetDeparturesQuery(
-        siteId ?? '',
-        { skip: !siteId || !!dateTime }
-    );
-
-    const { data: timedDepartures = [], isLoading: isTimedLoading, isError: isTimedError } = useGetDeparturesAtTimeQuery(
-        { siteId: siteId ?? '', dateTime: dateTime ?? '' },
-        { skip: !siteId || !dateTime }      
-    );
-
-    const activeDepartures = dateTime ? timedDepartures : departures;
-
-    // Filter to departures within the next 40 minutes and limit to 20 results - only with the chosen transport modes (Bus, tram, train)
-    const visibleDepartures = activeDepartures
-    .filter(d => transportModes.includes(d.transportMode.toUpperCase()))
-    .filter(d => (new Date(d.scheduled).getTime() - Date.now()) <= 40 * 60 * 1000)
-    .slice(0, 20);
-
     const scheduledFormatter = new Intl.DateTimeFormat('sv-SE', {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit'
@@ -49,6 +21,34 @@ export function TrafficWidget() {
         const Icon = transportIcons[mode.toUpperCase()] ?? HelpCircle;
         return <Icon size={30} className="text-muted" />;
     }
+
+
+
+export function TrafficWidget() {
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    
+    const [siteId, setSiteId] = useState<string | null>(null);
+    const [stationName, setStationName] = useState<string | null>(null);
+    const [dateTime, setDateTime] = useState<string | null>(null);
+    const [transportModes, setTransportModes] = useState<string[]>(['BUS', 'TRAM', 'TRAIN']);
+
+    const { data: departures = [], isLoading, isError } = useGetDeparturesQuery(
+        siteId ?? '',
+        { skip: !siteId || !!dateTime, pollingInterval: 30 * 1000 }
+    );
+
+    const { data: timedDepartures = [], isLoading: isTimedLoading, isError: isTimedError } = useGetDeparturesAtTimeQuery(
+        { siteId: siteId ?? '', dateTime: dateTime ?? '' },
+        { skip: !siteId || !dateTime , pollingInterval: 30 * 1000 }      
+    );
+
+    const activeDepartures = dateTime ? timedDepartures : departures;
+
+    // Filter to departures within the next 40 minutes and limit to 20 results - only with the chosen transport modes (Bus, tram, train)
+    const visibleDepartures = activeDepartures
+    .filter(d => transportModes.includes(d.transportMode.toUpperCase()))
+    .filter(d => (new Date(d.scheduled).getTime() - Date.now()) <= 40 * 60 * 1000)
+    .slice(0, 20);
 
     const activeLoading = isLoading || isTimedLoading;
     const activeError = isError || isTimedError;
@@ -100,8 +100,8 @@ export function TrafficWidget() {
 
                     {!activeLoading && !activeError && activeDepartures.length > 0 && (
                         <div className="space-y-2 max-h-60 overflow-y-auto subtle-scrollbar pr-4">
-                            {visibleDepartures.map((departure: TimetableEntryDto, index: number) => (
-                                <div key={index} className="rounded-xl bg-overlay px-3 py-2">
+                            {visibleDepartures.map((departure: TimetableEntryDto) => (
+                                <div key={`${departure.line}-${departure.scheduled}-${departure.direction}`} className="rounded-xl bg-overlay px-3 py-2">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex items-center gap-1 min-w-0">
                                             <TransportIcon mode={departure.transportMode} /> 
@@ -147,7 +147,7 @@ function TrafficEditModal({
     onSuccess: (config: { siteId: string; stationName: string; dateTime?: string; transportModes: string[] }) => void;
 }) {
     return (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+        <div className="fixed inset-0 z-80 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
             <div
                 className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
                 onClick={(event) => event.stopPropagation()}

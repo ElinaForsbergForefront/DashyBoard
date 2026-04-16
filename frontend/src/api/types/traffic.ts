@@ -1,7 +1,7 @@
 
 export interface TimetableEntryDto {
-  scheduled: Date;
-  realtime: Date | null;
+  scheduled: string;
+  realtime: string | null;
   delay: number;
   canceled: boolean;
   line: string;

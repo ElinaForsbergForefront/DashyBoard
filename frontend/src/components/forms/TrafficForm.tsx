@@ -3,6 +3,7 @@ import { useGetStopsByNameQuery } from '../../api/endpoints/traffic';
 import type { StationDto } from '../../api/types/traffic';
 import { DateTimePicker } from '../ui/DateTimePicker';
 import { FormCard } from '../ui/form-card';
+import { BusFrontIcon, TrainFrontIcon, TramFrontIcon, type LucideIcon} from 'lucide-react';
 
 interface TrafficFormProps {
     onSuccess?: (config: { siteId: string; stationName: string; dateTime?: string; transportModes: string[] }) => void;
@@ -106,17 +107,21 @@ export function TrafficForm({ onSuccess }: TrafficFormProps = {}) {
 
             {selectedStop && (
                 <>
-                        <div className="flex gap-3 text-xs text-muted">
-                            {['BUS', 'TRAM', 'TRAIN'].map(mode => (
-                                <label key={mode} className="flex items-center gap-1 pt-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={transportModes.includes(mode)}
-                                        onChange={() => toggleMode(mode)}
-                                        className="w-4 h-4"
-                                    />
+                        <div className="flex justify-center gap-6 pt-2">
+                            {([['BUS', BusFrontIcon], ['TRAM', TramFrontIcon], ['TRAIN', TrainFrontIcon]] as [string, LucideIcon][]).map(([mode, Icon]) => (
+                                <button
+                                    key={mode}
+                                    type="button"
+                                    onClick={() => toggleMode(mode)}
+                                    className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                                        transportModes.includes(mode)
+                                            ? 'border-primary bg-primary/20 text-foreground'
+                                            : 'border-border bg-overlay text-muted'
+                                    }`}
+                                >
+                                    <Icon size={14} />
                                     {mode.charAt(0) + mode.slice(1).toLowerCase()}
-                                </label>
+                                </button>
                             ))}
                         </div>
                         <label className="flex items-center gap-2 text-xs text-muted">
