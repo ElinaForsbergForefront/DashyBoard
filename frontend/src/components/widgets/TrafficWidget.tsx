@@ -2,7 +2,6 @@ import { useGetDeparturesQuery, useGetDeparturesAtTimeQuery } from '../../api/en
 import type { TimetableEntryDto } from '../../api/types/traffic';
 import { TrafficForm } from '../forms/TrafficForm';
 import { GlassCard } from '../ui/glass-card';
-import { useEditModeContext } from '../../context/EditModeContext';
 import { useState } from 'react';
 
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
