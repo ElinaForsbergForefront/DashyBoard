@@ -72,6 +72,8 @@ export const widgetRegistry: WidgetDefinition[] = [
     id: 'traffic',
     name: 'Traffic',
     description: 'Shows departing public transport from a selected station.',
+    cols: 2,
+    rows: 2,
     component: TrafficWidget, 
     configForm: TrafficForm,
   }
