@@ -9,8 +9,7 @@ import {
 import { GlassCard } from './ui/glass-card';
 
 export function Traffic() {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+    
   const [searchName, setSearchName] = useState('');
   const [submittedName, setSubmittedName] = useState('');
   const [selectedSiteId, setSelectedSiteId] = useState('');
