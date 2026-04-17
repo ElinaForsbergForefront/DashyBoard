@@ -22,13 +22,21 @@ export function ClockTimezoneForm({
   };
 
   useEffect(() => {
-    setPendingTimezone(selectedTimezone);
-  }, [selectedTimezone]);
+    if (selectedTimezone && timezones.includes(selectedTimezone)) {
+      setPendingTimezone(selectedTimezone);
+    } else if (timezones.length > 0) {
+      setPendingTimezone(timezones[0]);
+    }
+  }, [selectedTimezone, timezones]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     applyTimezone();
   };
+
+  if (timezones.length === 0) {
+    return <div className="p-2 text-sm text-destructive">Inga tidszoner är tillgängliga</div>;
+  }
 
   return (
     <FormCard onSubmit={onSubmit}>
@@ -50,8 +58,7 @@ export function ClockTimezoneForm({
       </label>
 
       <button
-        type="button"
-        onClick={applyTimezone}
+        type="submit"
         className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white"
       >
         Klar
