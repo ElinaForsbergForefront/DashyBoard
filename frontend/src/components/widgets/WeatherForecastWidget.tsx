@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../ui/glass-card';
 import { useTheme } from '../../context/ThemeContext';
 import { useGeocodeAddressQuery } from '../../api/endpoints/geocoding';
-import { useGetCurrentWeatherQuery } from '../../api/endpoints/weather';
+import { useGetDailyWeatherQuery } from '../../api/endpoints/weather';
 import { WeatherForm } from '../forms/WeatherForm';
 import ClearDayLight from '../../../assets/weather/light/ClearDay.png';
 import ClearNightLight from '../../../assets/weather/light/ClearNight.png';
@@ -25,31 +25,7 @@ import RainNightDark from '../../../assets/weather/dark/RainNight.png';
 import SnowDark from '../../../assets/weather/dark/Snow.png';
 import ThunderDark from '../../../assets/weather/dark/Thunder.png';
 
-const WEATHER_LOCATION_STORAGE_KEY = 'dashyboard.weather.location';
-
-type WeatherLocationSelection = {
-  city: string;
-};
-
-function buildSearchLocation(location: WeatherLocationSelection) {
-  return location.city.trim();
-}
-
-function readStoredWeatherLocation(): WeatherLocationSelection {
-  const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
-  if (!raw) return { city: '' };
-
-  try {
-    const parsed = JSON.parse(raw) as Partial<WeatherLocationSelection & { country?: string }>;
-    if (typeof parsed?.city === 'string') {
-      return { city: parsed.city };
-    }
-  } catch {
-    return { city: raw };
-  }
-
-  return { city: '' };
-}
+const WEATHER_FORECAST_LOCATION_STORAGE_KEY = 'dashyboard.weatherforecast.location';
 
 type ThemedIcon = { light: string; dark: string };
 
@@ -84,9 +60,19 @@ const WEATHER_TYPE_MAP: Record<string, WeatherTypeDisplay> = {
     dayIcon: { light: RainDayLight, dark: RainDayDark },
     nightIcon: { light: RainNightLight, dark: RainNightDark },
   },
-  rain: { label: 'Rain', icon: { light: RainLight, dark: RainDark } },
+  rain: {
+    label: 'Rain',
+    icon: { light: RainLight, dark: RainDark },
+    dayIcon: { light: RainDayLight, dark: RainDayDark },
+    nightIcon: { light: RainNightLight, dark: RainNightDark },
+  },
   snowfall: { label: 'Snow', icon: { light: SnowLight, dark: SnowDark } },
-  rainshowers: { label: 'Rain showers', icon: { light: RainLight, dark: RainDark } },
+  rainshowers: {
+    label: 'Rain showers',
+    icon: { light: RainLight, dark: RainDark },
+    dayIcon: { light: RainDayLight, dark: RainDayDark },
+    nightIcon: { light: RainNightLight, dark: RainNightDark },
+  },
   snowshowers: { label: 'Snow showers', icon: { light: SnowLight, dark: SnowDark } },
   thunderstorm: { label: 'Thunderstorm', icon: { light: ThunderLight, dark: ThunderDark } },
   thunderstormwithhail: { label: 'Thunderstorm with hail', icon: { light: ThunderLight, dark: ThunderDark } },
@@ -106,20 +92,14 @@ function normalizeWeatherLabel(rawType: string) {
     .replace(/^./, (char) => char.toUpperCase());
 }
 
-function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' | 'dark', isDay?: number) {
+function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' | 'dark') {
   if (!weatherType) {
     return { label: '', icon: undefined };
   }
 
   const normalizedType = normalizeWeatherType(weatherType);
   const mapped = WEATHER_TYPE_MAP[normalizedType];
-  const themedIcon = mapped
-    ? isDay === 0
-      ? mapped.nightIcon ?? mapped.icon
-      : isDay === 1
-        ? mapped.dayIcon ?? mapped.icon
-        : mapped.icon
-    : undefined;
+  const themedIcon = mapped?.icon;
 
   return {
     label: mapped?.label ?? normalizeWeatherLabel(weatherType),
@@ -127,24 +107,21 @@ function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' |
   };
 }
 
-export function WeatherWidget() {
+function formatDayLabel(dateString: string, index: number): string {
+  const date = new Date(dateString);
+  const today = new Date();
+
+  if (date.toDateString() === today.toDateString()) {
+    return 'Today';
+  } else {
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  }
+}
+
+export function WeatherForecastWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [location, setLocation] = useState<WeatherLocationSelection>(readStoredWeatherLocation);
-  const [searchLocation, setSearchLocation] = useState(() => {
-    const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
-    const parsed = readStoredWeatherLocation();
-    const fromStructuredValue = buildSearchLocation(parsed);
-
-    if (fromStructuredValue) return fromStructuredValue;
-    if (!raw) return '';
-
-    try {
-      JSON.parse(raw);
-      return '';
-    } catch {
-      return raw;
-    }
-  });
+  const [location, setLocation] = useState(() => localStorage.getItem(WEATHER_FORECAST_LOCATION_STORAGE_KEY) || '');
+  const [searchLocation, setSearchLocation] = useState(location);
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [weatherLocation, setWeatherLocation] = useState<string>('');
 
@@ -163,43 +140,37 @@ export function WeatherWidget() {
   }, [geocodeData, searchLocation]);
 
   const {
-    data: currentWeather,
+    data: dailyWeather,
     isFetching: isFetchingWeather,
     error: weatherError,
-  } = useGetCurrentWeatherQuery(
+  } = useGetDailyWeatherQuery(
     { longi: coordinates?.lon.toString() ?? '0', lati: coordinates?.lat.toString() ?? '0' },
     { skip: !coordinates },
   );
 
   const { theme } = useTheme();
-  const rawWeatherType = currentWeather?.current.weatherType ?? currentWeather?.current.weather_code;
-  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(
-    rawWeatherType,
-    theme,
-    currentWeather?.current.is_day,
-  );
 
   const isLoading = isGeocoding || isFetchingWeather;
   const hasLocation = searchLocation.trim() !== '';
   const errorMessage = geocodeError
     ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
     : weatherError
-      ? 'Kunde inte hämta vädret för platsen.'
+      ? 'Kunde inte hämta väderprognosen för platsen.'
       : undefined;
 
-  const handleLocationSubmit = (newLocation: WeatherLocationSelection) => {
+  const handleLocationSubmit = (newLocation: string) => {
     setLocation(newLocation);
-    localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(newLocation));
-    setSearchLocation(buildSearchLocation(newLocation));
+    localStorage.setItem(WEATHER_FORECAST_LOCATION_STORAGE_KEY, newLocation);
+    setSearchLocation(newLocation);
     setIsEditModalOpen(false);
   };
 
   return (
     <>
-      <GlassCard className="glass-widget w-72">
-        <div className="space-y-4">
+      <GlassCard className="glass-widget w-80">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-foreground-secondary">Weather</h3>
+            <h3 className="text-sm font-medium text-foreground-secondary">7-Day Forecast</h3>
             <button
               type="button"
               onClick={() => setIsEditModalOpen(true)}
@@ -209,56 +180,59 @@ export function WeatherWidget() {
             </button>
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Hämtar aktuellt väder…</p>}
+          {isLoading && <p className="text-xs text-muted">Hämtar väderprognos…</p>}
 
-          {!isLoading && !currentWeather && hasLocation && !errorMessage && (
+          {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
             <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
           )}
 
-          {!isLoading && currentWeather && (
-            <div className="space-y-2 text-center">
-              <div className="flex flex-col items-center justify-center gap-3">
-                {weatherIcon && (
-                  <img src={weatherIcon} alt={weatherTypeLabel} className="h-32 w-32" />
-                )}
-                <div>
-                  <p className="text-sm font-medium text-foreground-secondary">
-                    {weatherLocation || searchLocation}
-                  </p>
-                  {weatherTypeLabel && (
-                    <p className="text-xs text-muted">{weatherTypeLabel}</p>
-                  )}
-                </div>
-              </div>
-              <p className="text-4xl font-semibold text-foreground tracking-tight">
-                {Math.round(currentWeather.current.temperature_2m)}°C
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs text-muted">
-                <div>
-                  <p className="font-semibold text-foreground">Känns som</p>
-                  <p>{Math.round(currentWeather.current.apparent_temperature)}°C</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Vind</p>
-                  <p>{currentWeather.current.wind_speed_10m} km/h</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Nederbörd</p>
-                  <p>{currentWeather.current.precipitation} mm</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Sannolikhet</p>
-                  <p>{currentWeather.current.precipitation_probability}%</p>
-                </div>
+          {!isLoading && dailyWeather && (
+              <div className="space-y-2">
+              <p className="text-xs text-muted text-xs">{weatherLocation || searchLocation}</p>
+              <div className="space-y-1">
+                {dailyWeather.daily.time.map((date, index) => {
+                  const weatherType = dailyWeather.daily.weather_code?.[index];
+                  const maxTemp = dailyWeather.daily.temperature_2m_max?.[index];
+                  const minTemp = dailyWeather.daily.temperature_2m_min?.[index];
+                  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(weatherType, theme);
+                  const dayLabel = formatDayLabel(date, index);
+
+                  return (
+                    <div
+                      key={date}
+                      className="flex items-center justify-between rounded-md border border-border bg-overlay p-2 gap-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{dayLabel}</p>
+                        {weatherTypeLabel && (
+                          <p className="text-xs text-muted truncate">{weatherTypeLabel}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {weatherIcon && (
+                          <img src={weatherIcon} alt={weatherTypeLabel} className="h-10 w-10" />
+                        )}
+                        <div className="flex flex-col items-end">
+                          <p className="text-base font-semibold text-foreground">
+                            {maxTemp !== undefined ? `${Math.round(maxTemp)}°` : '-'}
+                          </p>
+                          <p className="text-xs text-muted">
+                            {minTemp !== undefined ? `${Math.round(minTemp)}°` : '-'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {!isLoading && !currentWeather && !hasLocation && (
+          {!isLoading && !dailyWeather && !hasLocation && (
             <p className="text-xs text-muted">Ingen plats vald ännu. Klicka på Edit för att lägga till.</p>
           )}
 
-          {!isLoading && !currentWeather && hasLocation && !errorMessage && (
+          {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
             <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
           )}
 
@@ -267,7 +241,7 @@ export function WeatherWidget() {
       </GlassCard>
 
       {isEditModalOpen && (
-        <WeatherEditModal
+        <WeatherForecastEditModal
           location={location}
           onLocationSubmit={handleLocationSubmit}
           onClose={() => setIsEditModalOpen(false)}
@@ -279,49 +253,24 @@ export function WeatherWidget() {
   );
 }
 
-function WeatherEditModal({
+function WeatherForecastEditModal({
   location,
   onLocationSubmit,
   onClose,
   isLoading,
   feedback,
 }: {
-  location: WeatherLocationSelection;
-  onLocationSubmit: (location: WeatherLocationSelection) => void;
+  location: string;
+  onLocationSubmit: (location: string) => void;
   onClose: () => void;
   isLoading: boolean;
   feedback?: string;
 }) {
-  const [tempCity, setTempCity] = useState(location.city);
-
-  useEffect(() => {
-    setTempCity(location.city);
-  }, [location]);
-
-  const trimmedCity = tempCity.trim();
-  const {
-    data: modalGeocodeData,
-    isFetching: isValidatingCity,
-    error: modalGeocodeError,
-  } = useGeocodeAddressQuery(trimmedCity, { skip: trimmedCity.length < 2 });
-
-  const cityError =
-    !trimmedCity
-      ? 'Ange en stad'
-      : trimmedCity.length < 2
-        ? 'Skriv minst 2 bokstäver'
-        : modalGeocodeError
-          ? 'Staden kunde inte hittas'
-          : '';
-
-  const isSubmitDisabled = !trimmedCity || !!cityError || isValidatingCity || !modalGeocodeData;
-
-  const cityHelperText =
-    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som kan hittas av karttjänsten';
+  const [tempLocation, setTempLocation] = useState(location);
 
   const handleSubmit = () => {
-    if (isSubmitDisabled) return;
-    onLocationSubmit({ city: trimmedCity });
+    if (!tempLocation.trim()) return;
+    onLocationSubmit(tempLocation.trim());
   };
 
   return (
@@ -331,7 +280,7 @@ function WeatherEditModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-foreground">Ändra väderplats</h4>
+          <h4 className="text-sm font-semibold text-foreground">Weatherforecast</h4>
           <button
             type="button"
             onClick={onClose}
@@ -342,14 +291,11 @@ function WeatherEditModal({
         </div>
 
         <WeatherForm
-          city={tempCity}
-          onCityChange={setTempCity}
-          cityHelperText={cityHelperText}
-          cityError={cityError}
+          location={tempLocation}
+          onLocationChange={setTempLocation}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           feedback={feedback}
-          isSubmitDisabled={isSubmitDisabled}
           buttonText="Spara"
         />
       </GlassCard>

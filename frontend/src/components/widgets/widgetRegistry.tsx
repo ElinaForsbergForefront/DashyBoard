@@ -4,7 +4,9 @@ import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
 import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
-import { WeatherWidget } from './WeatherWidget';
+import { WeatherForm } from '../forms/WeatherForm';
+import { CurrentWeatherWidget} from './CurrentWeatherWidget';
+import { WeatherForecastWidget } from './WeatherForecastWidget';
 
 
 /**
@@ -30,12 +32,12 @@ export interface WidgetDefinition {
 }
 
 export const widgetRegistry: WidgetDefinition[] = [
-    {
-        id: 'clock',
-        name: 'Clock',
-        description: 'Visar aktuell tid baserat på vald tidszon.',
-        component: ClockWidget,
-    },
+  {
+    id: 'clock',
+    name: 'Clock',
+    description: 'Visar aktuell tid baserat på vald tidszon.',
+    component: ClockWidget,
+  },
   {
     id: 'reminder',
     name: 'Reminder',
@@ -47,7 +49,14 @@ export const widgetRegistry: WidgetDefinition[] = [
     id: 'weather',
     name: 'Weather',
     description: 'Visar aktuellt väder för vald plats.',
-    component: WeatherWidget,
+    component: CurrentWeatherWidget,
+    configForm: WeatherForm,
+  },
+  {
+    id: 'weather-forecast',
+    name: 'Weather Forecast',
+    description: 'Visar väderprognos för vald plats.',
+    component: WeatherForecastWidget,
   },
   {
     id: 'currency',

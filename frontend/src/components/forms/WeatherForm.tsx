@@ -30,10 +30,10 @@ export function WeatherForm({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-surface p-3 space-y-3">
-      <p className="text-sm font-medium text-foreground">Väderplats</p>
+      <p className="text-sm font-medium text-foreground">Location</p>
 
       <label className="flex flex-col gap-1 text-xs text-muted">
-        Stad
+        City
         <input
           value={city}
           onChange={(event) => onCityChange(event.target.value)}
