@@ -3,6 +3,7 @@ import type { TimetableEntryDto } from '../../api/types/traffic';
 import { TrafficForm } from '../forms/TrafficForm';
 import { GlassCard } from '../ui/glass-card';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
 
@@ -132,9 +133,14 @@ export function TrafficWidget() {
                 </div>                      
             </GlassCard>
 
-            {isEditModalOpen && <TrafficEditModal 
-                                    onClose={() => setIsEditModalOpen(false)} 
-                                    onSuccess={handleFormSuccess}/>}
+
+            {isEditModalOpen && createPortal(
+                <TrafficEditModal 
+                    onClose={() => setIsEditModalOpen(false)} 
+                    onSuccess={handleFormSuccess}
+                />,
+                document.body
+            )}
         </>
     );
 }
