@@ -61,7 +61,7 @@ namespace DashyBoard.Api.Controllers
         {
             if (string.IsNullOrWhiteSpace(username))
             {
-                return Ok(new CheckUsernameResponse(true));
+                return BadRequest("Username is required.");
             }
 
             var isTaken = await _mediator.Send(new CheckUsernameQuery(username), ct);
