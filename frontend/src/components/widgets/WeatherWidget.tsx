@@ -27,6 +27,30 @@ import ThunderDark from '../../../assets/weather/dark/Thunder.png';
 
 const WEATHER_LOCATION_STORAGE_KEY = 'dashyboard.weather.location';
 
+type WeatherLocationSelection = {
+  city: string;
+};
+
+function buildSearchLocation(location: WeatherLocationSelection) {
+  return location.city.trim();
+}
+
+function readStoredWeatherLocation(): WeatherLocationSelection {
+  const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
+  if (!raw) return { city: '' };
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<WeatherLocationSelection & { country?: string }>;
+    if (typeof parsed?.city === 'string') {
+      return { city: parsed.city };
+    }
+  } catch {
+    return { city: raw };
+  }
+
+  return { city: '' };
+}
+
 type ThemedIcon = { light: string; dark: string };
 
 type WeatherTypeDisplay = {
@@ -60,19 +84,9 @@ const WEATHER_TYPE_MAP: Record<string, WeatherTypeDisplay> = {
     dayIcon: { light: RainDayLight, dark: RainDayDark },
     nightIcon: { light: RainNightLight, dark: RainNightDark },
   },
-  rain: {
-    label: 'Rain',
-    icon: { light: RainLight, dark: RainDark },
-    dayIcon: { light: RainDayLight, dark: RainDayDark },
-    nightIcon: { light: RainNightLight, dark: RainNightDark },
-  },
+  rain: { label: 'Rain', icon: { light: RainLight, dark: RainDark } },
   snowfall: { label: 'Snow', icon: { light: SnowLight, dark: SnowDark } },
-  rainshowers: {
-    label: 'Rain showers',
-    icon: { light: RainLight, dark: RainDark },
-    dayIcon: { light: RainDayLight, dark: RainDayDark },
-    nightIcon: { light: RainNightLight, dark: RainNightDark },
-  },
+  rainshowers: { label: 'Rain showers', icon: { light: RainLight, dark: RainDark } },
   snowshowers: { label: 'Snow showers', icon: { light: SnowLight, dark: SnowDark } },
   thunderstorm: { label: 'Thunderstorm', icon: { light: ThunderLight, dark: ThunderDark } },
   thunderstormwithhail: { label: 'Thunderstorm with hail', icon: { light: ThunderLight, dark: ThunderDark } },
@@ -115,8 +129,22 @@ function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' |
 
 export function WeatherWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [location, setLocation] = useState(() => localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY) || '');
-  const [searchLocation, setSearchLocation] = useState(location);
+  const [location, setLocation] = useState<WeatherLocationSelection>(readStoredWeatherLocation);
+  const [searchLocation, setSearchLocation] = useState(() => {
+    const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
+    const parsed = readStoredWeatherLocation();
+    const fromStructuredValue = buildSearchLocation(parsed);
+
+    if (fromStructuredValue) return fromStructuredValue;
+    if (!raw) return '';
+
+    try {
+      JSON.parse(raw);
+      return '';
+    } catch {
+      return raw;
+    }
+  });
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [weatherLocation, setWeatherLocation] = useState<string>('');
 
@@ -159,10 +187,10 @@ export function WeatherWidget() {
       ? 'Kunde inte hämta vädret för platsen.'
       : undefined;
 
-  const handleLocationSubmit = (newLocation: string) => {
+  const handleLocationSubmit = (newLocation: WeatherLocationSelection) => {
     setLocation(newLocation);
-    localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, newLocation);
-    setSearchLocation(newLocation);
+    localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(newLocation));
+    setSearchLocation(buildSearchLocation(newLocation));
     setIsEditModalOpen(false);
   };
 
@@ -258,23 +286,48 @@ function WeatherEditModal({
   isLoading,
   feedback,
 }: {
-  location: string;
-  onLocationSubmit: (location: string) => void;
+  location: WeatherLocationSelection;
+  onLocationSubmit: (location: WeatherLocationSelection) => void;
   onClose: () => void;
   isLoading: boolean;
   feedback?: string;
 }) {
-  const [tempLocation, setTempLocation] = useState(location);
+  const [tempCity, setTempCity] = useState(location.city);
+
+  useEffect(() => {
+    setTempCity(location.city);
+  }, [location]);
+
+  const trimmedCity = tempCity.trim();
+  const {
+    data: modalGeocodeData,
+    isFetching: isValidatingCity,
+    error: modalGeocodeError,
+  } = useGeocodeAddressQuery(trimmedCity, { skip: trimmedCity.length < 2 });
+
+  const cityError =
+    !trimmedCity
+      ? 'Ange en stad'
+      : trimmedCity.length < 2
+        ? 'Skriv minst 2 bokstäver'
+        : modalGeocodeError
+          ? 'Staden kunde inte hittas'
+          : '';
+
+  const isSubmitDisabled = !trimmedCity || !!cityError || isValidatingCity || !modalGeocodeData;
+
+  const cityHelperText =
+    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som kan hittas av karttjänsten';
 
   const handleSubmit = () => {
-    if (!tempLocation.trim()) return;
-    onLocationSubmit(tempLocation.trim());
+    if (isSubmitDisabled) return;
+    onLocationSubmit({ city: trimmedCity });
   };
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <GlassCard
-        className="w-full max-w-md"
+        className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -289,11 +342,14 @@ function WeatherEditModal({
         </div>
 
         <WeatherForm
-          location={tempLocation}
-          onLocationChange={setTempLocation}
+          city={tempCity}
+          onCityChange={setTempCity}
+          cityHelperText={cityHelperText}
+          cityError={cityError}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           feedback={feedback}
+          isSubmitDisabled={isSubmitDisabled}
           buttonText="Spara"
         />
       </GlassCard>
