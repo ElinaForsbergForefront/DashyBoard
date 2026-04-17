@@ -22,10 +22,10 @@ export interface DailyWeatherForecastDto{
 }
 
 export interface DailyforecastData {
-  Time: string[];
-  WeatherType: string[];
+  time: string[];
+  weather_code: string[];
   temperature_2m_max: number[];
-  temperature_2n_min: number[]
+  temperature_2m_min: number[];
 }
 
 export interface HourlyWeatherforecastDto {

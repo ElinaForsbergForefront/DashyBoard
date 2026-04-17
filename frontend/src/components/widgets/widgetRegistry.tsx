@@ -6,7 +6,9 @@ import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
 import { TrafficForm } from '../forms/TrafficForm';
 import { TrafficWidget } from './TrafficWidget';
-import { WeatherWidget } from './WeatherWidget';
+import { WeatherForm } from '../forms/WeatherForm';
+import { CurrentWeatherWidget} from './CurrentWeatherWidget';
+import { WeatherForecastWidget } from './WeatherForecastWidget';
 
 
 /**
@@ -50,7 +52,16 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Visar aktuellt väder för vald plats.',
     cols: 2,
     rows: 2,
-    component: WeatherWidget,
+    component: CurrentWeatherWidget,
+    configForm: WeatherForm,
+  },
+  {
+    id: 'weather-forecast',
+    name: 'Weather Forecast',
+    description: 'Visar väderprognos för vald plats.',
+    cols: 2,
+    rows: 2,
+    component: WeatherForecastWidget,
   },
   {
     id: 'currency',
