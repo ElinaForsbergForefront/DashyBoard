@@ -53,6 +53,7 @@ namespace DashyBoard.Api.Controllers
             return Ok(userProfile);
         }
 
+        [AllowAnonymous]
         [HttpGet("check-username")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> CheckUsername([FromQuery] string username, CancellationToken ct)
