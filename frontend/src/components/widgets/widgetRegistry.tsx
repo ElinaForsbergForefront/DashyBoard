@@ -4,6 +4,8 @@ import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
 import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
+import { TrafficForm } from '../forms/TrafficForm';
+import { TrafficWidget } from './TrafficWidget';
 
 /**
  * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
@@ -66,6 +68,15 @@ export const widgetRegistry: WidgetDefinition[] = [
     rows: 2,
     component: ClockWidget,
   },
+  {
+    id: 'traffic',
+    name: 'Traffic',
+    description: 'Shows departing public transport from a selected station.',
+    cols: 3,
+    rows: 3,
+    component: TrafficWidget, 
+    configForm: TrafficForm,
+  }
 ];
 
 // Hjälptyp — härledd automatiskt från registret, ingen manuell union-typ behövs

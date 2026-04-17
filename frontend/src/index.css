@@ -272,4 +272,20 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
+
+
+  /* Subtle Scrollbar */
+  .subtle-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+  }
 }
