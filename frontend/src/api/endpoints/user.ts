@@ -30,6 +30,10 @@ const userApi = api.injectEndpoints({
       query: (id) => ({ url: `/user/${id}`, method: 'DELETE' }),
       invalidatesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
+    syncUserToDatabase: builder.mutation<UserDto, UpdateUserBySubCommand>({
+      query: (body) => ({ url: `/user/sync-to-database`, method: 'POST', body }),
+      invalidatesTags: [{ type: 'User', id: 'ME' }],
+    }),
   }),
 });
 
@@ -41,4 +45,5 @@ export const {
   useDeleteCurrentUserMutation,
   useUpdateUserByIdMutation,
   useDeleteUserByIdMutation,
+  useSyncUserToDatabaseMutation,
 } = userApi;

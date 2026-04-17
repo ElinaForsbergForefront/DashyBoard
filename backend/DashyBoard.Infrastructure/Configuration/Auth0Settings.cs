@@ -6,4 +6,7 @@ public class Auth0Settings
 
     public string Domain { get; set; } = string.Empty;
     public string Audience { get; set; } = string.Empty;
+    public string ManagementClientId { get; set; } = string.Empty;
+    public string ManagementClientSecret { get; set; } = string.Empty;
+    public string ManagementDomain { get; set; } = string.Empty;
 }

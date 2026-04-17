@@ -73,6 +73,12 @@ public static class DependencyInjection
             client.BaseAddress = new Uri("https://realtime-api.trafiklab.se/v1/");
         });
 
+        // Auth0 Management API HttpClient
+        services.AddHttpClient("Auth0Management", client =>
+        {
+            // Configuration is done per-request in the service
+        });
+
         // Mirror
         services.AddScoped<IMirrorRepository, MirrorRepository>();
 
@@ -88,6 +94,9 @@ public static class DependencyInjection
         // Spotify
 		services.Configure<SpotifyOptions>(
 		config.GetSection(SpotifyOptions.SectionName));
+
+		// Add Auth0 Management API Service
+		services.AddScoped<IAuth0ManagementService, Auth0ManagementService>();
 
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
@@ -120,6 +129,7 @@ public static class DependencyInjection
 			return client.GetDatabase(settings.DatabaseName);
 		});
 
-		return services;
+
+        return services;
 	}
 }

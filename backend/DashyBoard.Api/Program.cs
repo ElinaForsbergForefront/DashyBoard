@@ -1,7 +1,5 @@
-using DashyBoard.Api.Middleware;
 using DashyBoard.Api.Extensions;
 using DashyBoard.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using DashyBoard.Application;
 using System.Text.Json.Serialization;
 
@@ -62,7 +60,6 @@ app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseUserSync();
 app.UseAuthorization();
 
 app.MapControllers();

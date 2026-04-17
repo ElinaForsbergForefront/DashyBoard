@@ -107,5 +107,36 @@ namespace DashyBoard.Api.Controllers
             var result = await _mediator.Send(command, ct);
             return Ok(result);
         }
+
+        [HttpPost("sync-to-database")]
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SyncUserToDatabase([FromBody] UpdateUserRequest request, CancellationToken ct)
+        {
+            var sub = GetCurrentSub();
+            if (string.IsNullOrWhiteSpace(sub))
+                return Unauthorized();
+
+            var email = User.FindFirst(ClaimTypes.Email)?.Value
+                ?? User.FindFirst("email")?.Value;
+
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("Email claim not found in token.");
+
+            var command = new SyncUserToDbCommand
+            {
+                Sub = sub,
+                Email = email,
+                Username = request.Username,
+                DisplayName = request.DisplayName,
+                Country = request.Country,
+                City = request.City
+            };
+
+            var result = await _mediator.Send(command, ct);
+            return Ok(result);
+        }
+
     }
 }

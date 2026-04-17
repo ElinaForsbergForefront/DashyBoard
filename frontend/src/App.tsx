@@ -2,16 +2,11 @@ import { Outlet } from 'react-router-dom';
 import { Navigation } from './components/layout/Navigation';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useGetCurrentUserQuery } from './api/endpoints/user';
-import { useProfileGuard } from './hooks/useProfileGuard';
-import { Form } from './components/layout/newUserForm/Form';
+import { useUserDataSync } from './hooks/useUserDataSync';
 
 function App() {
   const { isAuthenticated } = useAuth0();
-  const { data: user, isSuccess } = useGetCurrentUserQuery(undefined, { skip: !isAuthenticated });
-  const isProfileComplete = useProfileGuard(user);
-
-  const showProfileModal = isAuthenticated && isSuccess && !isProfileComplete;
+  const { isSynced, isLoading: isSyncLoading } = useUserDataSync();
 
   return (
     <AuthGuard>
@@ -22,11 +17,13 @@ function App() {
         >
           Skip to main content
         </a>
-        {isAuthenticated && isProfileComplete && <Navigation />}
+        {isAuthenticated && isSynced && <Navigation />}
+        {isSyncLoading && (
+          <div className="p-4 text-center text-sm text-muted-foreground">Syncing your data...</div>
+        )}
         <main id="main-content" className="flex-1 flex flex-col">
-          <Outlet />
+          {isAuthenticated && isSynced && <Outlet />}
         </main>
-        {showProfileModal && <Form />}
       </div>
     </AuthGuard>
   );
