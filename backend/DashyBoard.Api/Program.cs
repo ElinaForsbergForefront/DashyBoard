@@ -21,7 +21,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
               "http://localhost:5173",
               "https://dashyboard.se",
-              "https://www.dashyboard.se")
+              "https://www.dashyboard.se",
+              "https://www.auth.dashyboard.se",
+              "https://auth.dashyboard.se")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
