@@ -9,6 +9,7 @@ using DashyBoard.Application.Queries.User.Dto;
 namespace DashyBoard.Api.Controllers
 {
     public sealed record UpdateUserRequest(string? Username, string? DisplayName, string? Country, string? City);
+    public sealed record CheckUsernameResponse(bool IsTaken);
   
     [Authorize]
     [ApiController]
@@ -53,16 +54,18 @@ namespace DashyBoard.Api.Controllers
             return Ok(userProfile);
         }
 
-        [HttpGet("check-username")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [HttpGet("check-username")]
+        [ProducesResponseType(typeof(CheckUsernameResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CheckUsername([FromQuery] string username, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(username))
+            {
                 return BadRequest("Username is required.");
+            }
 
             var isTaken = await _mediator.Send(new CheckUsernameQuery(username), ct);
-            return Ok(isTaken);
+            return Ok(new CheckUsernameResponse(isTaken));
         }
 
         [HttpDelete("me")]
