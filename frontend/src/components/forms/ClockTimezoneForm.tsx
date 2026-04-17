@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { FormCard } from '../ui/form-card';
 
 interface ClockTimezoneFormProps {
@@ -15,6 +15,11 @@ export function ClockTimezoneForm({
   onSuccess,
 }: ClockTimezoneFormProps) {
   const [pendingTimezone, setPendingTimezone] = useState(selectedTimezone);
+
+  const uniqueTimezones = useMemo(
+    () => Array.from(new Set(timezones)),
+    [timezones]
+  );
 
   const applyTimezone = () => {
     onTimezoneChange(pendingTimezone);
@@ -49,7 +54,7 @@ export function ClockTimezoneForm({
           onChange={(event) => setPendingTimezone(event.target.value)}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm text-foreground outline-none focus:border-primary"
         >
-          {timezones.map((timezone) => (
+          {uniqueTimezones.map((timezone) => (
             <option key={timezone} value={timezone}>
               {timezone}
             </option>
