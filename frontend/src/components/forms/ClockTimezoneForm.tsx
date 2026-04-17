@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { FormCard } from '../ui/form-card';
 
 interface ClockTimezoneFormProps {
@@ -14,9 +14,20 @@ export function ClockTimezoneForm({
   onTimezoneChange,
   onSuccess,
 }: ClockTimezoneFormProps) {
+  const [pendingTimezone, setPendingTimezone] = useState(selectedTimezone);
+
+  const applyTimezone = () => {
+    onTimezoneChange(pendingTimezone);
+    onSuccess?.();
+  };
+
+  useEffect(() => {
+    setPendingTimezone(selectedTimezone);
+  }, [selectedTimezone]);
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSuccess?.();
+    applyTimezone();
   };
 
   return (
@@ -26,8 +37,8 @@ export function ClockTimezoneForm({
       <label className="flex flex-col gap-1 text-xs text-muted">
         Välj tidszon
         <select
-          value={selectedTimezone}
-          onChange={(event) => onTimezoneChange(event.target.value)}
+          value={pendingTimezone}
+          onChange={(event) => setPendingTimezone(event.target.value)}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm text-foreground outline-none focus:border-primary"
         >
           {timezones.map((timezone) => (
@@ -39,7 +50,8 @@ export function ClockTimezoneForm({
       </label>
 
       <button
-        type="submit"
+        type="button"
+        onClick={applyTimezone}
         className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white"
       >
         Klar
