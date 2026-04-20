@@ -25,7 +25,31 @@ import RainNightDark from '../../../assets/weather/dark/RainNight.png';
 import SnowDark from '../../../assets/weather/dark/Snow.png';
 import ThunderDark from '../../../assets/weather/dark/Thunder.png';
 
-const WEATHER_FORECAST_LOCATION_STORAGE_KEY = 'dashyboard.weatherforecast.location';
+const WEATHER_LOCATION_STORAGE_KEY = 'dashyboard.weather.location';
+
+type WeatherLocationSelection = {
+  city: string;
+};
+
+function buildSearchLocation(location: WeatherLocationSelection) {
+  return location.city.trim();
+}
+
+function readStoredWeatherLocation(): WeatherLocationSelection {
+  const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
+  if (!raw) return { city: '' };
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<WeatherLocationSelection & { country?: string }>;
+    if (typeof parsed?.city === 'string') {
+      return { city: parsed.city };
+    }
+  } catch {
+    return { city: raw };
+  }
+
+  return { city: '' };
+}
 
 type ThemedIcon = { light: string; dark: string };
 
@@ -120,8 +144,22 @@ function formatDayLabel(dateString: string, index: number): string {
 
 export function WeatherForecastWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [location, setLocation] = useState(() => localStorage.getItem(WEATHER_FORECAST_LOCATION_STORAGE_KEY) || '');
-  const [searchLocation, setSearchLocation] = useState(location);
+  const [location, setLocation] = useState<WeatherLocationSelection>(readStoredWeatherLocation);
+  const [searchLocation, setSearchLocation] = useState(() => {
+    const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
+    const parsed = readStoredWeatherLocation();
+    const fromStructuredValue = buildSearchLocation(parsed);
+
+    if (fromStructuredValue) return fromStructuredValue;
+    if (!raw) return '';
+
+    try {
+      JSON.parse(raw);
+      return '';
+    } catch {
+      return raw;
+    }
+  });
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [weatherLocation, setWeatherLocation] = useState<string>('');
 
@@ -158,10 +196,11 @@ export function WeatherForecastWidget() {
       ? 'Kunde inte hämta väderprognosen för platsen.'
       : undefined;
 
-  const handleLocationSubmit = (newLocation: string) => {
+  const handleLocationSubmit = (newLocationCity: string) => {
+    const newLocation = { city: newLocationCity };
     setLocation(newLocation);
-    localStorage.setItem(WEATHER_FORECAST_LOCATION_STORAGE_KEY, newLocation);
-    setSearchLocation(newLocation);
+    localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(newLocation));
+    setSearchLocation(buildSearchLocation(newLocation));
     setIsEditModalOpen(false);
   };
 
@@ -188,7 +227,7 @@ export function WeatherForecastWidget() {
 
           {!isLoading && dailyWeather && (
               <div className="space-y-2">
-              <p className="text-xs text-muted text-xs">{weatherLocation || searchLocation}</p>
+              <p className="text-xs text-muted text-xs">{(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}</p>
               <div className="space-y-1">
                 {dailyWeather.daily.time.map((date, index) => {
                   const weatherType = dailyWeather.daily.weather_code?.[index];
@@ -241,64 +280,31 @@ export function WeatherForecastWidget() {
       </GlassCard>
 
       {isEditModalOpen && (
-        <WeatherForecastEditModal
-          location={location}
-          onLocationSubmit={handleLocationSubmit}
-          onClose={() => setIsEditModalOpen(false)}
-          isLoading={isLoading}
-          feedback={errorMessage}
-        />
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={() => setIsEditModalOpen(false)}>
+          <GlassCard
+            className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-foreground">7-Day Forecast</h4>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+              >
+                Stäng
+              </button>
+            </div>
+
+            <WeatherForm
+              onSuccess={(city) => {
+                handleLocationSubmit(city);
+                setIsEditModalOpen(false);
+              }}
+            />
+          </GlassCard>
+        </div>
       )}
     </>
-  );
-}
-
-function WeatherForecastEditModal({
-  location,
-  onLocationSubmit,
-  onClose,
-  isLoading,
-  feedback,
-}: {
-  location: string;
-  onLocationSubmit: (location: string) => void;
-  onClose: () => void;
-  isLoading: boolean;
-  feedback?: string;
-}) {
-  const [tempLocation, setTempLocation] = useState(location);
-
-  const handleSubmit = () => {
-    if (!tempLocation.trim()) return;
-    onLocationSubmit(tempLocation.trim());
-  };
-
-  return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <GlassCard
-        className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-foreground">Weatherforecast</h4>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
-          >
-            Stäng
-          </button>
-        </div>
-
-        <WeatherForm
-          location={tempLocation}
-          onLocationChange={setTempLocation}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          feedback={feedback}
-          buttonText="Spara"
-        />
-      </GlassCard>
-    </div>
   );
 }

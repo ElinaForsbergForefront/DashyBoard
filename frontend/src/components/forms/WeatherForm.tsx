@@ -1,42 +1,63 @@
+import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { FormCard } from '../ui/form-card';
+import { useGeocodeAddressQuery } from '../../api/endpoints/geocoding';
 
 interface WeatherFormProps {
-  city: string;
-  onCityChange: (city: string) => void;
-  cityHelperText?: string;
-  cityError?: string;
-  onSubmit: () => void;
-  isLoading?: boolean;
-  feedback?: string | null;
-  isSubmitDisabled?: boolean;
-  buttonText?: string;
+  onSuccess?: (city: string) => void;
 }
 
-export function WeatherForm({
-  city,
-  onCityChange,
-  cityHelperText,
-  cityError,
-  onSubmit,
-  isLoading = false,
-  feedback,
-  isSubmitDisabled = false,
-  buttonText = 'Visa väder',
-}: WeatherFormProps) {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
+  const [city, setCity] = useState('');
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const trimmedCity = city.trim();
+  const {
+    data: geocodeData,
+    isFetching: isValidatingCity,
+    error: geocodeError,
+  } = useGeocodeAddressQuery(trimmedCity, { skip: trimmedCity.length < 2 });
+
+  const cityError =
+    !trimmedCity
+      ? 'Ange en stad'
+      : trimmedCity.length < 2
+        ? 'Skriv minst 2 bokstäver'
+        : geocodeError
+          ? 'Staden kunde inte hittas'
+          : '';
+
+  const isSubmitDisabled = !trimmedCity || !!cityError || isValidatingCity || !geocodeData;
+
+  const cityHelperText =
+    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som kan hittas av karttjänsten';
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSubmit();
+    setFeedback(null);
+
+    if (isSubmitDisabled) return;
+
+    try {
+      const submittedCity = city.trim();
+      setCity('');
+      setFeedback('Väder-konfigurationen sparades.');
+      onSuccess?.(submittedCity);
+    } catch {
+      setFeedback('Kunde inte konfigurera väder. Försök igen.');
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-surface p-3 space-y-3">
-      <p className="text-sm font-medium text-foreground">Location</p>
+    <FormCard onSubmit={handleSubmit}>
+      <p className="text-sm font-medium text-foreground">Väder Configuration</p>
 
       <label className="flex flex-col gap-1 text-xs text-muted">
-        City
+        Stad
         <input
+          type="text"
           value={city}
-          onChange={(event) => onCityChange(event.target.value)}
+          onChange={(event) => setCity(event.target.value)}
           placeholder="Ex: Oskarshamn"
           className="rounded-md border border-border bg-card px-2 py-2 text-sm text-foreground outline-none focus:border-primary"
           maxLength={50}
@@ -48,13 +69,13 @@ export function WeatherForm({
 
       <button
         type="submit"
-        disabled={isLoading || isSubmitDisabled}
+        disabled={isSubmitDisabled}
         className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
-        {isLoading ? 'Hämtar...' : buttonText}
+        {isValidatingCity ? 'Validerar...' : 'Konfigurera väder'}
       </button>
 
       {feedback && <p className="text-xs text-muted">{feedback}</p>}
-    </form>
+    </FormCard>
   );
 }
