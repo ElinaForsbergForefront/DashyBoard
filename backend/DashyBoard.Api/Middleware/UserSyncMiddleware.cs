@@ -14,20 +14,22 @@ public class UserSyncMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<UserSyncMiddleware> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly string _userMetadataClaimType;
     private readonly IMemoryCache _cache;
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
     private const string CacheKeyPrefix = "synced_";
-    private const string UserMetadataClaimType = "https://api.dashyboard.se/user_metadata";
 
     public UserSyncMiddleware(RequestDelegate next, ILogger<UserSyncMiddleware> logger, 
-        IServiceScopeFactory scopeFactory, IMemoryCache cache)
+        IServiceScopeFactory scopeFactory, IMemoryCache cache, IConfiguration configuration)
     {
         _next = next;
         _logger = logger;
         _scopeFactory = scopeFactory;
         _cache = cache;
+        _userMetadataClaimType = configuration["Authentication:UserMetadataClaimType"]
+            ?? throw new InvalidOperationException("UserMetadataClaimType not configured");
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -115,7 +117,7 @@ public class UserSyncMiddleware
     private (string? username, string? displayName, string? country, string? city)
         ParseUserMetadata(HttpContext context, string sub)
     {
-        var userMetadataClaim = context.User.FindFirst(UserMetadataClaimType);
+        var userMetadataClaim = context.User.FindFirst(_userMetadataClaimType);
         if (userMetadataClaim == null)
             return (null, null, null, null);
 
