@@ -120,7 +120,6 @@ public static class DependencyInjection
 			return client.GetDatabase(settings.DatabaseName);
 		});
 
-
         return services;
 	}
 }
