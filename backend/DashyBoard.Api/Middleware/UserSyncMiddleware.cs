@@ -1,13 +1,14 @@
-﻿using DashyBoard.Domain.Models;
-using DashyBoard.Infrastructure;
-using Microsoft.EntityFrameworkCore;
+﻿using DashyBoard.Application.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
-using Npgsql;
 using System.Security.Claims;
 using System.Text.Json;
 
 namespace DashyBoard.Api.Middleware;
 
+/// <summary>
+/// Middleware that syncs authenticated users from Auth0 to the database.
+/// Uses caching to prevent redundant database calls.
+/// </summary>
 public class UserSyncMiddleware
 {
     private readonly RequestDelegate _next;
@@ -18,8 +19,12 @@ public class UserSyncMiddleware
 
     private const string CacheKeyPrefix = "synced_";
 
-    public UserSyncMiddleware(RequestDelegate next, ILogger<UserSyncMiddleware> logger, 
-        IServiceScopeFactory scopeFactory, IMemoryCache cache, IConfiguration configuration)
+    public UserSyncMiddleware(
+        RequestDelegate next,
+        ILogger<UserSyncMiddleware> logger,
+        IServiceScopeFactory scopeFactory,
+        IMemoryCache cache,
+        IConfiguration configuration)
     {
         _next = next;
         _logger = logger;
@@ -33,97 +38,81 @@ public class UserSyncMiddleware
     {
         if (context.User.Identity?.IsAuthenticated == true)
         {
-            var sub = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                      ?? context.User.FindFirst("sub")?.Value;
-            var email = context.User.FindFirst(ClaimTypes.Email)?.Value
-                        ?? context.User.FindFirst("email")?.Value;
-
-            if (!string.IsNullOrEmpty(sub) && !string.IsNullOrEmpty(email))
-            {
-                var cacheKey = $"{CacheKeyPrefix}{sub}";
-                // First cache check
-                if (!_cache.TryGetValue(cacheKey, out bool _))
-                {
-                    try
-                    {
-                        await SyncUserAsync(context, sub, email, context.RequestAborted);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to sync user {Sub}", sub);
-                    }
-                }
-            }
+            await TrySyncUserAsync(context);
         }
 
         await _next(context);
     }
 
-    private async Task SyncUserAsync(HttpContext context, string sub, string email, CancellationToken ct)
+    private async Task TrySyncUserAsync(HttpContext context)
     {
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<DashyBoardDbContext>();
+        var (sub, email) = ExtractUserClaims(context);
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.AuthSub == sub, ct);
-
-        if (user?.Username != null)
-        {
-            // User already synced - cache it
-            _cache.Set($"{CacheKeyPrefix}{sub}", true, TimeSpan.FromHours(1));
+        if (string.IsNullOrEmpty(sub) || string.IsNullOrEmpty(email))
             return;
-        }
 
-        var (username, displayName, country, city) = ParseUserMetadata(context, sub);
+        var cacheKey = $"{CacheKeyPrefix}{sub}";
 
-        if (user == null)
+        if (_cache.TryGetValue(cacheKey, out bool _))
+            return; // Already synced
+
+        try
         {
-            db.Users.Add(new User(sub, email, username, displayName, country, city));
-            try
-            {
-                await db.SaveChangesAsync(ct);
-                _logger.LogInformation("New user created: {Sub}", sub);
-            }
-            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
-            {
-                _logger.LogInformation("User already exists (race condition): {Sub}", sub);
-            }
+            await SyncUserAndCacheAsync(context, sub, email, cacheKey);
         }
-        else if (username != null)
+        catch (Exception ex)
         {
-            user.Update(username, displayName, country, city);
-            await db.SaveChangesAsync(ct);
-            _logger.LogInformation("Updated profile for existing user: {Sub}", sub);
+            _logger.LogError(ex, "Failed to sync user {Sub}", sub);
         }
-
-        _cache.Set($"{CacheKeyPrefix}{sub}", true, TimeSpan.FromHours(1));
     }
 
-    private (string? username, string? displayName, string? country, string? city)
-        ParseUserMetadata(HttpContext context, string sub)
+    private async Task SyncUserAndCacheAsync(HttpContext context, string sub, string email, string cacheKey)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var userSyncService = scope.ServiceProvider.GetRequiredService<IUserSyncService>();
+
+        var (username, displayName, country, city) = ParseUserMetadata(context);
+
+        await userSyncService.SyncUserFromAuthAsync(sub, email, username, displayName, country, city, context.RequestAborted);
+
+        _cache.Set(cacheKey, true, TimeSpan.FromHours(1));
+    }
+
+    private static (string? sub, string? email) ExtractUserClaims(HttpContext context)
+    {
+        var sub = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                  ?? context.User.FindFirst("sub")?.Value;
+
+        var email = context.User.FindFirst(ClaimTypes.Email)?.Value
+                    ?? context.User.FindFirst("email")?.Value;
+
+        return (sub, email);
+    }
+
+    private (string? username, string? displayName, string? country, string? city) ParseUserMetadata(HttpContext context)
     {
         var userMetadataClaim = context.User.FindFirst(_userMetadataClaimType);
+
         if (userMetadataClaim == null)
             return (null, null, null, null);
 
         try
         {
             var meta = JsonSerializer.Deserialize<JsonElement>(userMetadataClaim.Value);
-            var username = meta.TryGetProperty("username", out var u) ? u.GetString() : null;
-            var displayName = meta.TryGetProperty("display_name", out var d) ? d.GetString() : null;
-            var country = meta.TryGetProperty("country", out var c) ? c.GetString() : null;
-            var city = meta.TryGetProperty("city", out var ci) ? ci.GetString() : null;
 
-            return (username, displayName, country, city);
+            return (
+                username: meta.TryGetProperty("username", out var u) ? u.GetString() : null,
+                displayName: meta.TryGetProperty("display_name", out var d) ? d.GetString() : null,
+                country: meta.TryGetProperty("country", out var c) ? c.GetString() : null,
+                city: meta.TryGetProperty("city", out var ci) ? ci.GetString() : null
+            );
         }
         catch (JsonException ex)
         {
-            _logger.LogWarning(ex, "Failed to parse user metadata for {Sub}", sub);
+            _logger.LogWarning(ex, "Failed to parse user metadata");
             return (null, null, null, null);
         }
     }
-
-    private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>
-        ex.InnerException is PostgresException { SqlState: "23505" };
 }
 
 public static class UserSyncMiddlewareExtensions
