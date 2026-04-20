@@ -3,7 +3,6 @@ using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
-using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -16,8 +15,6 @@ public class UserSyncMiddleware
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly string _userMetadataClaimType;
     private readonly IMemoryCache _cache;
-
-    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
     private const string CacheKeyPrefix = "synced_";
 
@@ -47,27 +44,13 @@ public class UserSyncMiddleware
                 // First cache check
                 if (!_cache.TryGetValue(cacheKey, out bool _))
                 {
-                    // Create a semaphore for this specific user
-                    var semaphore = _locks.GetOrAdd(sub, _ => new SemaphoreSlim(1, 1));
-
-                    // Wait for our turn (only one request per user can enter)
-                    await semaphore.WaitAsync(context.RequestAborted);
                     try
                     {
-                        // Check cache again after getting lock
-                        if (!_cache.TryGetValue(cacheKey, out bool _))
-                        {
-                            await SyncUserAsync(context, sub, email, context.RequestAborted);
-                        }
-                    } 
+                        await SyncUserAsync(context, sub, email, context.RequestAborted);
+                    }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Failed to sync user {Sub}", sub);
-                    }
-                    finally
-                    {
-                        // ALWAYS release the lock, even if error occurs
-                        semaphore.Release();
                     }
                 }
             }
@@ -86,7 +69,7 @@ public class UserSyncMiddleware
         if (user?.Username != null)
         {
             // User already synced - cache it
-            SetCacheWithCleanup(sub);
+            _cache.Set($"{CacheKeyPrefix}{sub}", true, TimeSpan.FromHours(1));
             return;
         }
 
@@ -112,7 +95,7 @@ public class UserSyncMiddleware
             _logger.LogInformation("Updated profile for existing user: {Sub}", sub);
         }
 
-        SetCacheWithCleanup(sub);
+        _cache.Set($"{CacheKeyPrefix}{sub}", true, TimeSpan.FromHours(1));
     }
 
     private (string? username, string? displayName, string? country, string? city)
@@ -137,35 +120,6 @@ public class UserSyncMiddleware
             _logger.LogWarning(ex, "Failed to parse user metadata for {Sub}", sub);
             return (null, null, null, null);
         }
-    }
-
-    private void SetCacheWithCleanup(string sub)
-    {
-        var cacheKey = $"{CacheKeyPrefix}{sub}";
-
-        _cache.Set(
-            cacheKey,
-            true,
-            new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
-                PostEvictionCallbacks =
-                {
-                    new PostEvictionCallbackRegistration
-                    {
-                        EvictionCallback = (key, value, reason, state) =>
-                        {
-                            // Remove from dictionary 
-                            if (key is string k && k.StartsWith(CacheKeyPrefix))
-                            {
-                                var userSub = k.Replace(CacheKeyPrefix, "");
-                                _locks.TryRemove(userSub, out _);
-                                _logger.LogDebug("Removed semaphore for {Sub}", userSub);
-                            }
-                        }
-                    }
-                }
-            });
     }
 
     private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>
