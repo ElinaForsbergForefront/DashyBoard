@@ -3,6 +3,7 @@ using DashyBoard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -14,6 +15,11 @@ public class UserSyncMiddleware
     private readonly ILogger<UserSyncMiddleware> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMemoryCache _cache;
+
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
+
+    private const string CacheKeyPrefix = "synced_";
+    private const string UserMetadataClaimType = "https://api.dashyboard.se/user_metadata";
 
     public UserSyncMiddleware(RequestDelegate next, ILogger<UserSyncMiddleware> logger, 
         IServiceScopeFactory scopeFactory, IMemoryCache cache)
@@ -35,46 +41,60 @@ public class UserSyncMiddleware
 
             if (!string.IsNullOrEmpty(sub) && !string.IsNullOrEmpty(email))
             {
-                // Skip DB entirely if already confirmed synced in this server session
-                if (!_cache.TryGetValue($"synced_{sub}", out bool _))
-                    await SyncUserAsync(context, sub, email);
+                var cacheKey = $"{CacheKeyPrefix}{sub}";
+                // First cache check
+                if (!_cache.TryGetValue(cacheKey, out bool _))
+                {
+                    // Create a sempahore for this specific user
+                    var semaphore = _locks.GetOrAdd(sub, _ => new SemaphoreSlim(1, 1));
+
+                    // Wait for our turn (only one request per user can enter)
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        // Check cache again after getting lock
+                        if (!_cache.TryGetValue(cacheKey, out bool _))
+                        {
+                            await SyncUserAsync(context, sub, email, context.RequestAborted);
+                        }
+                    } catch(Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to sync user {Sub}", sub);
+                    }
+                    finally
+                    {
+                        // ALWAYS release the lock, even if error occurs
+                        semaphore.Release();
+                    }
+                }
             }
         }
 
         await _next(context);
     }
 
-    private async Task SyncUserAsync(HttpContext context, string sub, string email)
+    private async Task SyncUserAsync(HttpContext context, string sub, string email, CancellationToken ct)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DashyBoardDbContext>();
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.AuthSub == sub);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.AuthSub == sub, ct);
 
         if (user?.Username != null)
         {
-            // Cache for 1 hour — no more DB hits until cache expires or server restarts
-            _cache.Set($"synced_{sub}", true, TimeSpan.FromHours(1));
+            // User already synced - cache it
+            SetCacheWithCleanup(sub);
             return;
         }
 
-        string? username = null, displayName = null, country = null, city = null;
-        var userMetadataClaim = context.User.FindFirst("https://api.dashyboard.se/user_metadata");
-        if (userMetadataClaim != null)
-        {
-            var meta = JsonSerializer.Deserialize<JsonElement>(userMetadataClaim.Value);
-            username    = meta.TryGetProperty("username",     out var u)  ? u.GetString()  : null;
-            displayName = meta.TryGetProperty("display_name", out var d)  ? d.GetString()  : null;
-            country     = meta.TryGetProperty("country",      out var c)  ? c.GetString()  : null;
-            city        = meta.TryGetProperty("city",         out var ci) ? ci.GetString() : null;
-        }
+        var (username, displayName, country, city) = ParseUserMetadata(context, sub);
 
         if (user == null)
         {
             db.Users.Add(new User(sub, email, username, displayName, country, city));
             try
             {
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(ct);
                 _logger.LogInformation("New user created: {Sub}", sub);
             }
             catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
@@ -85,11 +105,67 @@ public class UserSyncMiddleware
         else if (username != null)
         {
             user.Update(username, displayName, country, city);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(ct);
             _logger.LogInformation("Updated profile for existing user: {Sub}", sub);
         }
 
-        _cache.Set($"synced_{sub}", true, TimeSpan.FromHours(1));
+        SetCacheWithCleanup(sub);
+    }
+
+    private (string? username, string? displayName, string? country, string? city)
+        ParseUserMetadata(HttpContext context, string sub)
+    {
+        var userMetadataClaim = context.User.FindFirst(UserMetadataClaimType);
+        if (userMetadataClaim == null)
+            return (null, null, null, null);
+
+        try
+        {
+            var meta = JsonSerializer.Deserialize<JsonElement>(userMetadataClaim.Value);
+            var username = meta.TryGetProperty("username", out var u) ? u.GetString() : null;
+            var displayName = meta.TryGetProperty("display_name", out var d) ? d.GetString() : null;
+            var country = meta.TryGetProperty("country", out var c) ? c.GetString() : null;
+            var city = meta.TryGetProperty("city", out var ci) ? ci.GetString() : null;
+
+            return (username, displayName, country, city);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Failed to parse user metadata for {Sub}", sub);
+            return (null, null, null, null);
+        }
+    }
+
+    private void SetCacheWithCleanup(string sub)
+    {
+        var cacheKey = $"{CacheKeyPrefix}{sub}";
+
+        _cache.Set(
+            cacheKey,
+            true,
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+                PostEvictionCallbacks =
+                {
+                    new PostEvictionCallbackRegistration
+                    {
+                        EvictionCallback = (key, value, reason, state) =>
+                        {
+                            // Clean up semaphore when cache entry expires
+                            if (key is string k && k.StartsWith(CacheKeyPrefix))
+                            {
+                                var userSub = k.Replace(CacheKeyPrefix, "");
+                                if (_locks.TryRemove(userSub, out var semaphore))
+                                {
+                                    semaphore.Dispose();
+                                    _logger.LogDebug("Cleaned up semaphore for {Sub}", userSub);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
     }
 
     private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>
