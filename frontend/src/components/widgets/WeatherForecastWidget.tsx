@@ -206,7 +206,7 @@ export function WeatherForecastWidget() {
 
   return (
     <>
-      <GlassCard className="glass-widget w-80">
+      <GlassCard className="glass-widget w-full h-full">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground-secondary">7-Day Forecast</h3>
@@ -228,7 +228,7 @@ export function WeatherForecastWidget() {
           {!isLoading && dailyWeather && (
               <div className="space-y-2">
               <p className="text-xs text-muted text-xs">{(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}</p>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-60 overflow-y-auto subtle-scrollbar pr-4">
                 {dailyWeather.daily.time.map((date, index) => {
                   const weatherType = dailyWeather.daily.weather_code?.[index];
                   const maxTemp = dailyWeather.daily.temperature_2m_max?.[index];

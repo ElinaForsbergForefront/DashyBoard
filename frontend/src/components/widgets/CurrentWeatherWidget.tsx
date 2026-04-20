@@ -196,7 +196,7 @@ export function CurrentWeatherWidget() {
 
   return (
     <>
-      <GlassCard className="glass-widget w-72">
+      <GlassCard className="glass-widget w-full h-full">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground-secondary">Weather</h3>
@@ -216,23 +216,23 @@ export function CurrentWeatherWidget() {
           )}
 
           {!isLoading && currentWeather && (
-            <div className="space-y-2 text-center">
-              <div className="flex flex-col items-center justify-center gap-3">
-                {weatherIcon && (
-                  <img src={weatherIcon} alt={weatherTypeLabel} className="h-32 w-32" />
-                )}
-                <div>
+            <div className="space-y-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-foreground-secondary">
                     {(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}
                   </p>
                   {weatherTypeLabel && (
                     <p className="text-xs text-muted">{weatherTypeLabel}</p>
                   )}
+                  <p className="text-4xl font-semibold text-foreground tracking-tight">
+                    {Math.round(currentWeather.current.temperature_2m)}°C
+                  </p>
                 </div>
+                {weatherIcon && (
+                  <img src={weatherIcon} alt={weatherTypeLabel} className="h-20 w-20" />
+                )}
               </div>
-              <p className="text-4xl font-semibold text-foreground tracking-tight">
-                {Math.round(currentWeather.current.temperature_2m)}°C
-              </p>
               <div className="grid grid-cols-2 gap-2 text-xs text-muted">
                 <div>
                   <p className="font-semibold text-foreground">Känns som</p>
