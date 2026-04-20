@@ -47,7 +47,7 @@ public class UserSyncMiddleware
                 // First cache check
                 if (!_cache.TryGetValue(cacheKey, out bool _))
                 {
-                    // Create a sempahore for this specific user
+                    // Create a semaphore for this specific user
                     var semaphore = _locks.GetOrAdd(sub, _ => new SemaphoreSlim(1, 1));
 
                     // Wait for our turn (only one request per user can enter)
@@ -59,7 +59,8 @@ public class UserSyncMiddleware
                         {
                             await SyncUserAsync(context, sub, email, context.RequestAborted);
                         }
-                    } catch(Exception ex)
+                    } 
+                    catch (Exception ex)
                     {
                         _logger.LogError(ex, "Failed to sync user {Sub}", sub);
                     }
@@ -154,26 +155,13 @@ public class UserSyncMiddleware
                     {
                         EvictionCallback = (key, value, reason, state) =>
                         {
-                            try
-                        {
-                            // Clean up semaphore when cache entry expires
+                            // Remove from dictionary 
                             if (key is string k && k.StartsWith(CacheKeyPrefix))
                             {
                                 var userSub = k.Replace(CacheKeyPrefix, "");
-                                if (_locks.TryRemove(userSub, out var semaphore))
-                                {
-                                    semaphore?.Dispose();
-                                    _logger.LogDebug(
-                                        "Cleaned up semaphore for {Sub}, Reason: {Reason}",
-                                        userSub,
-                                        reason);
-                                }
+                                _locks.TryRemove(userSub, out _);
+                                _logger.LogDebug("Removed semaphore for {Sub}", userSub);
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to cleanup semaphore for cache key {Key}", key);
-                        }
                         }
                     }
                 }
