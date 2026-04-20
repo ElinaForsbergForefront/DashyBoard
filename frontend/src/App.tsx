@@ -2,11 +2,9 @@ import { Outlet } from 'react-router-dom';
 import { Navigation } from './components/layout/Navigation';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useUserDataSync } from './hooks/useUserDataSync';
 
 function App() {
   const { isAuthenticated } = useAuth0();
-  const { isSynced, isLoading: isSyncLoading } = useUserDataSync();
 
   return (
     <AuthGuard>
@@ -17,12 +15,9 @@ function App() {
         >
           Skip to main content
         </a>
-        {isAuthenticated && isSynced && <Navigation />}
-        {isSyncLoading && (
-          <div className="p-4 text-center text-sm text-muted-foreground">Syncing your data...</div>
-        )}
+        {isAuthenticated && <Navigation />}
         <main id="main-content" className="flex-1 flex flex-col">
-          {isAuthenticated && isSynced && <Outlet />}
+          {isAuthenticated && <Outlet />}
         </main>
       </div>
     </AuthGuard>
