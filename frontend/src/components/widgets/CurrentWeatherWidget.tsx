@@ -223,7 +223,7 @@ export function CurrentWeatherWidget() {
                 )}
                 <div>
                   <p className="text-sm font-medium text-foreground-secondary">
-                    {weatherLocation || searchLocation}
+                    {(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}
                   </p>
                   {weatherTypeLabel && (
                     <p className="text-xs text-muted">{weatherTypeLabel}</p>
@@ -267,92 +267,31 @@ export function CurrentWeatherWidget() {
       </GlassCard>
 
       {isEditModalOpen && (
-        <WeatherEditModal
-          location={location}
-          onLocationSubmit={handleLocationSubmit}
-          onClose={() => setIsEditModalOpen(false)}
-          isLoading={isLoading}
-          feedback={errorMessage}
-        />
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={() => setIsEditModalOpen(false)}>
+          <GlassCard
+            className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-foreground">Weather</h4>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+              >
+                Stäng
+              </button>
+            </div>
+
+            <WeatherForm
+              onSuccess={(city) => {
+                handleLocationSubmit({ city });
+                setIsEditModalOpen(false);
+              }}
+            />
+          </GlassCard>
+        </div>
       )}
     </>
-  );
-}
-
-function WeatherEditModal({
-  location,
-  onLocationSubmit,
-  onClose,
-  isLoading,
-  feedback,
-}: {
-  location: WeatherLocationSelection;
-  onLocationSubmit: (location: WeatherLocationSelection) => void;
-  onClose: () => void;
-  isLoading: boolean;
-  feedback?: string;
-}) {
-  const [tempCity, setTempCity] = useState(location.city);
-
-  useEffect(() => {
-    setTempCity(location.city);
-  }, [location]);
-
-  const trimmedCity = tempCity.trim();
-  const {
-    data: modalGeocodeData,
-    isFetching: isValidatingCity,
-    error: modalGeocodeError,
-  } = useGeocodeAddressQuery(trimmedCity, { skip: trimmedCity.length < 2 });
-
-  const cityError =
-    !trimmedCity
-      ? 'Ange en stad'
-      : trimmedCity.length < 2
-        ? 'Skriv minst 2 bokstäver'
-        : modalGeocodeError
-          ? 'Staden kunde inte hittas'
-          : '';
-
-  const isSubmitDisabled = !trimmedCity || !!cityError || isValidatingCity || !modalGeocodeData;
-
-  const cityHelperText =
-    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som kan hittas av karttjänsten';
-
-  const handleSubmit = () => {
-    if (isSubmitDisabled) return;
-    onLocationSubmit({ city: trimmedCity });
-  };
-
-  return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <GlassCard
-        className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-foreground">Weather</h4>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
-          >
-            Stäng
-          </button>
-        </div>
-
-        <WeatherForm
-          city={tempCity}
-          onCityChange={setTempCity}
-          cityHelperText={cityHelperText}
-          cityError={cityError}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          feedback={feedback}
-          isSubmitDisabled={isSubmitDisabled}
-          buttonText="Spara"
-        />
-      </GlassCard>
-    </div>
   );
 }
