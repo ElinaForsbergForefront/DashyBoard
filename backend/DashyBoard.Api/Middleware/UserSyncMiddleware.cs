@@ -49,7 +49,7 @@ public class UserSyncMiddleware
                     var semaphore = _locks.GetOrAdd(sub, _ => new SemaphoreSlim(1, 1));
 
                     // Wait for our turn (only one request per user can enter)
-                    await semaphore.WaitAsync();
+                    await semaphore.WaitAsync(context.RequestAborted);
                     try
                     {
                         // Check cache again after getting lock
@@ -152,16 +152,26 @@ public class UserSyncMiddleware
                     {
                         EvictionCallback = (key, value, reason, state) =>
                         {
+                            try
+                        {
                             // Clean up semaphore when cache entry expires
                             if (key is string k && k.StartsWith(CacheKeyPrefix))
                             {
                                 var userSub = k.Replace(CacheKeyPrefix, "");
                                 if (_locks.TryRemove(userSub, out var semaphore))
                                 {
-                                    semaphore.Dispose();
-                                    _logger.LogDebug("Cleaned up semaphore for {Sub}", userSub);
+                                    semaphore?.Dispose();
+                                    _logger.LogDebug(
+                                        "Cleaned up semaphore for {Sub}, Reason: {Reason}",
+                                        userSub,
+                                        reason);
                                 }
                             }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to cleanup semaphore for cache key {Key}", key);
+                        }
                         }
                     }
                 }
