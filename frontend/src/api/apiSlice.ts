@@ -5,14 +5,25 @@ export const api = createApi({
   reducerPath: 'api',
   baseQuery,
   tagTypes: [
+    
     'User',
+   
     'Gold',
+   
     'WorldTime',
+   
     'Mirror',
+   
     'Reminder',
+   
     'Geocoding',
+   
     'Countries',
+   
     'Cities',
+    'Currency',
+    'Weather',
+  ,
     'Currency',
     'Traffic',
     'Weather',

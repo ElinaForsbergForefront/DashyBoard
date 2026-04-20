@@ -3,6 +3,7 @@
 @layer base {
   /* Smooth transitions for theme changes */
   * {
+  * {
     @apply transition-colors duration-300;
   }
 
