@@ -113,6 +113,9 @@ function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' |
   }
 
   const normalizedType = normalizeWeatherType(weatherType);
+  if (!normalizedType) {
+    return { label: '', icon: undefined };
+  }
   const mapped = WEATHER_TYPE_MAP[normalizedType];
   const themedIcon = mapped
     ? isDay === 0
@@ -130,7 +133,6 @@ function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' |
 
 export function CurrentWeatherWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [location, setLocation] = useState<WeatherLocationSelection>(readStoredWeatherLocation);
   const [searchLocation, setSearchLocation] = useState(() => {
     const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
     const parsed = readStoredWeatherLocation();
@@ -189,7 +191,6 @@ export function CurrentWeatherWidget() {
       : undefined;
 
   const handleLocationSubmit = (newLocation: WeatherLocationSelection) => {
-    setLocation(newLocation);
     localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(newLocation));
     setSearchLocation(buildSearchLocation(newLocation));
     setIsEditModalOpen(false);

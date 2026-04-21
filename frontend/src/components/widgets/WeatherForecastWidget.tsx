@@ -123,6 +123,9 @@ function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' |
   }
 
   const normalizedType = normalizeWeatherType(weatherType);
+  if (!normalizedType) {
+    return { label: '', icon: undefined };
+  }
   const mapped = WEATHER_TYPE_MAP[normalizedType];
   const themedIcon = mapped?.icon;
 
@@ -132,7 +135,7 @@ function getWeatherTypeDisplay(weatherType: string | undefined, theme: 'light' |
   };
 }
 
-function formatDayLabel(dateString: string, index: number): string {
+function formatDayLabel(dateString: string): string {
   const date = new Date(dateString);
   const today = new Date();
 
@@ -145,7 +148,6 @@ function formatDayLabel(dateString: string, index: number): string {
 
 export function WeatherForecastWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [location, setLocation] = useState<WeatherLocationSelection>(readStoredWeatherLocation);
   const [searchLocation, setSearchLocation] = useState(() => {
     const raw = localStorage.getItem(WEATHER_LOCATION_STORAGE_KEY);
     const parsed = readStoredWeatherLocation();
@@ -199,7 +201,6 @@ export function WeatherForecastWidget() {
 
   const handleLocationSubmit = (newLocationCity: string) => {
     const newLocation = { city: newLocationCity };
-    setLocation(newLocation);
     localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(newLocation));
     setSearchLocation(buildSearchLocation(newLocation));
     setIsEditModalOpen(false);
@@ -235,7 +236,7 @@ export function WeatherForecastWidget() {
                   const maxTemp = dailyWeather.daily.temperature_2m_max?.[index];
                   const minTemp = dailyWeather.daily.temperature_2m_min?.[index];
                   const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(weatherType, theme);
-                  const dayLabel = formatDayLabel(date, index);
+                  const dayLabel = formatDayLabel(date);
 
                   return (
                     <div
