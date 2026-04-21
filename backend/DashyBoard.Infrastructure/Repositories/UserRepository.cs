@@ -1,5 +1,6 @@
 ﻿using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.User.Dto;
+using DashyBoard.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DashyBoard.Infrastructure.Repositories
@@ -76,7 +77,7 @@ namespace DashyBoard.Infrastructure.Repositories
             return MapToDto(user);
         }
 
-        private static UserDto MapToDto(Domain.Models.User user) => new()
+        private static UserDto MapToDto(User user) => new()
         {
             Id = user.Id,
             Email = user.Email,
@@ -86,5 +87,23 @@ namespace DashyBoard.Infrastructure.Repositories
             Country = user.Country,
             City = user.City
         };
+
+        public async Task<UserDto> CreateOrUpdateUserBySubAsync(string sub, string email, string? username, string? displayName, string? country, string? city, CancellationToken ct)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthSub == sub, ct);
+
+            if (user != null)
+            {
+                user.Update(username, displayName, country, city);
+            }
+            else
+            {
+                user = new User(sub, email, username, displayName, country, city);
+                _context.Users.Add(user);
+            }
+
+            await _context.SaveChangesAsync(ct);
+            return MapToDto(user);
+        }
     }
 }

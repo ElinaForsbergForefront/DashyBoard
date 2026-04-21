@@ -1,9 +1,8 @@
-using DashyBoard.Api.Middleware;
 using DashyBoard.Api.Extensions;
 using DashyBoard.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using DashyBoard.Application;
 using System.Text.Json.Serialization;
+using DashyBoard.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +20,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
               "http://localhost:5173",
               "https://dashyboard.se",
-              "https://www.dashyboard.se")
+              "https://www.dashyboard.se",
+              "https://localhost:7298",
+              "http://localhost:7298")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -39,6 +40,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddApiSwagger(builder.Configuration);
 
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
@@ -62,9 +64,8 @@ app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseUserSync();
 app.UseAuthorization();
-
+app.UseUserSync();
 app.MapControllers();
 
 app.Run();
