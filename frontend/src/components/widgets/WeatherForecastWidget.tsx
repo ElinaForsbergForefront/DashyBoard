@@ -210,7 +210,7 @@ export function WeatherForecastWidget() {
       <GlassCard className="glass-widget w-full h-full">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-foreground-secondary">7-Day Forecast</h3>
+            <h3 className="text-sm font-medium text-foreground-secondary">Weather Forecast</h3>
             <button
               type="button"
               onClick={() => setIsEditModalOpen(true)}
@@ -302,7 +302,7 @@ function WeatherEditModal({ onClose, onLocationSubmit }: { onClose: () => void; 
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-foreground">7-Day Forecast</h4>
+          <h4 className="text-sm font-semibold text-foreground">Weather Forecast</h4>
           <button
             type="button"
             onClick={onClose}
