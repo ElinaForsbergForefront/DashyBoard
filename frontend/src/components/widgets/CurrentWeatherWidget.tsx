@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { GlassCard } from '../ui/glass-card';
 import { useTheme } from '../../context/ThemeContext';
 import { useGeocodeAddressQuery } from '../../api/endpoints/geocoding';
@@ -266,32 +267,45 @@ export function CurrentWeatherWidget() {
         </div>
       </GlassCard>
 
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={() => setIsEditModalOpen(false)}>
-          <GlassCard
-            className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-foreground">Weather</h4>
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
-              >
-                Stäng
-              </button>
-            </div>
-
-            <WeatherForm
-              onSuccess={(city) => {
-                handleLocationSubmit({ city });
-                setIsEditModalOpen(false);
-              }}
-            />
-          </GlassCard>
-        </div>
+      {isEditModalOpen && createPortal(
+        <CurrentWeatherEditModal
+          onClose={() => setIsEditModalOpen(false)}
+          onLocationSubmit={handleLocationSubmit}
+        />,
+        document.body,
       )}
     </>
+  );
+}
+
+function CurrentWeatherEditModal({ onClose, onLocationSubmit }: { onClose: () => void; onLocationSubmit: (location: WeatherLocationSelection) => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <GlassCard
+        className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h4 className="text-sm font-semibold text-foreground">Weather</h4>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+          >
+            Stäng
+          </button>
+        </div>
+
+        <WeatherForm
+          onSuccess={(city) => {
+            onLocationSubmit({ city });
+            onClose();
+          }}
+        />
+      </GlassCard>
+    </div>
   );
 }

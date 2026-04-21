@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useGeocodeAddressQuery } from '../../api/endpoints/geocoding';
 import { useGetDailyWeatherQuery } from '../../api/endpoints/weather';
 import { WeatherForm } from '../forms/WeatherForm';
+import { createPortal } from 'react-dom';
 import ClearDayLight from '../../../assets/weather/light/ClearDay.png';
 import ClearNightLight from '../../../assets/weather/light/ClearNight.png';
 import CloudyLight from '../../../assets/weather/light/Cloudy.png';
@@ -226,9 +227,9 @@ export function WeatherForecastWidget() {
           )}
 
           {!isLoading && dailyWeather && (
-              <div className="space-y-2">
-              <p className="text-xs text-muted text-xs">{(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}</p>
-              <div className="space-y-1 max-h-60 overflow-y-auto subtle-scrollbar pr-4">
+              <div className="flex flex-col space-y-2 flex-1">
+              <p className="text-xs text-muted text-xs flex-shrink-0">{(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}</p>
+              <div className="space-y-1 overflow-y-auto subtle-scrollbar pr-4 flex-1">
                 {dailyWeather.daily.time.map((date, index) => {
                   const weatherType = dailyWeather.daily.weather_code?.[index];
                   const maxTemp = dailyWeather.daily.temperature_2m_max?.[index];
@@ -279,32 +280,45 @@ export function WeatherForecastWidget() {
         </div>
       </GlassCard>
 
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={() => setIsEditModalOpen(false)}>
-          <GlassCard
-            className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-foreground">7-Day Forecast</h4>
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
-              >
-                Stäng
-              </button>
-            </div>
-
-            <WeatherForm
-              onSuccess={(city) => {
-                handleLocationSubmit(city);
-                setIsEditModalOpen(false);
-              }}
-            />
-          </GlassCard>
-        </div>
+      {isEditModalOpen && createPortal(
+        <WeatherEditModal
+          onClose={() => setIsEditModalOpen(false)}
+          onLocationSubmit={handleLocationSubmit}
+        />,
+        document.body,
       )}
     </>
+  );
+}
+
+function WeatherEditModal({ onClose, onLocationSubmit }: { onClose: () => void; onLocationSubmit: (city: string) => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <GlassCard
+        className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-4"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h4 className="text-sm font-semibold text-foreground">7-Day Forecast</h4>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+          >
+            Stäng
+          </button>
+        </div>
+
+        <WeatherForm
+          onSuccess={(city) => {
+            onLocationSubmit(city);
+            onClose();
+          }}
+        />
+      </GlassCard>
+    </div>
   );
 }

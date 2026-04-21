@@ -60,7 +60,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     name: 'Weather Forecast',
     description: 'Visar väderprognos för vald plats.',
     cols: 2,
-    rows: 2,
+    rows: 3,
     component: WeatherForecastWidget,
   },
   {
