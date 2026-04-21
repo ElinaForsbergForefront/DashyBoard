@@ -14,6 +14,8 @@ export const api = createApi({
     'Countries',
     'Cities',
     'Currency',
+    'Traffic'
   ],
+
   endpoints: () => ({}),
 });

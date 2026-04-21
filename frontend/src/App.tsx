@@ -2,16 +2,9 @@ import { Outlet } from 'react-router-dom';
 import { Navigation } from './components/layout/Navigation';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useGetCurrentUserQuery } from './api/endpoints/user';
-import { useProfileGuard } from './hooks/useProfileGuard';
-import { Form } from './components/layout/newUserForm/Form';
 
 function App() {
   const { isAuthenticated } = useAuth0();
-  const { data: user, isSuccess } = useGetCurrentUserQuery(undefined, { skip: !isAuthenticated });
-  const isProfileComplete = useProfileGuard(user);
-
-  const showProfileModal = isAuthenticated && isSuccess && !isProfileComplete;
 
   return (
     <AuthGuard>
@@ -22,11 +15,10 @@ function App() {
         >
           Skip to main content
         </a>
-        {isAuthenticated && isProfileComplete && <Navigation />}
+        {isAuthenticated && <Navigation />}
         <main id="main-content" className="flex-1 flex flex-col">
-          <Outlet />
+          {isAuthenticated && <Outlet />}
         </main>
-        {showProfileModal && <Form />}
       </div>
     </AuthGuard>
   );

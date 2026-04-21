@@ -160,7 +160,7 @@
   --glass-border: rgba(255, 255, 255, 0.75);
   --glass-highlight: rgba(255, 255, 255, 0.78);
   --glass-shimmer: rgba(255, 255, 255, 0.86);
-  --glass-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
+  --glass-shadow: none;
 }
 
 /* Base styles */
@@ -271,5 +271,21 @@
   .glass-strong {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
+  }
+
+
+  /* Subtle Scrollbar */
+  .subtle-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
   }
 }
