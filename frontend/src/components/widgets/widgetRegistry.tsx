@@ -4,6 +4,8 @@ import { ReminderForm } from '../forms/ReminderForm';
 import { ReminderWidget } from './ReminderWidget';
 import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
+import { TrafficForm } from '../forms/TrafficForm';
+import { TrafficWidget } from './TrafficWidget';
 import { SpotifyWidget } from './spotify/SpotifyWidget';
 
 /**
@@ -67,6 +69,15 @@ export const widgetRegistry: WidgetDefinition[] = [
     rows: 2,
     component: ClockWidget,
   },
+  {
+    id: 'traffic',
+    name: 'Traffic',
+    description: 'Shows departing public transport from a selected station.',
+    cols: 3,
+    rows: 3,
+    component: TrafficWidget, 
+    configForm: TrafficForm,
+  }
   {
     id: 'spotify',
     name: 'Spotify',

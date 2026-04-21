@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useGetRemindersQuery } from '../../api/endpoints/reminder';
 import type { ReminderDto } from '../../api/types/reminder';
 import { ReminderForm } from '../forms/ReminderForm';
@@ -74,7 +75,10 @@ export function ReminderWidget() {
         </div>
       </GlassCard>
 
-      {isEditModalOpen && <ReminderEditModal onClose={() => setIsEditModalOpen(false)} />}
+      {isEditModalOpen && createPortal(
+        <ReminderEditModal onClose={() => setIsEditModalOpen(false)} />,
+        document.body,
+      )}
     </>
   );
 }

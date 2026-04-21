@@ -86,7 +86,9 @@ public sealed class TrafficApiClient : ITrafficApiClient
             .Select(d =>
             {
                 var route = d.GetProperty("route");
-                var platform = d.GetProperty("realtime_platform");
+                var platformDesignation = d.TryGetProperty("realtime_platform", out var platform) && platform.ValueKind != JsonValueKind.Null
+                    ? platform.GetProperty("designation").GetString()!
+                    : string.Empty;
 
                 return new TimetableEntryDto(
                     d.GetProperty("scheduled").GetDateTime(),
@@ -96,7 +98,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
                     route.GetProperty("designation").GetString()!,
                     route.GetProperty("direction").GetString()!,
                     route.GetProperty("transport_mode").GetString()!,
-                    platform.GetProperty("designation").GetString()!
+                    platformDesignation
                 );
             })
             .ToList() ?? [];
@@ -105,14 +107,16 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
     public async Task<IReadOnlyList<TimetableEntryDto>> GetDeparturesSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
     {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}?key={_apiKey}", ct);
+        var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}/{dateTime}?key={_apiKey}", ct);
         return doc?.RootElement
             .GetProperty("departures")
             .EnumerateArray()
             .Select(d =>
             {
                 var route = d.GetProperty("route");
-                var platform = d.GetProperty("realtime_platform");
+                var platformDesignation = d.TryGetProperty("realtime_platform", out var platform) && platform.ValueKind != JsonValueKind.Null
+                    ? platform.GetProperty("designation").GetString()!
+                    : string.Empty;
 
                 return new TimetableEntryDto(
                     d.GetProperty("scheduled").GetDateTime(),
@@ -122,7 +126,7 @@ public sealed class TrafficApiClient : ITrafficApiClient
                     route.GetProperty("designation").GetString()!,
                     route.GetProperty("direction").GetString()!,
                     route.GetProperty("transport_mode").GetString()!,
-                    platform.GetProperty("designation").GetString()!
+                    platformDesignation
                 );
             })
             .ToList() ?? [];
