@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
               "https://dashyboard.se",
               "https://www.dashyboard.se",
               "https://localhost:7298",
-              "http://localhost:7298")
+              "http://localhost:7298",
               "https://www.auth.dashyboard.se",
               "https://auth.dashyboard.se")
               .AllowAnyHeader()
