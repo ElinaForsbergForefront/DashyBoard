@@ -77,7 +77,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     rows: 3,
     component: TrafficWidget, 
     configForm: TrafficForm,
-  }
+  },
   {
     id: 'spotify',
     name: 'Spotify',
