@@ -62,6 +62,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseSecurityHeaders();
+
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
