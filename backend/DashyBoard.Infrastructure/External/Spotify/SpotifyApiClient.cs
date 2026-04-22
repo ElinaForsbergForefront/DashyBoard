@@ -1,5 +1,6 @@
 ﻿using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.Spotify.Dto;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -98,17 +99,49 @@ namespace DashyBoard.Infrastructure.Clients
                 return connection.AccessToken;
             }
 
-            var refreshed = await _spotifyTokenClient.RefreshAsync(connection.RefreshToken, cancellationToken);
+            // Retry up to 3 times in case of concurrent updates
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                try
+                {
+                    // Re-fetch from DB to get latest state
+                    var latestConnection = await _spotifyConnectionRepository
+                        .GetByUserIdAsync(connection.UserId, cancellationToken);
 
-            connection.UpdateTokens(
-                refreshed.AccessToken,
-                refreshed.RefreshToken,
-                DateTime.UtcNow.AddSeconds(refreshed.ExpiresIn));
+                    if (latestConnection is null)
+                    {
+                        throw new InvalidOperationException("Spotify connection not found");
+                    }
 
-            _spotifyConnectionRepository.Update(connection);
-            await _spotifyConnectionRepository.SaveChangesAsync(cancellationToken);
+                    // Check if another request already refreshed it
+                    if (latestConnection.ExpiresAtUtc > threshold)
+                    {
+                        return latestConnection.AccessToken;
+                    }
 
-            return connection.AccessToken;
+                    var refreshed = await _spotifyTokenClient.RefreshAsync(
+                        latestConnection.RefreshToken, 
+                        cancellationToken);
+
+                    latestConnection.UpdateTokens(
+                        refreshed.AccessToken,
+                        refreshed.RefreshToken,
+                        DateTime.UtcNow.AddSeconds(refreshed.ExpiresIn));
+
+                    _spotifyConnectionRepository.Update(latestConnection);
+                    await _spotifyConnectionRepository.SaveChangesAsync(cancellationToken);
+
+                    return latestConnection.AccessToken;
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    // Another request updated the token - retry with fresh data
+                    if (attempt == 2) throw; // Last attempt failed
+                    await Task.Delay(50 * (attempt + 1), cancellationToken); // Exponential backoff
+                }
+            }
+
+            throw new InvalidOperationException("Failed to refresh Spotify token after retries");
         }
 
         private sealed class SpotifyNowPlayingResponse

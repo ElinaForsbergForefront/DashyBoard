@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel.DataAnnotations;
 
 namespace DashyBoard.Domain.Models
 {
@@ -8,19 +9,24 @@ namespace DashyBoard.Domain.Models
     {
         public Guid Id { get; private set; }
         public Guid UserId { get; private set; }
-
-        public string AccessToken { get; private set; } = string.Empty;
-        public string RefreshToken { get; private set; } = string.Empty;
+        public string AccessToken { get; private set; }
+        public string RefreshToken { get; private set; }
         public DateTime ExpiresAtUtc { get; private set; }
-
         public DateTime CreatedAtUtc { get; private set; }
         public DateTime UpdatedAtUtc { get; private set; }
-
+        
+        [Timestamp] // Concurrency token
+        public byte[]? RowVersion { get; private set; }
+        
         public User User { get; private set; } = null!;
 
-        private SpotifyConnection() { }
+        private SpotifyConnection() { } // EF Core
 
-        public SpotifyConnection(Guid userId, string accessToken, string refreshToken, DateTime expiresAtUtc)
+        public SpotifyConnection(
+            Guid userId,
+            string accessToken,
+            string refreshToken,
+            DateTime expiresAtUtc)
         {
             Id = Guid.NewGuid();
             UserId = userId;
@@ -31,17 +37,12 @@ namespace DashyBoard.Domain.Models
             UpdatedAtUtc = DateTime.UtcNow;
         }
 
-        public void UpdateTokens(string accessToken, string? refreshToken, DateTime expiresAtUtc)
+        public void UpdateTokens(string accessToken, string refreshToken, DateTime expiresAtUtc)
         {
             AccessToken = accessToken;
-
-            if (!string.IsNullOrWhiteSpace(refreshToken))
-            {
-                RefreshToken = refreshToken;
-            }
-
+            RefreshToken = refreshToken;
             ExpiresAtUtc = expiresAtUtc;
-            UpdatedAtUtc = DateTime.UtcNow;
+            UpdatedAtUtc = DateTime.UtcNow; // Uppdatera tidsstämpel
         }
     }
 }
