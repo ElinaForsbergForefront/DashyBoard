@@ -5,6 +5,7 @@ using DashyBoard.Infrastructure.Configuration;
 using DashyBoard.Infrastructure.External;
 using DashyBoard.Infrastructure.External.Location;
 using DashyBoard.Infrastructure.Repositories;
+using DashyBoard.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -125,6 +126,9 @@ public static class DependencyInjection
 			var client = sp.GetRequiredService<IMongoClient>();
 			return client.GetDatabase(settings.DatabaseName);
 		});
+
+		services.AddMemoryCache();
+		services.AddScoped<IOAuthStateCache, OAuthStateCache>();
 
 		return services;
 	}

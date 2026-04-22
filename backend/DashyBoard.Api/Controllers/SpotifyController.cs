@@ -24,19 +24,22 @@ namespace DashyBoard.Api.Controllers
         private readonly ISpotifyConnectionRepository _spotifyConnectionRepository;
         private readonly IMediator _mediator;
         private readonly DashyBoardDbContext _dbContext;
+        private readonly IOAuthStateCache _oauthStateCache;
 
         public SpotifyController(
             IOptions<SpotifyOptions> spotifyOptions,
             ISpotifyTokenClient spotifyTokenClient,
             ISpotifyConnectionRepository spotifyConnectionRepository,
             IMediator mediator,
-            DashyBoardDbContext dbContext)
+            DashyBoardDbContext dbContext,
+            IOAuthStateCache oauthStateCache)
         {
             _spotifyOptions = spotifyOptions;
             _spotifyTokenClient = spotifyTokenClient;
             _spotifyConnectionRepository = spotifyConnectionRepository;
             _mediator = mediator;
             _dbContext = dbContext;
+            _oauthStateCache = oauthStateCache;
         }
 
 
@@ -49,8 +52,12 @@ namespace DashyBoard.Api.Controllers
                 return Unauthorized();
             }
 
-            var nonce = Guid.NewGuid().ToString("N");
-            var state = $"{userId}:{nonce}";
+            // Generate cryptographically secure state
+            var state = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+                .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+            // Store state in cache with TTL (5-10 minutes)
+            await _oauthStateCache.SetAsync(state, userId.Value, TimeSpan.FromMinutes(10), cancellationToken);
 
             var scope = "user-read-currently-playing user-read-playback-state";
 
@@ -88,16 +95,17 @@ namespace DashyBoard.Api.Controllers
                 return BadRequest("Missing Spotify state.");
             }
 
-            var stateParts = state.Split(':', 2);
-            if (stateParts.Length != 2 || !Guid.TryParse(stateParts[0], out var userId))
+            // Validate state from cache (prevents CSRF and replay attacks)
+            var userId = await _oauthStateCache.GetAndRemoveAsync(state, cancellationToken);
+            if (userId is null)
             {
-                return BadRequest("Invalid Spotify OAuth state.");
+                return BadRequest("Invalid or expired OAuth state.");
             }
 
             var tokenResponse = await _spotifyTokenClient.ExchangeCodeAsync(code, cancellationToken);
             var expiresAtUtc = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
 
-            var existingConnection = await _spotifyConnectionRepository.GetByUserIdAsync(userId, cancellationToken);
+            var existingConnection = await _spotifyConnectionRepository.GetByUserIdAsync(userId.Value, cancellationToken);
 
             if (existingConnection is null)
             {
@@ -107,7 +115,7 @@ namespace DashyBoard.Api.Controllers
                 }
 
                 var connection = new SpotifyConnection(
-                    userId,
+                    userId.Value,
                     tokenResponse.AccessToken,
                     tokenResponse.RefreshToken,
                     expiresAtUtc);
