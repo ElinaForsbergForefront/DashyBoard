@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
+using DashyBoard.Infrastructure.Services;
 using MongoDB.Driver;
 
 
@@ -83,6 +83,7 @@ public static class DependencyInjection
 
         // Users
 		services.AddScoped<IUserRepository, UserRepository>();
+		services.AddScoped<IUserSyncService, UserSyncService>();
 
 		// Friends
 		services.AddScoped<IFriendRepository, FriendRepository>();

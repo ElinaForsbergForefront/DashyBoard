@@ -11,6 +11,6 @@ namespace DashyBoard.Application.Interfaces
         Task DeleteUserByIdAsync(Guid userId, CancellationToken ct);
         Task<UserDto> UpdateUserBySubAsync(string sub, string? username, string? displayName, string? country, string? city, CancellationToken ct);
         Task<UserDto> UpdateUserByIdAsync(Guid id, string? username, string? displayName, string? country, string? city, CancellationToken ct);
-
+        Task<UserDto> CreateOrUpdateUserBySubAsync(string sub, string email, string? username, string? displayName, string? country, string? city, CancellationToken ct);
     }
 }
