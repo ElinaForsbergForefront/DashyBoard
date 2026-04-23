@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye } from 'lucide-react';
 import { DesktopNav } from './navigation/DesktopNav';
 import { Logo } from './navigation/Logo';
 import { MenuButton } from './navigation/MenuButton';
