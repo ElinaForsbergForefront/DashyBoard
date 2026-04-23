@@ -40,7 +40,7 @@ export const Navigation = ({ disableInteractions = false }: NavigationProps) => 
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-md border border-border text-muted hover:text-foreground hover:bg-overlay cursor-pointer transition-all"
                 aria-label="Preview mirror"
               >
-                <Eye size={14} />
+               
                 Preview
               </button>
             )}
