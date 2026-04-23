@@ -30,7 +30,7 @@ export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
   const isSubmitDisabled = !trimmedCity || !!cityError || isValidatingCity || !geocodeData;
 
   const cityHelperText =
-    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som kan hittas av karttjänsten';
+    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som existerar';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
