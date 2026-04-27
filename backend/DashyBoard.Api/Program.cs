@@ -56,9 +56,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseSecurityHeaders();
-
+// CORS måste komma FÖRE SecurityHeaders
 app.UseCors("AllowFrontend");
+app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
