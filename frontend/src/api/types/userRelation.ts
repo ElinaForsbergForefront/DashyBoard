@@ -4,7 +4,7 @@ export interface UserRelationDto {
   user1Id: string;
   user2Id: string;
 
-  username: string;        // den andra personen (det du visar i UI)
+  username: string;        // den andra personen (det som visas i UI)
   displayName?: string;
 
   status: 'Pending' | 'Accepted' | 'Blocked';
