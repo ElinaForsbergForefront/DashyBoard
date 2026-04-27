@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace DashyBoard.Api.Middleware;
 
@@ -8,10 +9,12 @@ namespace DashyBoard.Api.Middleware;
 public class SecurityHeadersMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly IConfiguration _configuration;
 
-    public SecurityHeadersMiddleware(RequestDelegate next)
+    public SecurityHeadersMiddleware(RequestDelegate next, IConfiguration configuration)
     {
         _next = next;
+        _configuration = configuration;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -19,15 +22,18 @@ public class SecurityHeadersMiddleware
         // Don't add security headers to OPTIONS requests (CORS preflight)
         if (context.Request.Method != HttpMethods.Options)
         {
+            var allowedOrigins = _configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+            var connectSrc = $"'self' {string.Join(" ", allowedOrigins)}";
+
             // Content Security Policy - Prevents XSS attacks
             context.Response.Headers.Append("Content-Security-Policy", 
-                "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-                "style-src 'self' 'unsafe-inline'; " +
-                "img-src 'self' data: https:; " +
-                "font-src 'self' data:; " +
-                "connect-src 'self' http://localhost:5173 https://dashyboard.se https://auth.dashyboard.se https://www.dashyboard.se https://www.auth.dashyboard.se; " +
-                "frame-ancestors 'none';");
+                $"default-src 'self'; " +
+                $"script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                $"style-src 'self' 'unsafe-inline'; " +
+                $"img-src 'self' data: https:; " +
+                $"font-src 'self' data:; " +
+                $"connect-src {connectSrc}; " +
+                $"frame-ancestors 'none';");
 
             // Strict Transport Security - Enforces HTTPS (only in production)
             if (!context.Request.Host.Host.Contains("localhost"))
