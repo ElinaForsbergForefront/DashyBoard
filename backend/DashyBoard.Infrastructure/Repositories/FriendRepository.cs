@@ -151,10 +151,48 @@ namespace DashyBoard.Infrastructure.Repositories
 
         // ========== QUERIES: UserRelationship ==========
 
+        public async Task<IReadOnlyList<UserRelationDto>> GetBlockedUsersAsync(Guid currentUserId, CancellationToken ct)
+        {
+            var blocked = await _db.UserRelationships
+                .Where(r => r.Status == UserRelationshipStatus.Blocked 
+                            && r.ActionByUserId == currentUserId  // Endast de JAG har blockerat
+                            && (r.User1Id == currentUserId || r.User2Id == currentUserId))
+                .Select(r => new
+                {
+                    Relationship = r,
+                    OtherUserId = r.User1Id == currentUserId ? r.User2Id : r.User1Id
+                })
+                .Join(_db.Users,
+                    r => r.OtherUserId,
+                    u => u.Id,
+                    (r, u) => new UserRelationDto
+                    {
+                        UserId = u.Id,
+                        Username = u.Username,
+                        DisplayName = u.DisplayName,
+                        Status = r.Relationship.Status,
+                        IsFriend = false,
+                        IsPending = false,
+                        IsRequestedByCurrentUser = false,
+                        IsIncomingRequest = false,
+                        IsBlocked = true,
+                        CanSendRequest = false,
+                        CanAccept = false,
+                        CanDecline = false,
+                        CanRemoveFriend = false,
+                        CanBlock = false,
+                        CanUnblock = true
+                    })
+                .ToListAsync(ct);
+
+            return blocked;
+        }
+
         public async Task<IReadOnlyList<UserRelationDto>> GetFriendListAsync(Guid currentUserId, CancellationToken ct)
         {
             var friends = await _db.UserRelationships
-                .Where(r => (r.User1Id == currentUserId || r.User2Id == currentUserId) && r.Status == UserRelationshipStatus.Accepted)
+                .Where(r => (r.User1Id == currentUserId || r.User2Id == currentUserId) 
+                            && r.Status == UserRelationshipStatus.Accepted)
                 .Select(r => new
                 {
                     Relationship = r,
@@ -189,9 +227,9 @@ namespace DashyBoard.Infrastructure.Repositories
         public async Task<IReadOnlyList<UserRelationDto>> GetFriendRequestsAsync(Guid currentUserId, CancellationToken ct)
         {
             var requests = await _db.UserRelationships
-                .Where(r => r.Status == UserRelationshipStatus.Pending && 
-                           r.RequestedByUserId != currentUserId &&
-                           (r.User1Id == currentUserId || r.User2Id == currentUserId))
+                .Where(r => r.Status == UserRelationshipStatus.Pending 
+                           && r.RequestedByUserId != currentUserId
+                           && (r.User1Id == currentUserId || r.User2Id == currentUserId))
                 .Select(r => new
                 {
                     Relationship = r,
@@ -223,41 +261,6 @@ namespace DashyBoard.Infrastructure.Repositories
             return requests;
         }
 
-        public async Task<IReadOnlyList<UserRelationDto>> GetBlockedUsersAsync(Guid currentUserId, CancellationToken ct)
-        {
-            var blocked = await _db.UserRelationships
-                .Where(r => (r.User1Id == currentUserId || r.User2Id == currentUserId) && r.Status == UserRelationshipStatus.Blocked)
-                .Select(r => new
-                {
-                    Relationship = r,
-                    OtherUserId = r.User1Id == currentUserId ? r.User2Id : r.User1Id
-                })
-                .Join(_db.Users,
-                    r => r.OtherUserId,
-                    u => u.Id,
-                    (r, u) => new UserRelationDto
-                    {
-                        UserId = u.Id,
-                        Username = u.Username,
-                        DisplayName = u.DisplayName,
-                        Status = r.Relationship.Status,
-                        IsFriend = false,
-                        IsPending = false,
-                        IsRequestedByCurrentUser = false,
-                        IsIncomingRequest = false,
-                        IsBlocked = true,
-                        CanSendRequest = false,
-                        CanAccept = false,
-                        CanDecline = false,
-                        CanRemoveFriend = false,
-                        CanBlock = false,
-                        CanUnblock = true
-                    })
-                .ToListAsync(ct);
-
-            return blocked;
-        }
-
         public async Task<UserRelationDto?> GetFriendAsync(Guid currentUserId, string otherUsername, CancellationToken ct)
         {
             var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == otherUsername, ct);
@@ -286,6 +289,13 @@ namespace DashyBoard.Infrastructure.Repositories
                     CanBlock = false,
                     CanUnblock = false
                 };
+            }
+
+            // Om den andra användaren har blockerat mig, returnera null (jag kan inte se dem)
+            if (relationship.Status == UserRelationshipStatus.Blocked 
+                && relationship.ActionByUserId != currentUserId)
+            {
+                return null;
             }
 
             var isRequestedByCurrentUser = relationship.RequestedByUserId == currentUserId;
