@@ -25,6 +25,7 @@ RUN npm install -g serve
 
 # Copy built files from build stage
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/serve.json ./serve.json
 
 # Expose port
 EXPOSE 5173
