@@ -16,6 +16,10 @@ export const api = createApi({
     'Currency',
     'Traffic',
     'Weather',
+    'FriendRequests',
+    'Friends',
+    'Blocked',
+    'Pokes',
   ],
   endpoints: () => ({}),
 });
