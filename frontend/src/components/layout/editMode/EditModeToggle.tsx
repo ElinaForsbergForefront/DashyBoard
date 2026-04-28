@@ -1,4 +1,4 @@
-import { Eye, LayoutGrid, Pencil } from 'lucide-react';
+import { LayoutGrid, Pencil } from 'lucide-react';
 import { useEditModeContext } from '../../../context/EditModeContext';
 
 interface EditModeToggleProps {
@@ -18,7 +18,6 @@ export function EditModeToggle({
   onEnterEditMode,
   onSave,
   onDiscard,
-  onPreview,
 }: EditModeToggleProps) {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode, toggleSidebar } =
     useEditModeContext();
@@ -56,16 +55,6 @@ export function EditModeToggle({
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
-      {onPreview && (
-        <button
-          onClick={onPreview}
-          disabled={disabled}
-          aria-label="Preview mirror"
-          className="w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary hover:shadow-[0_0_0_3px_rgba(51,153,255,0.15)] transition-all duration-200 flex items-center justify-center cursor-pointer group disabled:opacity-40 disabled:pointer-events-none"
-        >
-          <Eye size={18} className="group-hover:scale-110 transition-transform duration-200" />
-        </button>
-      )}
       <button
         onClick={onEnterEditMode ?? enterEditMode}
         disabled={disabled}
