@@ -3,6 +3,7 @@ import App from './src/App';
 import { StyleGuide } from './src/pages/StyleGuide';
 import { Mirrors } from './src/pages/Mirrors';
 import { Widgets } from './src/pages/Widgets';
+import { Friends } from './src/pages/Friends';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
       {
         path: '/widgets',
         element: <Widgets />,
+      },
+      {
+        path: '/friends',
+        element: <Friends />,
       },
       {
         path: '/style-guide',
