@@ -3,6 +3,7 @@ import App from './src/App';
 import { StyleGuide } from './src/pages/StyleGuide';
 import { Mirrors } from './src/pages/Mirrors';
 import { Widgets } from './src/pages/Widgets';
+import { Preview } from './src/pages/Preview';
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
       {
         path: '/style-guide',
         element: <StyleGuide />,
+      },
+      {
+        path: '/preview/:mirrorId',
+        element: <Preview />,
       },
     ],
   },
