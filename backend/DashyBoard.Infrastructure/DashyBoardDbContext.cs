@@ -127,22 +127,23 @@ namespace DashyBoard.Infrastructure
 
             modelBuilder.Entity<SpotifyConnection>(entity =>
             {
-                entity.HasKey(sc => sc.Id);
-
-                entity.Property(sc => sc.UserId).IsRequired();
-
-                entity.Property(sc => sc.AccessToken).IsRequired();
-                entity.Property(sc => sc.RefreshToken).IsRequired();
-                entity.Property(sc => sc.ExpiresAtUtc).IsRequired();
-
-                entity.Property(sc => sc.CreatedAtUtc).IsRequired();
-                entity.Property(sc => sc.UpdatedAtUtc).IsRequired();
-
-                entity.HasIndex(sc => sc.UserId).IsUnique();
-
-                entity.HasOne(sc => sc.User)
-                      .WithOne(u => u.SpotifyConnection)
-                      .HasForeignKey<SpotifyConnection>(sc => sc.UserId)
+                entity.HasKey(e => e.Id);
+                
+                entity.HasIndex(e => e.UserId).IsUnique();
+                
+                entity.Property(e => e.AccessToken).IsRequired();
+                entity.Property(e => e.RefreshToken).IsRequired();
+                entity.Property(e => e.ExpiresAtUtc).IsRequired();
+                entity.Property(e => e.CreatedAtUtc).IsRequired();
+                entity.Property(e => e.UpdatedAtUtc).IsRequired();
+                
+                // PostgreSQL concurrency token - EF Core hanterar xmin automatiskt
+                entity.Property(e => e.RowVersion)
+                    .IsRowVersion();
+                
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }

@@ -9,6 +9,7 @@ import { TrafficWidget } from './TrafficWidget';
 import { WeatherForm } from '../forms/WeatherForm';
 import { CurrentWeatherWidget} from './CurrentWeatherWidget';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
+import { SpotifyWidget } from './spotify/SpotifyWidget';
 
 
 /**
@@ -89,6 +90,15 @@ export const widgetRegistry: WidgetDefinition[] = [
     rows: 3,
     component: TrafficWidget, 
     configForm: TrafficForm,
+  },
+  {
+    id: 'spotify',
+    name: 'Spotify',
+    description: 'Visar vad du lyssnar på just nu.',
+    cols: 2,
+    rows: 2,
+    component: SpotifyWidget,
+    isPremium: true,
   }
 ];
 
