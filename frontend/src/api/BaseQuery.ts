@@ -11,8 +11,18 @@ export const injectGetAccessTokenSilently = (fn: GetAccessTokenSilently): void =
   _getAccessTokenSilently = fn;
 };
 
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+};
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
+  prepareHeaders: (headers) => {
+    headers.set('Content-Type', 'application/json');
+    headers.set('Accept', 'application/json');
+    return headers;
+  },
 });
 
 export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
@@ -29,8 +39,8 @@ export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
 
     const modifiedArgs: FetchArgs =
       typeof args === 'string'
-        ? { url: args, headers: { Authorization: `Bearer ${token}` } }
-        : { ...args, headers: { ...args.headers, Authorization: `Bearer ${token}` } };
+        ? { url: args, headers: { ...defaultHeaders, Authorization: `Bearer ${token}` } }
+        : { ...args, headers: { ...defaultHeaders, ...args.headers, Authorization: `Bearer ${token}` } };
 
     return rawBaseQuery(modifiedArgs, api, extraOptions);
   }
