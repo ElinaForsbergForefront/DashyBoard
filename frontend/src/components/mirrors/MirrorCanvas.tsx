@@ -96,7 +96,7 @@ export const MirrorCanvas = ({
         <div
           key={widget.id}
           data-widget-id={widget.id}
-          className={`absolute group touch-none ${isEditMode && !previewMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`absolute group touch-none select-none ${isEditMode && !previewMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
           style={{
             left: position.x,
             top: position.y,
