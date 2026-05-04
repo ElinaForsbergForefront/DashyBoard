@@ -4,6 +4,7 @@ import { TrafficForm } from '../forms/TrafficForm';
 import { GlassCard } from '../ui/glass-card';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useEditModeContext } from '../../context/EditModeContext';
 
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
 
@@ -27,7 +28,8 @@ import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIco
 
 export function TrafficWidget() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    
+    const { isEditMode } = useEditModeContext();
+
     const [siteId, setSiteId] = useState<string | null>(null);
     const [stationName, setStationName] = useState<string | null>(null);
     const [dateTime, setDateTime] = useState<string | null>(null);
@@ -81,13 +83,15 @@ export function TrafficWidget() {
                             <span className="rounded-full bg-overlay px-2 py-0.5 text-xs text-muted">
                                 {visibleDepartures.length}
                             </span>
-                            <button
-                                type="button"
-                                onClick={() => setIsEditModalOpen(true)}
-                                className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
-                            >
-                                Edit
-                            </button>
+                            {isEditMode && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
+                                >
+                                    Edit
+                                </button>
+                            )}
                         </div>
                     </div>
 

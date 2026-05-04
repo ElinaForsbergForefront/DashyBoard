@@ -1,7 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { WidgetSidebar } from '../components/layout/dashboard/WidgetSidebar';
 import { EditModeToggle } from '../components/layout/editMode/EditModeToggle';
 import { EditModeProvider, useEditModeContext } from '../context/EditModeContext';
+import { useActiveMirror } from '../context/ActiveMirrorContext';
 import { MirrorSubNav } from '../components/layout/navigation/sub-navigation/MirrorSubNav';
 import { CreateMirrorModal } from '../components/mirrors/CreateMirrorModal';
 import { EditMirrorModal } from '../components/mirrors/EditMirrorModal';
@@ -20,7 +22,16 @@ import { findFirstFreeCell } from '../utils/widgetPlacement';
 
 function MirrorContent() {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode } = useEditModeContext();
-  const [activeMirrorId, setActiveMirrorId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { activeMirrorId, setActiveMirrorId } = useActiveMirror();
+
+  // Initialise from navigation state (e.g. when returning from preview)
+  useEffect(() => {
+    const stateId = (location.state as { activeMirrorId?: string } | null)?.activeMirrorId;
+    if (stateId) setActiveMirrorId(stateId);
+
+  }, []);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingMirror, setEditingMirror] = useState<MirrorDto | null>(null);
   const [deletingMirror, setDeletingMirror] = useState<MirrorDto | null>(null);
@@ -51,6 +62,17 @@ function MirrorContent() {
       setLocalMirror(structuredClone(activeMirror));
     }
   }, [isEditMode, activeMirror]);
+
+  // When navigated back from preview with enterEditMode flag, auto-enter edit mode.
+  useEffect(() => {
+    const state = location.state as { enterEditMode?: boolean } | null;
+    if (state?.enterEditMode && activeMirror && !isEditMode) {
+      handleEnterEditMode();
+      // Clear the state so a refresh doesn't re-trigger.
+      navigate('/', { replace: true, state: { activeMirrorId } });
+    }
+
+  }, [activeMirror]);
 
   const handleEnterEditMode = () => {
     if (!activeMirror) return;
@@ -202,6 +224,7 @@ function MirrorContent() {
           onEnterEditMode={handleEnterEditMode}
           onSave={handleSave}
           onDiscard={handleDiscard}
+          onPreview={activeMirrorId ? () => navigate(`/preview/${activeMirrorId}`) : undefined}
         />
       </div>
     </div>

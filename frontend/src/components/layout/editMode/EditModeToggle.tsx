@@ -9,6 +9,8 @@ interface EditModeToggleProps {
   onSave?: () => void | Promise<void>;
   /** Called instead of context discardEditMode when provided */
   onDiscard?: () => void;
+  /** When provided, shows a Preview button in view mode */
+  onPreview?: () => void;
 }
 
 export function EditModeToggle({
@@ -52,13 +54,15 @@ export function EditModeToggle({
   }
 
   return (
-    <button
-      onClick={onEnterEditMode ?? enterEditMode}
-      disabled={disabled}
-      aria-label="Enter edit mode"
-      className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary hover:shadow-[0_0_0_3px_rgba(51,153,255,0.15)] transition-all duration-200 flex items-center justify-center cursor-pointer group disabled:opacity-40 disabled:pointer-events-none"
-    >
-      <Pencil size={18} className="group-hover:rotate-12 transition-transform duration-200" />
-    </button>
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+      <button
+        onClick={onEnterEditMode ?? enterEditMode}
+        disabled={disabled}
+        aria-label="Enter edit mode"
+        className="w-12 h-12 rounded-full bg-surface border border-border text-muted hover:text-foreground hover:border-primary hover:shadow-[0_0_0_3px_rgba(51,153,255,0.15)] transition-all duration-200 flex items-center justify-center cursor-pointer group disabled:opacity-40 disabled:pointer-events-none"
+      >
+        <Pencil size={18} className="group-hover:rotate-12 transition-transform duration-200" />
+      </button>
+    </div>
   );
 }
