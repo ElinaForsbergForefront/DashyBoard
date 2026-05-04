@@ -37,10 +37,16 @@ namespace DashyBoard.Domain.Models
             UpdatedAtUtc = DateTime.UtcNow;
         }
 
-        public void UpdateTokens(string accessToken, string refreshToken, DateTime expiresAtUtc)
+        public void UpdateTokens(string accessToken, string? refreshToken, DateTime expiresAtUtc)
         {
             AccessToken = accessToken;
-            RefreshToken = refreshToken;
+            
+            // Uppdatera endast refresh token om en ny tillhandahålls
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+            {
+                RefreshToken = refreshToken;
+            }
+            
             ExpiresAtUtc = expiresAtUtc;
             UpdatedAtUtc = DateTime.UtcNow; // Uppdatera tidsstämpel
         }
