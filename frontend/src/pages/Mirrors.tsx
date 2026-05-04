@@ -19,6 +19,7 @@ import type { WidgetType } from '../components/layout/dashboard/widgetSidebar/ty
 import type { MirrorDto } from '../api/types/mirror';
 import { widgetRegistry } from '../components/widgets/widgetRegistry';
 import { findFirstFreeCell } from '../utils/widgetPlacement';
+import { useGetCurrentUserQuery } from '../api/endpoints/user';
 
 function MirrorContent() {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode } = useEditModeContext();
@@ -42,6 +43,9 @@ function MirrorContent() {
   const snapshotRef = useRef<MirrorDto | null>(null);
 
   const { data: mirrors = [], refetch: refetchMirrors } = useGetMyMirrorsQuery();
+  const { data: currentUser } = useGetCurrentUserQuery();
+  const mirrorLimit = currentUser?.isPremium ? 10 : 3;
+  const canAddMirror = mirrors.length < mirrorLimit;
   const [addWidget] = useAddWidgetMutation();
   const [moveWidget] = useMoveWidgetMutation();
   const [removeWidget] = useRemoveWidgetMutation();
@@ -196,6 +200,7 @@ function MirrorContent() {
         onAddMirror={() => setShowCreateModal(true)}
         onEditMirror={setEditingMirror}
         onDeleteMirror={setDeletingMirror}
+        canAddMirror={canAddMirror}
       />
 
       {showCreateModal && <CreateMirrorModal onClose={() => setShowCreateModal(false)} />}
