@@ -328,6 +328,7 @@
   /* Subtle Scrollbar */
   .subtle-scrollbar::-webkit-scrollbar {
     width: 4px;
+    height: 4px;  
   }
   .subtle-scrollbar::-webkit-scrollbar-track {
       background: transparent;

@@ -20,7 +20,7 @@ export const MirrorSubNav = ({
   const { data: mirrors = [] } = useGetMyMirrorsQuery();
 
   return (
-    <div className="border-b border-border bg-surface px-4 py-2 flex items-center gap-2 overflow-x-auto">
+    <div className="border-b border-border bg-surface px-4 py-2 flex items-center gap-2 overflow-x-auto subtle-scrollbar">
       {mirrors.map((mirror) => (
         <div key={mirror.id} className="group relative flex items-center">
           <button
