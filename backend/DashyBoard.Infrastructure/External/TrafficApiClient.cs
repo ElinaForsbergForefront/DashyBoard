@@ -74,6 +74,8 @@ public sealed class TrafficApiClient : ITrafficApiClient
                         modes
                     ));
             })
+            .GroupBy(s => s.Id)
+            .Select(g => g.Last())
             .ToList() ?? [];
     }
 
