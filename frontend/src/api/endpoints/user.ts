@@ -14,6 +14,9 @@ const userApi = api.injectEndpoints({
     checkUsername: builder.query<boolean, string>({
       query: (username) => `/user/check-username?username=${encodeURIComponent(username)}`,
     }),
+    searchUsers: builder.query<UserDto[], string>({
+      query: (q) => `/user/search?q=${encodeURIComponent(q)}`,
+    }),
     updateCurrentUser: builder.mutation<UserDto, UpdateUserBySubCommand>({
       query: (body) => ({ url: `/user/me`, method: 'PUT', body }),
       invalidatesTags: [{ type: 'User', id: 'ME' }],
@@ -37,6 +40,7 @@ export const {
   useGetCurrentUserQuery,
   useGetUserProfileQuery,
   useLazyCheckUsernameQuery,
+  useLazySearchUsersQuery,
   useUpdateCurrentUserMutation,
   useDeleteCurrentUserMutation,
   useUpdateUserByIdMutation,

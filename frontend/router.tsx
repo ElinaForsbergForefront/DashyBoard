@@ -5,6 +5,7 @@ import { Mirrors } from './src/pages/Mirrors';
 import { Widgets } from './src/pages/Widgets';
 import { SpotifyConnected } from './src/pages/SpotifyConnected';
 import { Preview } from './src/pages/Preview';
+import { Friends } from './src/pages/Friends';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         path: '/widgets',
         element: <Widgets />,
+      },
+      {
+        path: '/friends',
+        element: <Friends />,
       },
       {
         path: '/style-guide',
