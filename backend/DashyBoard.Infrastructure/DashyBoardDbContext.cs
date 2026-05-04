@@ -137,13 +137,14 @@ namespace DashyBoard.Infrastructure
                 entity.Property(e => e.CreatedAtUtc).IsRequired();
                 entity.Property(e => e.UpdatedAtUtc).IsRequired();
                 
-                // PostgreSQL concurrency token - EF Core hanterar xmin automatiskt
+                // PostgreSQL concurrency token
                 entity.Property(e => e.RowVersion)
                     .IsRowVersion();
                 
+                // Fixa relationen: en-till-en istället för en-till-många
                 entity.HasOne(e => e.User)
-                      .WithMany()
-                      .HasForeignKey(e => e.UserId)
+                      .WithOne(u => u.SpotifyConnection) 
+                      .HasForeignKey<SpotifyConnection>(e => e.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }
