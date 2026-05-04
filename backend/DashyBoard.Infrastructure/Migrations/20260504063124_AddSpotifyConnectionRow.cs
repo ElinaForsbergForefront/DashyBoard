@@ -5,7 +5,7 @@
 namespace DashyBoard.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSpotifyConnectionRowVersion : Migration
+    public partial class AddSpotifyConnectionRow : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

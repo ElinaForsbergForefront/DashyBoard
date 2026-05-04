@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DashyBoard.Infrastructure.Migrations
 {
     [DbContext(typeof(DashyBoardDbContext))]
-    [Migration("20260422080308_AddSpotifyConnectionRowVersion")]
-    partial class AddSpotifyConnectionRowVersion
+    [Migration("20260504063124_AddSpotifyConnectionRow")]
+    partial class AddSpotifyConnectionRow
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
