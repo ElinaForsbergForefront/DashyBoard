@@ -3,9 +3,15 @@ import App from './src/App';
 import { StyleGuide } from './src/pages/StyleGuide';
 import { Mirrors } from './src/pages/Mirrors';
 import { Widgets } from './src/pages/Widgets';
+import { SpotifyConnected } from './src/pages/SpotifyConnected';
+import { Preview } from './src/pages/Preview';
 import { Friends } from './src/pages/Friends';
 
 export const router = createBrowserRouter([
+  {
+    path: '/spotify/connected',
+    element: <SpotifyConnected />,
+  },
   {
     path: '/',
     element: <App />,
@@ -26,6 +32,10 @@ export const router = createBrowserRouter([
       {
         path: '/style-guide',
         element: <StyleGuide />,
+      },
+      {
+        path: '/preview/:mirrorId',
+        element: <Preview />,
       },
     ],
   },

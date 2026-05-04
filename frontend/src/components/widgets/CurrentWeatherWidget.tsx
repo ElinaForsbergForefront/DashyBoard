@@ -7,9 +7,11 @@ import { getWeatherTypeDisplay } from '../../utils/weather';
 import type { WeatherLocationSelection } from '../../utils/weather';
 import { useWeatherLocation } from '../../hooks/useWeatherLocation';
 import { WeatherLocationEditModal } from './weather/WeatherLocationEditModal';
+import { useEditModeContext } from '../../context/EditModeContext';
 
 export function CurrentWeatherWidget() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { isEditMode } = useEditModeContext();
   const {
     searchLocation,
     coordinates,
@@ -55,13 +57,15 @@ export function CurrentWeatherWidget() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground-secondary">Weather</h3>
-            <button
-              type="button"
-              onClick={() => setIsEditModalOpen(true)}
-              className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
-            >
-              Edit
-            </button>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
+              >
+                Edit
+              </button>
+            )}
           </div>
 
           {isLoading && <p className="text-xs text-muted">Hämtar aktuellt väder…</p>}
