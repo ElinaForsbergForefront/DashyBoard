@@ -63,6 +63,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     cols: 2,
     rows: 3,
     component: WeatherForecastWidget,
+    isPremium: true,
   },
   {
     id: 'currency',
