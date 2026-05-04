@@ -8,6 +8,7 @@ interface MirrorSubNavProps {
   onAddMirror: () => void;
   onEditMirror: (mirror: MirrorDto) => void;
   onDeleteMirror: (mirror: MirrorDto) => void;
+  canAddMirror?: boolean;
 }
 
 export const MirrorSubNav = ({
@@ -16,6 +17,7 @@ export const MirrorSubNav = ({
   onAddMirror,
   onEditMirror,
   onDeleteMirror,
+  canAddMirror
 }: MirrorSubNavProps) => {
   const { data: mirrors = [] } = useGetMyMirrorsQuery();
 
@@ -66,7 +68,9 @@ export const MirrorSubNav = ({
       <button
         type="button"
         onClick={onAddMirror}
-        className="ml-auto px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-on-primary hover:bg-primary/90 transition-all duration-200 whitespace-nowrap cursor-pointer"
+        disabled={!canAddMirror}
+        title={!canAddMirror ? 'Mirror limit reached' : undefined}
+        className="ml-auto px-3 py-1.5 text-sm font-medium rounded-md bg-primary text-on-primary hover:bg-primary/90 transition-all duration-200 whitespace-nowrap cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
       >
         + Add Mirror
       </button>
