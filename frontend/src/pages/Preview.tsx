@@ -84,7 +84,7 @@ function PreviewContent() {
 
 export function Preview() {
   return (
-    <EditModeProvider>
+    <EditModeProvider initialEditMode={false}>
       <PreviewContent />
     </EditModeProvider>
   );

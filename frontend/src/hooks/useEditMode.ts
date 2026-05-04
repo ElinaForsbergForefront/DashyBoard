@@ -7,8 +7,10 @@ function getInitialEditMode(): boolean {
   return localStorage.getItem(STORAGE_KEY) === 'true';
 }
 
-export function useEditMode() {
-  const [isEditMode, setIsEditMode] = useState<boolean>(getInitialEditMode);
+export function useEditMode(initialEditMode?: boolean) {
+  const [isEditMode, setIsEditMode] = useState<boolean>(
+    () => (initialEditMode !== undefined ? initialEditMode : getInitialEditMode()),
+  );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const enterEditMode = () => {
