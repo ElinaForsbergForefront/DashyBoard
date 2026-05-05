@@ -105,11 +105,11 @@ export function TrafficWidget() {
 
                     {!activeLoading && !activeError && activeDepartures.length > 0 && (
                         <div className="space-y-2 max-h-60 overflow-y-auto subtle-scrollbar pr-4">
-                            {visibleDepartures.map((departure: TimetableEntryDto) => (
-                                <div key={`${departure.line}-${departure.scheduled}-${departure.direction}`} className="rounded-xl bg-overlay px-3 py-2">
+                            {visibleDepartures.map((departure: TimetableEntryDto, index) => (
+                                <div key={`${departure.transportMode}-${departure.line}-${departure.scheduled}-${departure.direction}-${departure.platform}-${index}`} className="rounded-xl bg-overlay px-3 py-2">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex items-center gap-1 min-w-0">
-                                            <TransportIcon mode={departure.transportMode} /> 
+                                            <div className="shrink-0"><TransportIcon mode={departure.transportMode} /></div>
                                             <div>
                                                 <div className="flex gap-4 text-sm font-medium text-foreground">
                                                     <p >{departure.line}</p>
