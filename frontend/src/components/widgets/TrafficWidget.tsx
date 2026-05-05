@@ -5,7 +5,7 @@ import { GlassCard } from '../ui/glass-card';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useEditModeContext } from '../../context/EditModeContext';
-
+import { useTrafficConfig } from '../../hooks/useTrafficConfig';
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
 
     const scheduledFormatter = new Intl.DateTimeFormat('sv-SE', {
@@ -30,10 +30,12 @@ export function TrafficWidget() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const { isEditMode } = useEditModeContext();
 
-    const [siteId, setSiteId] = useState<string | null>(null);
-    const [stationName, setStationName] = useState<string | null>(null);
-    const [dateTime, setDateTime] = useState<string | null>(null);
-    const [transportModes, setTransportModes] = useState<string[]>(['BUS', 'TRAM', 'TRAIN']);
+    const { config, saveTrafficConfig } = useTrafficConfig();
+
+    const siteId = config?.siteId ?? null;
+    const stationName = config?.stationName ?? null;
+    const dateTime = config?.dateTime ?? null;
+    const transportModes = config?.transportModes ?? ['BUS', 'TRAM', 'TRAIN'];
 
     const { data: departures = [], isLoading, isError } = useGetDeparturesQuery(
         siteId ?? '',
@@ -58,12 +60,14 @@ export function TrafficWidget() {
 
     const showEmptyState = siteId !== null && !activeLoading && !activeError && activeDepartures.length === 0;
 
-    const handleFormSuccess = (config: { siteId: string; stationName: string; dateTime?: string; transportModes: string[] }) => {
-        setSiteId(config.siteId);
-        setStationName(config.stationName);
-        setDateTime(config.dateTime ?? null);
+    const handleFormSuccess = (incoming: { siteId: string; stationName: string; dateTime?: string; transportModes: string[] }) => {
+        saveTrafficConfig({
+            siteId: incoming.siteId,
+            stationName: incoming.stationName,
+            dateTime: incoming.dateTime ?? null,
+            transportModes: incoming.transportModes,
+        });
         setIsEditModalOpen(false);
-        setTransportModes(config.transportModes);
     };
 
 
