@@ -17,34 +17,6 @@ public sealed class TrafficApiClient : ITrafficApiClient
         _apiKey = configuration["TrafficApi:ApiKey"]!;
     }
 
-
-/*
-    public async Task<IReadOnlyList<StationDto>> GetAllStopsAsync(CancellationToken ct = default)
-    {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"stops/list?key={_apiKey}", ct);
-        return doc?.RootElement
-            .GetProperty("stop_groups")
-            .EnumerateArray()
-            .SelectMany(g =>
-            {
-                var modes = g.GetProperty("transport_modes")
-                    .EnumerateArray()
-                    .Select(m => m.GetString()!)
-                    .ToList();
-
-                return g.GetProperty("stops")
-                    .EnumerateArray()
-                    .Select(s => new StationDto(
-                        s.GetProperty("id").GetString()!,
-                        s.GetProperty("name").GetString()!,
-                        s.GetProperty("lat").GetDouble(),
-                        s.GetProperty("lon").GetDouble(),
-                        modes
-                    ));
-            })
-            .ToList() ?? [];
-    }  */
-
     public async Task<IReadOnlyList<StationDto>> GetStopByNameAsync(string name, CancellationToken ct = default)
     {
         var doc = await _http.GetFromJsonAsync<JsonDocument>($"stops/name/{name}?key={_apiKey}", ct);
