@@ -7,9 +7,10 @@ interface CurrencyDropdownProps {
   currentSymbol: string;
   currentName: string | undefined;
   onSelect: (symbol: string) => void;
+  disabled?: boolean;
 }
 
-export function CurrencyDropdown({ currentSymbol, currentName, onSelect }: CurrencyDropdownProps) {
+export function CurrencyDropdown({ currentSymbol, currentName, onSelect, disabled = false }: CurrencyDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -38,8 +39,9 @@ export function CurrencyDropdown({ currentSymbol, currentName, onSelect }: Curre
     <div ref={dropdownRef} className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1 rounded-md transition hover:bg-overlay px-1 -ml-1 cursor-pointer"
+        onClick={() => !disabled && setIsOpen((prev) => !prev)}
+        disabled={disabled}
+        className={`flex items-center gap-1 rounded-md transition px-1 -ml-1 ${disabled ? 'cursor-default' : 'hover:bg-overlay cursor-pointer'}`}
       >
         <div className="text-left">
           <h3 className="text-sm font-medium text-foreground-secondary">

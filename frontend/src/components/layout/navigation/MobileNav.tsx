@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from './nav-items';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useFriendNotifications } from '../../../hooks/useFriendNotifications';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface MobileNavProps {
 
 export const MobileNav = ({ isOpen, disabled = false, onClose }: MobileNavProps) => {
   const { hasPermission } = usePermissions();
+  const { total: friendNotifications } = useFriendNotifications();
   return (
     <nav
       id="mobile-menu"
@@ -33,14 +35,19 @@ export const MobileNav = ({ isOpen, disabled = false, onClose }: MobileNavProps)
                 tabIndex={disabled ? -1 : undefined}
                 onClick={disabled ? (event) => event.preventDefault() : onClose}
                 className={({ isActive }) =>
-                  `block w-full px-4 py-3 text-base font-medium rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  `flex items-center justify-between w-full px-4 py-3 text-base font-medium rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     isActive
                       ? 'bg-overlay text-foreground'
                       : 'text-muted hover:text-foreground hover:bg-overlay'
                   } ${disabled ? 'pointer-events-none opacity-50' : ''}`
                 }
               >
-                {label}
+                <span>{label}</span>
+                {to === '/friends' && friendNotifications > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold leading-none text-on-primary">
+                    {friendNotifications > 9 ? '9+' : friendNotifications}
+                  </span>
+                )}
               </NavLink>
             </li>
           );

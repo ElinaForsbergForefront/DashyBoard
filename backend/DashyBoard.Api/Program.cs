@@ -13,18 +13,12 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
 // Add CORS
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-              "http://localhost:5173",
-              "https://dashyboard.se",
-              "https://www.dashyboard.se",
-              "https://localhost:7298",
-              "http://localhost:7298",
-              "https://www.auth.dashyboard.se",
-              "https://auth.dashyboard.se")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -46,6 +40,8 @@ builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
+app.UseGlobalExceptionHandler();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -62,7 +58,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// CORS måste komma FÖRE SecurityHeaders
 app.UseCors("AllowFrontend");
+app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

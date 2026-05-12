@@ -27,7 +27,8 @@ namespace DashyBoard.Application.Queries.Weather
                     raw.Current.WindSpeed,
                     WeatherCodeMapper.ToWeatherType(raw.Current.WeatherCode),
                     raw.Current.Precipitation,
-                    raw.Current.PrecipitationProbability
+                    raw.Current.PrecipitationProbability,
+                    raw.Current.Day
                 )
             );
         }

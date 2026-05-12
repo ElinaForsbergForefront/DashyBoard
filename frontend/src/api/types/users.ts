@@ -6,6 +6,7 @@ export interface UserDto {
   country: string | null;
   city: string | null;
   authSub: string | null;
+  isPremium: boolean;
 }
 
 export interface UpdateUserBySubCommand {

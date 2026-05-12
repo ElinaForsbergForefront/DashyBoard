@@ -14,8 +14,12 @@ export const api = createApi({
     'Countries',
     'Cities',
     'Currency',
-    'Traffic'
+    'Traffic',
+    'Weather',
+    'FriendRequests',
+    'Friends',
+    'Blocked',
+    'Pokes',
   ],
-
   endpoints: () => ({}),
 });

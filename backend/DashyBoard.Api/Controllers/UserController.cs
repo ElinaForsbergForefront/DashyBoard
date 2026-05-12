@@ -111,5 +111,20 @@ namespace DashyBoard.Api.Controllers
             var result = await _mediator.Send(command, ct);
             return Ok(result);
         }
+
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(IReadOnlyList<UserDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SearchUsers([FromQuery] string q, CancellationToken ct)
+        {
+            var sub = GetCurrentSub();
+            if (string.IsNullOrWhiteSpace(sub))
+                return Unauthorized();
+
+            // Hämta current user id
+            var currentUser = await _mediator.Send(new GetUserBySubQuery(sub), ct);
+            
+            var users = await _mediator.Send(new SearchUsersQuery(q, currentUser.Id), ct);
+            return Ok(users);
+        }
     }
 }

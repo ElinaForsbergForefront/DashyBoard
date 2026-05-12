@@ -6,6 +6,11 @@ import { CurrencyWidget } from './CurrencyWidget';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
 import { TrafficForm } from '../forms/TrafficForm';
 import { TrafficWidget } from './TrafficWidget';
+import { WeatherForm } from '../forms/WeatherForm';
+import { CurrentWeatherWidget} from './CurrentWeatherWidget';
+import { WeatherForecastWidget } from './WeatherForecastWidget';
+import { SpotifyWidget } from './spotify/SpotifyWidget';
+
 
 /**
  * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
@@ -45,10 +50,20 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: 'weather',
     name: 'Weather',
-    description: 'Visar aktuellt väder. Ingen konfiguration krävs.',
+    description: 'Visar aktuellt väder för vald plats.',
     cols: 2,
     rows: 2,
-    component: ReminderWidget, // TODO: ersätt med WeatherWidget när den finns
+    component: CurrentWeatherWidget,
+    configForm: WeatherForm,
+  },
+  {
+    id: 'weather-forecast',
+    name: 'Weather Forecast',
+    description: 'Visar väderprognos för vald plats.',
+    cols: 2,
+    rows: 3,
+    component: WeatherForecastWidget,
+    isPremium: true,
   },
   {
     id: 'currency',
@@ -76,6 +91,15 @@ export const widgetRegistry: WidgetDefinition[] = [
     rows: 3,
     component: TrafficWidget, 
     configForm: TrafficForm,
+  },
+  {
+    id: 'spotify',
+    name: 'Spotify',
+    description: 'Visar vad du lyssnar på just nu.',
+    cols: 2,
+    rows: 2,
+    component: SpotifyWidget,
+    isPremium: true,
   }
 ];
 

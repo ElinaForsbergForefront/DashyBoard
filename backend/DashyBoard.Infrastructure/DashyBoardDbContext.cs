@@ -127,22 +127,24 @@ namespace DashyBoard.Infrastructure
 
             modelBuilder.Entity<SpotifyConnection>(entity =>
             {
-                entity.HasKey(sc => sc.Id);
-
-                entity.Property(sc => sc.UserId).IsRequired();
-
-                entity.Property(sc => sc.AccessToken).IsRequired();
-                entity.Property(sc => sc.RefreshToken).IsRequired();
-                entity.Property(sc => sc.ExpiresAtUtc).IsRequired();
-
-                entity.Property(sc => sc.CreatedAtUtc).IsRequired();
-                entity.Property(sc => sc.UpdatedAtUtc).IsRequired();
-
-                entity.HasIndex(sc => sc.UserId).IsUnique();
-
-                entity.HasOne(sc => sc.User)
-                      .WithOne(u => u.SpotifyConnection)
-                      .HasForeignKey<SpotifyConnection>(sc => sc.UserId)
+                entity.HasKey(e => e.Id);
+                
+                entity.HasIndex(e => e.UserId).IsUnique();
+                
+                entity.Property(e => e.AccessToken).IsRequired();
+                entity.Property(e => e.RefreshToken).IsRequired();
+                entity.Property(e => e.ExpiresAtUtc).IsRequired();
+                entity.Property(e => e.CreatedAtUtc).IsRequired();
+                entity.Property(e => e.UpdatedAtUtc).IsRequired();
+                
+                // PostgreSQL concurrency token
+                entity.Property(e => e.RowVersion)
+                    .IsRowVersion();
+                
+                // Fixa relationen: en-till-en istället för en-till-många
+                entity.HasOne(e => e.User)
+                      .WithOne(u => u.SpotifyConnection) 
+                      .HasForeignKey<SpotifyConnection>(e => e.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }

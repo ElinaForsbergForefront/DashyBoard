@@ -14,6 +14,7 @@ public static class MongoDbConfigurator
             BsonClassMap.RegisterClassMap<Mirror>(cm =>
             {
                 cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
                 cm.MapIdMember(m => m.Id).SetSerializer(new GuidSerializer(BsonType.String));
             });
         }

@@ -4,6 +4,7 @@ import { TrafficForm } from '../forms/TrafficForm';
 import { GlassCard } from '../ui/glass-card';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useEditModeContext } from '../../context/EditModeContext';
 
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
 
@@ -27,7 +28,8 @@ import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIco
 
 export function TrafficWidget() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    
+    const { isEditMode } = useEditModeContext();
+
     const [siteId, setSiteId] = useState<string | null>(null);
     const [stationName, setStationName] = useState<string | null>(null);
     const [dateTime, setDateTime] = useState<string | null>(null);
@@ -81,13 +83,15 @@ export function TrafficWidget() {
                             <span className="rounded-full bg-overlay px-2 py-0.5 text-xs text-muted">
                                 {visibleDepartures.length}
                             </span>
-                            <button
-                                type="button"
-                                onClick={() => setIsEditModalOpen(true)}
-                                className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
-                            >
-                                Edit
-                            </button>
+                            {isEditMode && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
+                                >
+                                    Edit
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -101,11 +105,11 @@ export function TrafficWidget() {
 
                     {!activeLoading && !activeError && activeDepartures.length > 0 && (
                         <div className="space-y-2 max-h-60 overflow-y-auto subtle-scrollbar pr-4">
-                            {visibleDepartures.map((departure: TimetableEntryDto) => (
-                                <div key={`${departure.line}-${departure.scheduled}-${departure.direction}`} className="rounded-xl bg-overlay px-3 py-2">
+                            {visibleDepartures.map((departure: TimetableEntryDto, index) => (
+                                <div key={`${departure.transportMode}-${departure.line}-${departure.scheduled}-${departure.direction}-${departure.platform}-${index}`} className="rounded-xl bg-overlay px-3 py-2">
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex items-center gap-1 min-w-0">
-                                            <TransportIcon mode={departure.transportMode} /> 
+                                            <div className="shrink-0"><TransportIcon mode={departure.transportMode} /></div>
                                             <div>
                                                 <div className="flex gap-4 text-sm font-medium text-foreground">
                                                     <p >{departure.line}</p>

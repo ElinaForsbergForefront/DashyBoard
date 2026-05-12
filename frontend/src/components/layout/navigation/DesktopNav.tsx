@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from './nav-items';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useFriendNotifications } from '../../../hooks/useFriendNotifications';
 
 interface DesktopNavProps {
   disabled?: boolean;
@@ -8,6 +9,7 @@ interface DesktopNavProps {
 
 export const DesktopNav = ({ disabled = false }: DesktopNavProps) => {
   const { hasPermission } = usePermissions();
+  const { total: friendNotifications } = useFriendNotifications();
 
   return (
     <nav aria-label="Main navigation" className="hidden md:block">
@@ -29,7 +31,7 @@ export const DesktopNav = ({ disabled = false }: DesktopNavProps) => {
               tabIndex={disabled ? -1 : undefined}
               onClick={disabled ? (event) => event.preventDefault() : undefined}
               className={({ isActive }) =>
-                `inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+                `inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
                   isActive
                     ? 'bg-white/10 backdrop-blur-sm border-white/20 text-foreground shadow-lg'
                     : 'bg-transparent border-white/0 text-muted hover:bg-white/5'
@@ -39,6 +41,11 @@ export const DesktopNav = ({ disabled = false }: DesktopNavProps) => {
               }
             >
               {label}
+              {to === '/friends' && friendNotifications > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold leading-none text-on-primary">
+                  {friendNotifications > 9 ? '9+' : friendNotifications}
+                </span>
+              )}
             </NavLink>
           );
         })}

@@ -1,9 +1,11 @@
 using DashyBoard.Application.Interfaces;         
 using DashyBoard.Domain.Configuration;
+using DashyBoard.Infrastructure.Clients;
 using DashyBoard.Infrastructure.Configuration;
 using DashyBoard.Infrastructure.External;
 using DashyBoard.Infrastructure.External.Location;
 using DashyBoard.Infrastructure.Repositories;
+using DashyBoard.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -90,6 +92,11 @@ public static class DependencyInjection
 		services.Configure<SpotifyOptions>(
 		config.GetSection(SpotifyOptions.SectionName));
 
+        services.AddScoped<ISpotifyConnectionRepository, SpotifyConnectionRepository>();
+
+		services.AddHttpClient<ISpotifyTokenClient, SpotifyTokenClient>();
+        services.AddHttpClient<ISpotifyApiClient, SpotifyApiClient>();
+
         //EF Core
         var cs = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
@@ -121,6 +128,9 @@ public static class DependencyInjection
 			return client.GetDatabase(settings.DatabaseName);
 		});
 
-        return services;
+		services.AddMemoryCache();
+		services.AddScoped<IOAuthStateCache, OAuthStateCache>();
+
+		return services;
 	}
 }

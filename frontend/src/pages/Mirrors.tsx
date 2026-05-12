@@ -1,7 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { WidgetSidebar } from '../components/layout/dashboard/WidgetSidebar';
 import { EditModeToggle } from '../components/layout/editMode/EditModeToggle';
 import { EditModeProvider, useEditModeContext } from '../context/EditModeContext';
+import { useActiveMirror } from '../context/ActiveMirrorContext';
 import { MirrorSubNav } from '../components/layout/navigation/sub-navigation/MirrorSubNav';
 import { CreateMirrorModal } from '../components/mirrors/CreateMirrorModal';
 import { EditMirrorModal } from '../components/mirrors/EditMirrorModal';
@@ -17,10 +19,20 @@ import type { WidgetType } from '../components/layout/dashboard/widgetSidebar/ty
 import type { MirrorDto } from '../api/types/mirror';
 import { widgetRegistry } from '../components/widgets/widgetRegistry';
 import { findFirstFreeCell } from '../utils/widgetPlacement';
+import { useGetCurrentUserQuery } from '../api/endpoints/user';
 
 function MirrorContent() {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode } = useEditModeContext();
-  const [activeMirrorId, setActiveMirrorId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { activeMirrorId, setActiveMirrorId } = useActiveMirror();
+
+  // Initialise from navigation state (e.g. when returning from preview)
+  useEffect(() => {
+    const stateId = (location.state as { activeMirrorId?: string } | null)?.activeMirrorId;
+    if (stateId) setActiveMirrorId(stateId);
+
+  }, []);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingMirror, setEditingMirror] = useState<MirrorDto | null>(null);
   const [deletingMirror, setDeletingMirror] = useState<MirrorDto | null>(null);
@@ -31,6 +43,9 @@ function MirrorContent() {
   const snapshotRef = useRef<MirrorDto | null>(null);
 
   const { data: mirrors = [], refetch: refetchMirrors } = useGetMyMirrorsQuery();
+  const { data: currentUser } = useGetCurrentUserQuery();
+  const mirrorLimit = currentUser?.isPremium ? 10 : 3;
+  const canAddMirror = mirrors.length < mirrorLimit;
   const [addWidget] = useAddWidgetMutation();
   const [moveWidget] = useMoveWidgetMutation();
   const [removeWidget] = useRemoveWidgetMutation();
@@ -51,6 +66,17 @@ function MirrorContent() {
       setLocalMirror(structuredClone(activeMirror));
     }
   }, [isEditMode, activeMirror]);
+
+  // When navigated back from preview with enterEditMode flag, auto-enter edit mode.
+  useEffect(() => {
+    const state = location.state as { enterEditMode?: boolean } | null;
+    if (state?.enterEditMode && activeMirror && !isEditMode) {
+      handleEnterEditMode();
+      // Clear the state so a refresh doesn't re-trigger.
+      navigate('/', { replace: true, state: { activeMirrorId } });
+    }
+
+  }, [activeMirror]);
 
   const handleEnterEditMode = () => {
     if (!activeMirror) return;
@@ -174,6 +200,7 @@ function MirrorContent() {
         onAddMirror={() => setShowCreateModal(true)}
         onEditMirror={setEditingMirror}
         onDeleteMirror={setDeletingMirror}
+        canAddMirror={canAddMirror}
       />
 
       {showCreateModal && <CreateMirrorModal onClose={() => setShowCreateModal(false)} />}
@@ -202,6 +229,7 @@ function MirrorContent() {
           onEnterEditMode={handleEnterEditMode}
           onSave={handleSave}
           onDiscard={handleDiscard}
+          onPreview={activeMirrorId ? () => navigate(`/preview/${activeMirrorId}`) : undefined}
         />
       </div>
     </div>

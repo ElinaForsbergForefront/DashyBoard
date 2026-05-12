@@ -105,5 +105,37 @@ namespace DashyBoard.Infrastructure.Repositories
             await _context.SaveChangesAsync(ct);
             return MapToDto(user);
         }
+
+        public async Task<IReadOnlyList<UserDto>> SearchUsersAsync(string searchTerm, Guid currentUserId, CancellationToken ct)
+        {
+            // Hämta användare som har blockerat mig (ActionByUserId != currentUserId och jag är involverad)
+            var blockedByOthersIds = await _context.UserRelationships
+                .Where(r => r.Status == UserRelationshipStatus.Blocked 
+                            && r.ActionByUserId != currentUserId
+                            && (r.User1Id == currentUserId || r.User2Id == currentUserId))
+                .Select(r => r.ActionByUserId)
+                .ToListAsync(ct);
+
+            // Sök användare vars användarnamn innehåller söktermen, exkludera mig själv och de som blockerat mig
+            var users = await _context.Users
+                .Where(u => u.Username != null 
+                            && u.Username.ToLower().Contains(searchTerm.ToLower())
+                            && u.Id != currentUserId
+                            && !blockedByOthersIds.Contains(u.Id))
+                .Take(20) // Begränsa till max 20 resultat
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    AuthSub = u.AuthSub,
+                    Username = u.Username,
+                    DisplayName = u.DisplayName,
+                    Country = u.Country,
+                    City = u.City
+                })
+                .ToListAsync(ct);
+
+            return users;
+        }
     }
 }

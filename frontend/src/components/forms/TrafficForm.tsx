@@ -17,6 +17,7 @@ export function TrafficForm({ onSuccess }: TrafficFormProps = {}) {
     const [useSpecificTime, setUseSpecificTime] = useState(false);
     const [transportModes, setTransportModes] = useState<string[]>(['BUS', 'TRAM', 'TRAIN']);
     const [feedback, setFeedback] = useState<string | null>(null);
+    const [showResults, setShowResults] = useState(false);
 
     const { data: stops = [], isLoading, isError } = useGetStopsByNameQuery(
         submittedName,
@@ -33,6 +34,7 @@ export function TrafficForm({ onSuccess }: TrafficFormProps = {}) {
         if (searchInput.trim()) {
             setSubmittedName(searchInput.trim());
             setSelectedStop(null);
+            setShowResults(true);            
         }
     };
 
@@ -86,15 +88,20 @@ export function TrafficForm({ onSuccess }: TrafficFormProps = {}) {
             {isLoading && <p className="text-xs text-muted">Searching...</p>}
             {isError && <p className="text-xs text-muted">Could not fetch stops.</p>}
 
-            {stops.length > 0 && (
-                <div className="flex flex-col gap-1">
-                    {stops.map((stop) => (
+            {showResults && stops.length > 0 && (
+                <div className="flex flex-col gap-1 max-h-64 overflow-y-auto subtle-scrollbar pr-1">
+                    {stops.slice(0, 10).map((stop) => (
                         <button
                             key={stop.id}
                             type="button"
-                            onClick={() => setSelectedStop(stop)}
+                            onClick={() => {
+                                setSelectedStop(stop);
+                                setSearchInput(stop.name ?? '');
+                                setSubmittedName('');
+                                setShowResults(false);    
+                            }}
                             className={`rounded-md border px-2 py-2 text-left text-sm text-foreground transition hover:bg-glass ${
-                                selectedStop?.id === stop.id
+                                selectedStop?.groupId === stop.groupId
                                     ? 'border-primary bg-overlay'
                                     : 'border-border bg-overlay'
                             }`}

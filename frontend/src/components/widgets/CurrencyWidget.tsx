@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useGetCurrencyChartQuery } from '../../api/endpoints/currency';
 import { GlassCard } from '../ui/glass-card';
+import { useEditModeContext } from '../../context/EditModeContext';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { CurrencyDropdown } from './currency/CurrencyDropdown';
 import { CurrencyChartTooltip } from './currency/CurrencyChartTooltip';
@@ -16,6 +17,7 @@ import {
 export function CurrencyWidget() {
   const [activePreset, setActivePreset] = useState<IntervalPreset>(INTERVALS[0]);
   const [symbol, setSymbol] = useState('ETH-USD');
+  const { isEditMode } = useEditModeContext();
 
   const start = useMemo(() => buildStartDate(activePreset.daysBack), [activePreset]);
 
@@ -42,6 +44,7 @@ export function CurrencyWidget() {
             currentSymbol={symbol}
             currentName={data?.assetName}
             onSelect={setSymbol}
+            disabled={!isEditMode}
           />
           {data && (
             <span
@@ -127,13 +130,14 @@ export function CurrencyWidget() {
             <button
               key={preset.label}
               type="button"
-              onClick={() => setActivePreset(preset)}
-              className={`cursor-pointer flex-1 rounded-lg py-1 text-xs font-medium transition
+              onClick={() => isEditMode && setActivePreset(preset)}
+              disabled={!isEditMode}
+              className={`flex-1 rounded-lg py-1 text-xs font-medium transition
                 ${
                   activePreset.label === preset.label
                     ? 'bg-primary/15 text-primary'
-                    : 'text-muted hover:bg-overlay hover:text-foreground-secondary'
-                }`}
+                    : 'text-muted'
+                } ${isEditMode ? 'cursor-pointer hover:bg-overlay hover:text-foreground-secondary' : 'cursor-default'}`}
             >
               {preset.label}
             </button>

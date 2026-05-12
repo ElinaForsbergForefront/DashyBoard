@@ -5,8 +5,14 @@ type EditModeContextType = ReturnType<typeof useEditMode>;
 
 const EditModeContext = createContext<EditModeContextType | null>(null);
 
-export function EditModeProvider({ children }: { children: React.ReactNode }) {
-  const editMode = useEditMode();
+export function EditModeProvider({
+  children,
+  initialEditMode,
+}: {
+  children: React.ReactNode;
+  initialEditMode?: boolean;
+}) {
+  const editMode = useEditMode(initialEditMode);
   return <EditModeContext.Provider value={editMode}>{children}</EditModeContext.Provider>;
 }
 

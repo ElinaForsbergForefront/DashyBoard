@@ -12,4 +12,5 @@ export const NAV_ITEMS = [
     requiredPermissions: ['view:style-guide', 'admin:access'],
   },
   { to: '/widgets', label: 'Widgets' },
+  { to: '/friends', label: 'Friends' },
 ];
