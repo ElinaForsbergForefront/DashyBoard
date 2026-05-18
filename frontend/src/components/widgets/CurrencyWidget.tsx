@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useGetCurrencyChartQuery } from '../../api/endpoints/currency';
 import { GlassCard } from '../ui/glass-card';
 import { useEditModeContext } from '../../context/EditModeContext';

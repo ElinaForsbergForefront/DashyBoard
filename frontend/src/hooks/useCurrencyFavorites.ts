@@ -13,7 +13,7 @@ export function useCurrencyFavorites(symbol?: string) {
     error: favoritesError,
   } = useGetUserFavoritesQuery();
 
-  const { data: checkData, isLoading: checkLoading } = useCheckIfFavoritedQuery(symbol || '', {
+  const { isLoading: checkLoading } = useCheckIfFavoritedQuery(symbol || '', {
     skip: !symbol,
   });
 
