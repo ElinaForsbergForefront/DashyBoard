@@ -9,7 +9,7 @@ public class FavoriteCurrencyTests
     [Test]
     public void Constructor_WithValidData_CreatesInstance()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
         var symbol = "AAPL";
 
         var favorite = new FavoriteCurrency(userId, symbol);
@@ -23,7 +23,7 @@ public class FavoriteCurrencyTests
     [Test]
     public void Constructor_WithEmptySymbol_ThrowsArgumentException()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
 
         var ex = Assert.Throws<ArgumentException>(() => new FavoriteCurrency(userId, ""));
 
@@ -33,7 +33,7 @@ public class FavoriteCurrencyTests
     [Test]
     public void Constructor_WithNullSymbol_ThrowsArgumentException()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
 
         var ex = Assert.Throws<ArgumentException>(() => new FavoriteCurrency(userId, null!));
 

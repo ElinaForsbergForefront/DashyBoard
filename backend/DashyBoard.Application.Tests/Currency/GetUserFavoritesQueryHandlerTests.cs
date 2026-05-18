@@ -22,7 +22,7 @@ public class GetUserFavoritesQueryHandlerTests
     [Test]
     public async Task Handle_ReturnsUserFavoritesFromRepository()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
         var expectedFavorites = new List<FavoriteCurrencyDto>
         {
             new("AAPL", DateTime.UtcNow),
@@ -45,7 +45,7 @@ public class GetUserFavoritesQueryHandlerTests
     [Test]
     public async Task Handle_WhenUserHasNoFavorites_ReturnsEmptyList()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
         var expectedFavorites = new List<FavoriteCurrencyDto>();
 
         _repositoryMock

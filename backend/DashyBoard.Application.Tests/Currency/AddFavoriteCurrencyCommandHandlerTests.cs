@@ -22,7 +22,7 @@ public class AddFavoriteCurrencyCommandHandlerTests
     [Test]
     public async Task Handle_WhenUserHasLessThanFiveFavorites_AddsFavorite()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
         var symbol = "AAPL";
         var expectedDto = new FavoriteCurrencyDto(symbol, DateTime.UtcNow);
 
@@ -51,7 +51,7 @@ public class AddFavoriteCurrencyCommandHandlerTests
     [Test]
     public void Handle_WhenUserHasFiveFavorites_ThrowsInvalidOperationException()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
         var symbol = "AAPL";
 
         _repositoryMock
@@ -73,7 +73,7 @@ public class AddFavoriteCurrencyCommandHandlerTests
     [Test]
     public void Handle_WhenCurrencyAlreadyFavorited_ThrowsInvalidOperationException()
     {
-        var userId = Guid.NewGuid();
+        var userId = "auth0|user123";
         var symbol = "AAPL";
 
         _repositoryMock
