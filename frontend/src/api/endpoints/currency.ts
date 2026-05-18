@@ -3,6 +3,8 @@ import type {
   CurrencyChartDataDto,
   CurrencySearchDto,
   GetCurrencyChartParams,
+  FavoriteCurrencyDto,
+  CheckFavoritedResponse,
 } from '../types/currency';
 
 const currencyApi = api.injectEndpoints({
@@ -19,7 +21,35 @@ const currencyApi = api.injectEndpoints({
     searchCurrencies: builder.query<CurrencySearchDto, string>({
       query: (q) => `/currency/search?q=${encodeURIComponent(q)}`,
     }),
+    getUserFavorites: builder.query<FavoriteCurrencyDto[], void>({
+      query: () => '/currency/favorites',
+      providesTags: ['FavoriteCurrency'],
+    }),
+    checkIfFavorited: builder.query<CheckFavoritedResponse, string>({
+      query: (symbol) => `/currency/favorites/${encodeURIComponent(symbol)}/check`,
+    }),
+    addFavoriteCurrency: builder.mutation<FavoriteCurrencyDto, string>({
+      query: (symbol) => ({
+        url: `/currency/favorites/${encodeURIComponent(symbol)}`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['FavoriteCurrency'],
+    }),
+    removeFavoriteCurrency: builder.mutation<void, string>({
+      query: (symbol) => ({
+        url: `/currency/favorites/${encodeURIComponent(symbol)}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['FavoriteCurrency'],
+    }),
   }),
 });
 
-export const { useGetCurrencyChartQuery, useLazySearchCurrenciesQuery } = currencyApi;
+export const {
+  useGetCurrencyChartQuery,
+  useLazySearchCurrenciesQuery,
+  useGetUserFavoritesQuery,
+  useCheckIfFavoritedQuery,
+  useAddFavoriteCurrencyMutation,
+  useRemoveFavoriteCurrencyMutation,
+} = currencyApi;

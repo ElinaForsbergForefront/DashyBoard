@@ -32,3 +32,12 @@ export interface GetCurrencyChartParams {
   end?: string;
   interval?: string;
 }
+
+export interface FavoriteCurrencyDto {
+  symbol: string;
+  addedAt: string; // ISO 8601 datetime
+}
+
+export interface CheckFavoritedResponse {
+  isFavorited: boolean;
+}

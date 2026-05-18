@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useGetCurrencyChartQuery } from '../../api/endpoints/currency';
 import { GlassCard } from '../ui/glass-card';
 import { useEditModeContext } from '../../context/EditModeContext';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { CurrencyDropdown } from './currency/CurrencyDropdown';
 import { CurrencyChartTooltip } from './currency/CurrencyChartTooltip';
+import { CurrencyFavoriteButton } from './currency/CurrencyFavoriteButton';
+import { useCurrencyFavorites } from '../../hooks/useCurrencyFavorites';
 import { INTERVALS, type IntervalPreset } from '../constants/currency';
 import {
   buildStartDate,
@@ -16,16 +18,28 @@ import {
 
 export function CurrencyWidget() {
   const [activePreset, setActivePreset] = useState<IntervalPreset>(INTERVALS[0]);
-  const [symbol, setSymbol] = useState('ETH-USD');
+  const [symbol, setSymbol] = useState('');
+  const [openDropdown, setOpenDropdown] = useState(false);
   const { isEditMode } = useEditModeContext();
+  const { favorites, isLoading: favoritesLoading } = useCurrencyFavorites();
+
+  // Auto-select first favorite when favorites load
+  useEffect(() => {
+    if (!symbol && favorites.length > 0 && !favoritesLoading) {
+      setSymbol(favorites[0].symbol);
+    }
+  }, [favorites, favoritesLoading, symbol]);
 
   const start = useMemo(() => buildStartDate(activePreset.daysBack), [activePreset]);
 
-  const { data, isLoading, isError } = useGetCurrencyChartQuery({
-    symbol,
-    interval: activePreset.value,
-    start,
-  });
+  const { data, isLoading, isError } = useGetCurrencyChartQuery(
+    {
+      symbol,
+      interval: activePreset.value,
+      start,
+    },
+    { skip: !symbol }, // Skip query if no symbol selected
+  );
 
   const change = useMemo(
     () => (data ? getPriceChange(data.priceHistory) : { value: 0, percent: 0 }),
@@ -43,21 +57,29 @@ export function CurrencyWidget() {
           <CurrencyDropdown
             currentSymbol={symbol}
             currentName={data?.assetName}
-            onSelect={setSymbol}
+            onSelect={(sym) => {
+              setSymbol(sym);
+              setOpenDropdown(false);
+            }}
             disabled={!isEditMode}
+            isOpen={openDropdown}
+            onOpenChange={setOpenDropdown}
           />
-          {data && (
-            <span
-              className="rounded-full px-2 py-0.5 text-xs font-medium"
-              style={{
-                color: accentColor,
-                backgroundColor: isPositive ? 'rgba(34,197,94,0.12)' : 'rgba(220,40,40,0.12)',
-              }}
-            >
-              {isPositive ? '+' : ''}
-              {change.percent.toFixed(2)}%
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {symbol && <CurrencyFavoriteButton symbol={symbol} compact showLabel={false} />}
+            {data && (
+              <span
+                className="rounded-full px-2 py-0.5 text-xs font-medium"
+                style={{
+                  color: accentColor,
+                  backgroundColor: isPositive ? 'rgba(34,197,94,0.12)' : 'rgba(220,40,40,0.12)',
+                }}
+              >
+                {isPositive ? '+' : ''}
+                {change.percent.toFixed(2)}%
+              </span>
+            )}
+          </div>
         </div>
 
         {latestPrice != null && data && (
@@ -72,12 +94,38 @@ export function CurrencyWidget() {
         )}
 
         <div className="h-36 w-full">
-          {isLoading && (
+          {!symbol && (
+            <div className="flex h-full items-center justify-center">
+              {favorites.length === 0 ? (
+                <div className="text-center">
+                  <p className="text-xs text-muted mb-3">
+                    No currency favorited, please{' '}
+                    <button
+                      type="button"
+                      onClick={() => setOpenDropdown(true)}
+                      className="text-primary font-medium hover:underline"
+                    >
+                      add new
+                    </button>
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(!openDropdown)}
+                  className="rounded-lg bg-primary/20 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/30"
+                >
+                  Select Currency
+                </button>
+              )}
+            </div>
+          )}
+          {symbol && isLoading && (
             <div className="flex h-full items-center justify-center">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           )}
-          {isError && (
+          {symbol && isError && (
             <div className="flex h-full items-center justify-center">
               <p className="text-xs text-muted">Failed to load chart data.</p>
             </div>
@@ -125,24 +173,26 @@ export function CurrencyWidget() {
           )}
         </div>
 
-        <div className="flex gap-1">
-          {INTERVALS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => isEditMode && setActivePreset(preset)}
-              disabled={!isEditMode}
-              className={`flex-1 rounded-lg py-1 text-xs font-medium transition
-                ${
-                  activePreset.label === preset.label
-                    ? 'bg-primary/15 text-primary'
-                    : 'text-muted'
-                } ${isEditMode ? 'cursor-pointer hover:bg-overlay hover:text-foreground-secondary' : 'cursor-default'}`}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
+        {symbol && (
+          <div className="flex gap-1">
+            {INTERVALS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => isEditMode && setActivePreset(preset)}
+                disabled={!isEditMode}
+                className={`flex-1 rounded-lg py-1 text-xs font-medium transition
+                  ${
+                    activePreset.label === preset.label
+                      ? 'bg-primary/15 text-primary'
+                      : 'text-muted'
+                  } ${isEditMode ? 'cursor-pointer hover:bg-overlay hover:text-foreground-secondary' : 'cursor-default'}`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </GlassCard>
   );

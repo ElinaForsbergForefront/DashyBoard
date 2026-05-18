@@ -14,6 +14,7 @@ export const api = createApi({
     'Countries',
     'Cities',
     'Currency',
+    'FavoriteCurrency',
     'Traffic',
     'Weather',
     'FriendRequests',

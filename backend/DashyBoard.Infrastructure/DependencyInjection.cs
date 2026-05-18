@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using DashyBoard.Infrastructure.Services;
 using MongoDB.Driver;
 
 
@@ -74,6 +73,9 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri("https://realtime-api.trafiklab.se/v1/");
         });
+
+        // Currency
+        services.AddScoped<IFavoriteCurrencyRepository, FavoriteCurrencyRepository>();
 
         // Mirror
         services.AddScoped<IMirrorRepository, MirrorRepository>();
