@@ -41,9 +41,9 @@ export function CurrentWeatherWidget() {
 
   const isLoading = isGeocoding || isFetchingWeather;
   const errorMessage = geocodeError
-    ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
+    ? 'Could not resolve location. Make sure you enter a city or town.'
     : weatherError
-      ? 'Kunde inte hämta vädret för platsen.'
+      ? 'Could not fetch weather for the location.'
       : undefined;
 
   const handleLocationSubmit = (newLocation: WeatherLocationSelection) => {
@@ -68,10 +68,10 @@ export function CurrentWeatherWidget() {
             )}
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Hämtar aktuellt väder…</p>}
+          {isLoading && <p className="text-xs text-muted">Fetching current weather…</p>}
 
           {!isLoading && !currentWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {!isLoading && currentWeather && (
@@ -94,19 +94,19 @@ export function CurrentWeatherWidget() {
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs text-muted">
                 <div>
-                  <p className="font-semibold text-foreground">Känns som</p>
+                  <p className="font-semibold text-foreground">Feels like</p>
                   <p>{Math.round(currentWeather.current.apparent_temperature)}°C</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Vind</p>
+                  <p className="font-semibold text-foreground">Wind</p>
                   <p>{currentWeather.current.wind_speed_10m} km/h</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Nederbörd</p>
+                  <p className="font-semibold text-foreground">Precipitation</p>
                   <p>{currentWeather.current.precipitation} mm</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Sannolikhet</p>
+                  <p className="font-semibold text-foreground">Probability</p>
                   <p>{currentWeather.current.precipitation_probability}%</p>
                 </div>
               </div>
@@ -114,11 +114,11 @@ export function CurrentWeatherWidget() {
           )}
 
           {!isLoading && !currentWeather && !hasLocation && (
-            <p className="text-xs text-muted">Ingen plats vald ännu. Klicka på Edit för att lägga till.</p>
+            <p className="text-xs text-muted">No location selected yet. Click Edit to add one.</p>
           )}
 
           {!isLoading && !currentWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {errorMessage && <p className="text-xs text-muted">{errorMessage}</p>}

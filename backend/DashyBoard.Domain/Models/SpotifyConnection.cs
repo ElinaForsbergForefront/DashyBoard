@@ -41,14 +41,14 @@ namespace DashyBoard.Domain.Models
         {
             AccessToken = accessToken;
             
-            // Uppdatera endast refresh token om en ny tillhandahålls
+            // Only update the refresh token if a new one is provided
             if (!string.IsNullOrWhiteSpace(refreshToken))
             {
                 RefreshToken = refreshToken;
             }
             
             ExpiresAtUtc = expiresAtUtc;
-            UpdatedAtUtc = DateTime.UtcNow; // Uppdatera tidsstämpel
+            UpdatedAtUtc = DateTime.UtcNow; // Update timestamp
         }
     }
 }

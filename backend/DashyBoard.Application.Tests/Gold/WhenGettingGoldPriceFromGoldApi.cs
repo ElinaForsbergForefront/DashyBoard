@@ -22,9 +22,9 @@ namespace DashyBoard.Application.Tests.Gold
                 "Just now"
             );
 
-            // Meningen med detta test är inte att testa det externa Gold API:t,
-            // utan att verifiera att handlern anropar klienten korrekt
-            // och returnerar den data som den får tillbaka.
+            // The purpose of this test is not to test the external Gold API,
+            // but to verify that the handler calls the client correctly
+            // and returns the data it receives.
             var mockClient = new Mock<IGoldApiClient>();
             mockClient
                 .Setup(x => x.GetPriceAsync("XAU", It.IsAny<CancellationToken>()))

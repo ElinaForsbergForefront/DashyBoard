@@ -18,7 +18,7 @@ namespace DashyBoard.Application.Commands.Reminders
 
         public Task<ReminderDto> Handle(CreateReminderCommand command, CancellationToken ct)
         {
-            // Minimal “orchestration” – ingen DB-logik här
+            // Minimal orchestration – no DB logic here
             return _repository.CreateReminderAsync(
                 command.userId,
                 command.title,

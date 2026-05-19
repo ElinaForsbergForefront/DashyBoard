@@ -108,7 +108,7 @@ namespace DashyBoard.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<UserDto>> SearchUsersAsync(string searchTerm, Guid currentUserId, CancellationToken ct)
         {
-            // Hämta användare som har blockerat mig (ActionByUserId != currentUserId och jag är involverad)
+            // Get users who have blocked me (ActionByUserId != currentUserId and I am involved)
             var blockedByOthersIds = await _context.UserRelationships
                 .Where(r => r.Status == UserRelationshipStatus.Blocked 
                             && r.ActionByUserId != currentUserId
@@ -116,13 +116,13 @@ namespace DashyBoard.Infrastructure.Repositories
                 .Select(r => r.ActionByUserId)
                 .ToListAsync(ct);
 
-            // Sök användare vars användarnamn innehåller söktermen, exkludera mig själv och de som blockerat mig
+            // Search for users whose username contains the search term, excluding myself and those who have blocked me
             var users = await _context.Users
                 .Where(u => u.Username != null 
                             && u.Username.ToLower().Contains(searchTerm.ToLower())
                             && u.Id != currentUserId
                             && !blockedByOthersIds.Contains(u.Id))
-                .Take(20) // Begränsa till max 20 resultat
+                .Take(20) // Limit to max 20 results
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
