@@ -13,5 +13,11 @@ public interface IMirrorRepository
     Task<MirrorDto> AddWidgetAsync(Guid mirrorId, string type, double x, double y, CancellationToken ct);
     Task<MirrorDto> MoveWidgetAsync(Guid mirrorId, Guid widgetId, double x, double y, CancellationToken ct);
     Task<MirrorDto> RemoveWidgetAsync(Guid mirrorId, Guid widgetId, CancellationToken ct);
+    Task<MirrorDto> UpdateWidgetConfigAsync(
+        Guid mirrorId,
+        Guid widgetId,
+        IReadOnlyDictionary<string, object?> config,
+        CancellationToken ct
+    );
 
 }
