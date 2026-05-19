@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { FormCard } from '../ui/form-card';
 import { useGeocodeAddressQuery } from '../../api/endpoints/geocoding';
@@ -10,27 +10,46 @@ interface WeatherFormProps {
 export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
   const [city, setCity] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [debouncedCity, setDebouncedCity] = useState('');
 
   const trimmedCity = city.trim();
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedCity(trimmedCity);
+    }, 1000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [trimmedCity]);
+
   const {
     data: geocodeData,
     isFetching: isValidatingCity,
     error: geocodeError,
-  } = useGeocodeAddressQuery(trimmedCity, { skip: trimmedCity.length < 2 });
+  } = useGeocodeAddressQuery(debouncedCity, { skip: debouncedCity.length < 2 });
+
+  const isWaitingForValidation = trimmedCity.length >= 2 && debouncedCity !== trimmedCity;
+  const hasCurrentCityValidation = trimmedCity.length >= 2 && debouncedCity === trimmedCity;
+  const hasValidCurrentCity = hasCurrentCityValidation && !!geocodeData;
 
   const cityError =
     !trimmedCity
       ? 'Ange en stad'
       : trimmedCity.length < 2
         ? 'Skriv minst 2 bokstäver'
+        : isWaitingForValidation || isValidatingCity
+          ? ''
         : geocodeError
           ? 'Staden kunde inte hittas'
           : '';
 
-  const isSubmitDisabled = !trimmedCity || !!cityError || isValidatingCity || !geocodeData;
+  const isSubmitDisabled =
+    !trimmedCity || !!cityError || isWaitingForValidation || isValidatingCity || !hasValidCurrentCity;
 
   const cityHelperText =
-    isValidatingCity ? 'Validerar stad...' : 'Ange en stad som existerar';
+    isWaitingForValidation || isValidatingCity
+      ? 'Validerar stad...'
+      : 'Ange en stad som existerar';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
