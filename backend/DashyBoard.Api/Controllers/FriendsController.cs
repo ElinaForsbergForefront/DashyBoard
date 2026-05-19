@@ -40,8 +40,6 @@ namespace DashyBoard.Api.Controllers
             return user.Id;
         }
 
-        // ========== FRIEND REQUESTS ==========
-
         [HttpPost("request/{username}")]
         [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
         public async Task<IActionResult> SendFriendRequest(string username, CancellationToken ct)
@@ -50,10 +48,10 @@ namespace DashyBoard.Api.Controllers
             if (userId is null) return Unauthorized();
 
             var relationshipId = await _mediator.Send(new SendFriendRequestCommand(userId.Value, username), ct);
-            
+
             return CreatedAtAction(
-                nameof(GetFriend), 
-                new { username }, 
+                nameof(GetFriend),
+                new { username },
                 relationshipId);
         }
 
@@ -75,7 +73,7 @@ namespace DashyBoard.Api.Controllers
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId is null) return Unauthorized();
 
-            await _mediator.Send(new RemoveFriendCommand(username, userId.Value), ct);
+            await _mediator.Send(new RejectFriendRequestCommand(username, userId.Value), ct);
             return NoContent();
         }
 
@@ -89,8 +87,6 @@ namespace DashyBoard.Api.Controllers
             var requests = await _mediator.Send(new GetFriendRequestsQuery(userId.Value), ct);
             return Ok(requests);
         }
-
-        // ========== FRIENDS ==========
 
         [HttpGet("list")]
         [ProducesResponseType(typeof(IReadOnlyList<UserRelationDto>), StatusCodes.Status200OK)]
@@ -127,8 +123,6 @@ namespace DashyBoard.Api.Controllers
             return NoContent();
         }
 
-        // ========== BLOCK ==========
-
         [HttpPost("block/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> BlockUser(string username, CancellationToken ct)
@@ -161,8 +155,6 @@ namespace DashyBoard.Api.Controllers
             var blocked = await _mediator.Send(new GetBlockedUsersQuery(userId.Value), ct);
             return Ok(blocked);
         }
-
-        // ========== POKES ==========
 
         [HttpPost("poke/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
