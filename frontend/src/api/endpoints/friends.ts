@@ -1,6 +1,6 @@
 import { api } from '../apiSlice';
 import type { UserRelationDto } from '../types/userRelation';
-import type { PokeDto } from '../types/poke';
+import type { PokeDto, SentPokeDto } from '../types/poke';
 
 const friendsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -46,11 +46,15 @@ const friendsApi = api.injectEndpoints({
     }),
     sendPoke: builder.mutation<void, string>({
       query: (username) => ({ url: `/friends/poke/${encodeURIComponent(username)}`, method: 'POST' }),
-      invalidatesTags: [{ type: 'Pokes', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Pokes', id: 'LIST' }, { type: 'Pokes', id: 'SENT' }],
     }),
     getPokes: builder.query<PokeDto[], void>({
       query: () => '/friends/pokes',
       providesTags: [{ type: 'Pokes', id: 'LIST' }],
+    }),
+    getSentPokes: builder.query<SentPokeDto[], void>({
+      query: () => '/friends/pokes/sent',
+      providesTags: [{ type: 'Pokes', id: 'SENT' }],
     }),
     markPokeAsSeen: builder.mutation<void, string>({
       query: (pokeId) => ({ url: `/friends/pokes/${pokeId}/seen`, method: 'POST' }),
@@ -58,7 +62,7 @@ const friendsApi = api.injectEndpoints({
     }),
     dismissPoke: builder.mutation<void, string>({
       query: (pokeId) => ({ url: `/friends/pokes/${pokeId}`, method: 'DELETE' }),
-      invalidatesTags: [{ type: 'Pokes', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Pokes', id: 'LIST' }, { type: 'Pokes', id: 'SENT' }],
     }),
   }),
 });
@@ -76,6 +80,7 @@ export const {
   useGetBlockedUsersQuery,
   useSendPokeMutation,
   useGetPokesQuery,
+  useGetSentPokesQuery,
   useMarkPokeAsSeenMutation,
   useDismissPokeMutation,
 } = friendsApi;

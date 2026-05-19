@@ -11,3 +11,15 @@ export interface PokeDto {
 
   isActive: boolean;
 }
+
+export interface SentPokeDto {
+  id: string;
+
+  fromUserId: string;
+  toUserId: string;
+  toUsername: string;
+
+  createdAtUtc: string;
+
+  isActive: boolean;
+}

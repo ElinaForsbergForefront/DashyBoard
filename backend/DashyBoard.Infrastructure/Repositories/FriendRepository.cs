@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using DashyBoard.Application.Interfaces;
+﻿using DashyBoard.Application.Interfaces;
 using DashyBoard.Application.Queries.Poke.Dto;
 using DashyBoard.Application.Queries.UserRelation.Dto;
+using DashyBoard.Application.Realtime;
 using DashyBoard.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +10,12 @@ namespace DashyBoard.Infrastructure.Repositories
     public sealed class FriendRepository : IFriendRepository
     {
         private readonly DashyBoardDbContext _db;
+        private readonly IFriendRealtimeNotifier _realtimeNotifier;
 
-        public FriendRepository(DashyBoardDbContext db)
+        public FriendRepository(DashyBoardDbContext db, IFriendRealtimeNotifier realtimeNotifier)
         {
             _db = db;
+            _realtimeNotifier = realtimeNotifier;
         }
 
         // ========== COMMANDS: UserRelationship ==========
@@ -28,9 +26,10 @@ namespace DashyBoard.Infrastructure.Repositories
             if (receiver == null)
                 throw new KeyNotFoundException($"User '{receiverUsername}' not found.");
 
-            var receiverId = receiver.Id;
+            var receiverInfo = ToRealtimeUser(receiver);
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
 
-            var existingRelation = await GetRelationshipBetweenUsersAsync(currentUserId, receiverId, ct);
+            var existingRelation = await GetRelationshipBetweenUsersAsync(currentUserId, receiver.Id, ct);
 
             if (existingRelation != null)
             {
@@ -44,10 +43,19 @@ namespace DashyBoard.Infrastructure.Repositories
                     throw new InvalidOperationException("Already friends.");
             }
 
-            var relationship = new UserRelationship(currentUserId, receiverId, currentUserId);
+            var relationship = new UserRelationship(currentUserId, receiver.Id, currentUserId);
             _db.UserRelationships.Add(relationship);
             await _db.SaveChangesAsync(ct);
-            
+
+            await NotifyAsync(
+                receiverInfo.UserId,
+                FriendRealtimeEventTypes.FriendRequestSent,
+                actor,
+                receiverInfo,
+                pokeId: null,
+                shouldToast: true,
+                ct);
+
             return relationship.Id;
         }
 
@@ -57,6 +65,9 @@ namespace DashyBoard.Infrastructure.Repositories
             if (otherUser == null)
                 throw new KeyNotFoundException($"User '{username}' not found.");
 
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var otherUserInfo = ToRealtimeUser(otherUser);
+
             var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
@@ -64,6 +75,13 @@ namespace DashyBoard.Infrastructure.Repositories
 
             relationship.Accept(currentUserId);
             await _db.SaveChangesAsync(ct);
+
+            await NotifyActorAndOtherUserAsync(
+                FriendRealtimeEventTypes.FriendRequestAccepted,
+                actor,
+                otherUserInfo,
+                pokeId: null,
+                ct);
         }
 
         public async Task RejectFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct)
@@ -71,6 +89,9 @@ namespace DashyBoard.Infrastructure.Repositories
             var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
             if (otherUser == null)
                 throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var otherUserInfo = ToRealtimeUser(otherUser);
 
             var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
@@ -82,6 +103,13 @@ namespace DashyBoard.Infrastructure.Repositories
 
             _db.UserRelationships.Remove(relationship);
             await _db.SaveChangesAsync(ct);
+
+            await NotifyActorAndOtherUserAsync(
+                FriendRealtimeEventTypes.FriendRequestRejected,
+                actor,
+                otherUserInfo,
+                pokeId: null,
+                ct);
         }
 
         public async Task RemoveFriendAsync(string username, Guid currentUserId, CancellationToken ct)
@@ -89,6 +117,9 @@ namespace DashyBoard.Infrastructure.Repositories
             var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
             if (otherUser == null)
                 throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var otherUserInfo = ToRealtimeUser(otherUser);
 
             var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
@@ -103,6 +134,13 @@ namespace DashyBoard.Infrastructure.Repositories
 
             _db.UserRelationships.Remove(relationship);
             await _db.SaveChangesAsync(ct);
+
+            await NotifyActorAndOtherUserAsync(
+                FriendRealtimeEventTypes.FriendRemoved,
+                actor,
+                otherUserInfo,
+                pokeId: null,
+                ct);
         }
 
         public async Task BlockUserAsync(string username, Guid currentUserId, CancellationToken ct)
@@ -111,11 +149,13 @@ namespace DashyBoard.Infrastructure.Repositories
             if (otherUser == null)
                 throw new KeyNotFoundException($"User '{username}' not found.");
 
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var otherUserInfo = ToRealtimeUser(otherUser);
+
             var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
 
             if (relationship == null)
             {
-                // Skapa ny relationship med blocked status
                 var newRelationship = new UserRelationship(currentUserId, otherUser.Id, currentUserId);
                 newRelationship.Block(currentUserId);
                 _db.UserRelationships.Add(newRelationship);
@@ -124,8 +164,15 @@ namespace DashyBoard.Infrastructure.Repositories
             {
                 relationship.Block(currentUserId);
             }
-            
+
             await _db.SaveChangesAsync(ct);
+
+            await NotifyActorAndOtherUserAsync(
+                FriendRealtimeEventTypes.UserBlocked,
+                actor,
+                otherUserInfo,
+                pokeId: null,
+                ct);
         }
 
         public async Task UnblockUserAsync(string username, Guid currentUserId, CancellationToken ct)
@@ -331,6 +378,9 @@ namespace DashyBoard.Infrastructure.Repositories
             if (toUser == null)
                 throw new KeyNotFoundException($"User '{toUsername}' not found.");
 
+            var actor = await GetRealtimeUserAsync(fromUserId, ct);
+            var receiverInfo = ToRealtimeUser(toUser);
+
             var relationship = await GetRelationshipBetweenUsersAsync(fromUserId, toUser.Id, ct);
 
             if (relationship == null || relationship.Status != UserRelationshipStatus.Accepted)
@@ -346,6 +396,15 @@ namespace DashyBoard.Infrastructure.Repositories
             var poke = new Domain.Models.Poke(relationship.Id, fromUserId, toUser.Id);
             _db.Pokes.Add(poke);
             await _db.SaveChangesAsync(ct);
+
+            await NotifyAsync(
+                receiverInfo.UserId,
+                FriendRealtimeEventTypes.PokeSent,
+                actor,
+                receiverInfo,
+                poke.Id,
+                shouldToast: true,
+                ct);
         }
 
         public async Task MarkPokeAsSeenAsync(Guid pokeId, Guid currentUserId, CancellationToken ct)
@@ -358,8 +417,29 @@ namespace DashyBoard.Infrastructure.Repositories
             if (poke.ToUserId != currentUserId)
                 throw new InvalidOperationException("You can only mark pokes sent to you as seen.");
 
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var sender = await GetRealtimeUserAsync(poke.FromUserId, ct);
+
             poke.MarkAsSeen();
             await _db.SaveChangesAsync(ct);
+
+            await NotifyAsync(
+                sender.UserId,
+                FriendRealtimeEventTypes.PokeSeen,
+                actor,
+                sender,
+                poke.Id,
+                shouldToast: true,
+                ct);
+
+            await NotifyAsync(
+                actor.UserId,
+                FriendRealtimeEventTypes.PokeSeen,
+                actor,
+                sender,
+                poke.Id,
+                shouldToast: false,
+                ct);
         }
 
         public async Task InactivatePokeAsync(Guid pokeId, Guid currentUserId, CancellationToken ct)
@@ -372,8 +452,29 @@ namespace DashyBoard.Infrastructure.Repositories
             if (poke.ToUserId != currentUserId)
                 throw new InvalidOperationException("You can only dismiss pokes sent to you.");
 
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var sender = await GetRealtimeUserAsync(poke.FromUserId, ct);
+
             poke.Deactivate();
             await _db.SaveChangesAsync(ct);
+
+            await NotifyAsync(
+                sender.UserId,
+                FriendRealtimeEventTypes.PokeDismissed,
+                actor,
+                sender,
+                poke.Id,
+                shouldToast: true,
+                ct);
+
+            await NotifyAsync(
+                actor.UserId,
+                FriendRealtimeEventTypes.PokeDismissed,
+                actor,
+                sender,
+                poke.Id,
+                shouldToast: false,
+                ct);
         }
 
         // ========== QUERIES: Poke ==========
@@ -402,6 +503,35 @@ namespace DashyBoard.Infrastructure.Repositories
             return pokes;
         }
 
+        public async Task<IReadOnlyList<PokeDto>> GetSentPokesAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var pokes = await _db.Pokes
+                .Where(p => p.FromUserId == userId && p.IsActive)
+                .Join(_db.Users,
+                    p => p.FromUserId,  
+                    u => u.Id,
+                    (p, fromUser) => new { Poke = p, FromUser = fromUser })
+                .Join(_db.Users,
+                    x => x.Poke.ToUserId,  
+                    u => u.Id,
+                    (x, toUser) => new PokeDto
+                    {
+                        Id = x.Poke.Id,
+                        FromUserId = x.Poke.FromUserId,
+                        FromUsername = x.FromUser.Username,  
+                        ToUserId = x.Poke.ToUserId,
+                        ToUsername = toUser.Username, 
+                        CreatedAtUtc = x.Poke.CreatedAtUtc,
+                        IsSeen = x.Poke.SeenAtUtc != null,
+                        IsActive = x.Poke.IsActive,
+                        CanDismiss = false
+                    })
+                .OrderByDescending(p => p.CreatedAtUtc)
+                .ToListAsync(cancellationToken);
+
+            return pokes;
+        }
+
         // ========== HELPER ==========
 
         private async Task<UserRelationship?> GetRelationshipBetweenUsersAsync(Guid user1Id, Guid user2Id, CancellationToken ct)
@@ -412,5 +542,78 @@ namespace DashyBoard.Infrastructure.Repositories
             return await _db.UserRelationships
                 .FirstOrDefaultAsync(r => r.User1Id == smaller && r.User2Id == larger, ct);
         }
+    // Helpers
+    private sealed record FriendRealtimeUser(Guid UserId, string? Username, string? DisplayName);
+
+    private static FriendRealtimeUser ToRealtimeUser(User user)
+    {
+        return new FriendRealtimeUser(user.Id, user.Username, user.DisplayName);
+    }
+
+    private async Task<FriendRealtimeUser> GetRealtimeUserAsync(Guid userId, CancellationToken ct)
+    {
+        var user = await _db.Users
+            .Where(u => u.Id == userId)
+            .Select(u => new FriendRealtimeUser(u.Id, u.Username, u.DisplayName))
+            .FirstOrDefaultAsync(ct);
+
+        if (user == null)
+            throw new KeyNotFoundException($"User '{userId}' not found.");
+
+        return user;
+    }
+
+    private async Task NotifyActorAndOtherUserAsync(
+        string eventType,
+        FriendRealtimeUser actor,
+        FriendRealtimeUser otherUser,
+        Guid? pokeId,
+        CancellationToken ct)
+    {
+        await NotifyAsync(
+            otherUser.UserId,
+            eventType,
+            actor,
+            otherUser,
+            pokeId,
+            shouldToast: true,
+            ct);
+
+        await NotifyAsync(
+            actor.UserId,
+            eventType,
+            actor,
+            otherUser,
+            pokeId,
+            shouldToast: false,
+            ct);
+    }
+
+    private async Task NotifyAsync(
+        Guid recipientUserId,
+        string eventType,
+        FriendRealtimeUser actor,
+        FriendRealtimeUser otherUser,
+        Guid? pokeId,
+        bool shouldToast,
+        CancellationToken ct)
+    {
+        await _realtimeNotifier.NotifyAsync(
+            recipientUserId,
+            new FriendRealtimeEvent
+            {
+                EventType = eventType,
+                User1Id = actor.UserId,
+                User1Username = actor.Username,
+                User1DisplayName = actor.DisplayName,
+                User2Id = otherUser.UserId,
+                User2Username = otherUser.Username,
+                PokeId = pokeId,
+                OccurredAtUtc = DateTime.UtcNow,
+                ShouldToast = shouldToast
+            },
+            ct);
+    }
     }
 }
+

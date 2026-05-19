@@ -6,8 +6,8 @@
 
         public Guid FromUserId { get; init; }
         public string? FromUsername { get; init; }
-
         public Guid ToUserId { get; init; }
+        public string? ToUsername { get; init; }  
 
         public DateTime CreatedAtUtc { get; init; }
 
