@@ -20,6 +20,13 @@ import type { MirrorDto } from '../api/types/mirror';
 import { widgetRegistry } from '../components/widgets/widgetRegistry';
 import { findFirstFreeCell } from '../utils/widgetPlacement';
 import { useGetCurrentUserQuery } from '../api/endpoints/user';
+import { useMirrorAutosavePreference } from '../hooks/useMirrorAutosavePreference';
+import { buildMirrorWidgetMutationPlan } from '../utils/mirrorWidgetMutationPlan';
+
+const AUTOSAVE_INTERVAL_MS = 60_000;
+const AUTOSAVE_STATUS_RESET_MS = 2_000;
+
+type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 function MirrorContent() {
   const { isEditMode, enterEditMode, saveEditMode, discardEditMode } = useEditModeContext();
@@ -27,25 +34,28 @@ function MirrorContent() {
   const location = useLocation();
   const { activeMirrorId, setActiveMirrorId } = useActiveMirror();
 
-  // Initialise from navigation state (e.g. when returning from preview)
-  useEffect(() => {
-    const stateId = (location.state as { activeMirrorId?: string } | null)?.activeMirrorId;
-    if (stateId) setActiveMirrorId(stateId);
-
-  }, []);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingMirror, setEditingMirror] = useState<MirrorDto | null>(null);
   const [deletingMirror, setDeletingMirror] = useState<MirrorDto | null>(null);
 
-  // Local copy of the mirror used during edit mode – changes are buffered here
-  // and only flushed to the server when the user clicks "Save".
+  // Local copy of the mirror used during edit mode - changes are buffered here
+  // and only flushed to the server when the user clicks "Save" or autosave runs.
   const [localMirror, setLocalMirror] = useState<MirrorDto | null>(null);
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
+
   const snapshotRef = useRef<MirrorDto | null>(null);
+  const localMirrorRef = useRef<MirrorDto | null>(null);
+  const saveInFlightRef = useRef(false);
+  const pendingAutosaveSyncMirrorIdRef = useRef<string | null>(null);
+  const autosaveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { isAutosaveEnabled, toggleAutosave } = useMirrorAutosavePreference();
 
   const { data: mirrors = [], refetch: refetchMirrors } = useGetMyMirrorsQuery();
   const { data: currentUser } = useGetCurrentUserQuery();
   const mirrorLimit = currentUser?.isPremium ? 10 : 3;
   const canAddMirror = mirrors.length < mirrorLimit;
+
   const [addWidget] = useAddWidgetMutation();
   const [moveWidget] = useMoveWidgetMutation();
   const [removeWidget] = useRemoveWidgetMutation();
@@ -57,6 +67,44 @@ function MirrorContent() {
   // Show localMirror whenever it exists (including while background save mutations are in-flight)
   const displayedMirror = localMirror ?? activeMirror;
 
+  useEffect(() => {
+    localMirrorRef.current = localMirror;
+  }, [localMirror]);
+
+  const clearAutosaveStatusTimer = useCallback(() => {
+    if (autosaveStatusTimeoutRef.current) {
+      clearTimeout(autosaveStatusTimeoutRef.current);
+      autosaveStatusTimeoutRef.current = null;
+    }
+  }, []);
+
+  const updateAutosaveStatus = useCallback(
+    (nextStatus: AutosaveStatus) => {
+      clearAutosaveStatusTimer();
+      setAutosaveStatus(nextStatus);
+
+      if (nextStatus === 'saved' || nextStatus === 'error') {
+        autosaveStatusTimeoutRef.current = setTimeout(() => {
+          setAutosaveStatus('idle');
+          autosaveStatusTimeoutRef.current = null;
+        }, AUTOSAVE_STATUS_RESET_MS);
+      }
+    },
+    [clearAutosaveStatusTimer],
+  );
+
+  useEffect(() => {
+    return () => {
+      clearAutosaveStatusTimer();
+    };
+  }, [clearAutosaveStatusTimer]);
+
+  // Initialise from navigation state (e.g. when returning from preview)
+  useEffect(() => {
+    const stateId = (location.state as { activeMirrorId?: string } | null)?.activeMirrorId;
+    if (stateId) setActiveMirrorId(stateId);
+  }, [location.state, setActiveMirrorId]);
+
   // Fallback: if edit mode was persisted via localStorage and the mirror data
   // arrives after mount, initialise the local copy automatically.
   useEffect(() => {
@@ -67,26 +115,53 @@ function MirrorContent() {
     }
   }, [isEditMode, activeMirror]);
 
+  // When autosave completes, refetch brings back canonical widget IDs from the API.
+  // Rebase both the snapshot and the local draft to that fresh server state so the
+  // next autosave diff only includes new changes.
+  useEffect(() => {
+    const pendingMirrorId = pendingAutosaveSyncMirrorIdRef.current;
+
+    if (!pendingMirrorId || !activeMirror || activeMirror.id !== pendingMirrorId) {
+      return;
+    }
+
+    const freshMirror = structuredClone(activeMirror);
+    snapshotRef.current = freshMirror;
+    localMirrorRef.current = structuredClone(activeMirror);
+    setLocalMirror(structuredClone(activeMirror));
+
+    pendingAutosaveSyncMirrorIdRef.current = null;
+    saveInFlightRef.current = false;
+    updateAutosaveStatus('saved');
+  }, [activeMirror, updateAutosaveStatus]);
+
+  const startEditSession = useCallback(
+    (mirror: MirrorDto) => {
+      const snapshot = structuredClone(mirror);
+      snapshotRef.current = snapshot;
+      setLocalMirror(structuredClone(mirror));
+      updateAutosaveStatus('idle');
+      enterEditMode();
+    },
+    [enterEditMode, updateAutosaveStatus],
+  );
+
   // When navigated back from preview with enterEditMode flag, auto-enter edit mode.
   useEffect(() => {
     const state = location.state as { enterEditMode?: boolean } | null;
     if (state?.enterEditMode && activeMirror && !isEditMode) {
-      handleEnterEditMode();
+      startEditSession(activeMirror);
       // Clear the state so a refresh doesn't re-trigger.
       navigate('/', { replace: true, state: { activeMirrorId } });
     }
+  }, [activeMirror, activeMirrorId, isEditMode, location.state, navigate, startEditSession]);
 
-  }, [activeMirror]);
-
-  const handleEnterEditMode = () => {
+  const handleEnterEditMode = useCallback(() => {
     if (!activeMirror) return;
-    const snapshot = structuredClone(activeMirror);
-    snapshotRef.current = snapshot;
-    setLocalMirror(structuredClone(activeMirror));
-    enterEditMode();
-  };
+    startEditSession(activeMirror);
+  }, [activeMirror, startEditSession]);
 
-  // All widget mutations only update the local copy – no API calls yet.
+  // All widget mutations only update the local copy - no API calls yet.
   const handleAddWidget = useCallback((widgetType: WidgetType) => {
     setLocalMirror((prev) => {
       if (!prev) return prev;
@@ -133,64 +208,156 @@ function MirrorContent() {
     });
   }, []);
 
+  const flushMirrorChanges = useCallback(
+    async ({
+      exitEditMode,
+      trigger,
+    }: {
+      exitEditMode: boolean;
+      trigger: 'manual' | 'autosave';
+    }) => {
+      if (saveInFlightRef.current || pendingAutosaveSyncMirrorIdRef.current) {
+        return false;
+      }
+
+      const snapshot = snapshotRef.current;
+      const draft = localMirrorRef.current;
+
+      if (!snapshot || !draft) {
+        if (exitEditMode) {
+          saveEditMode();
+          setLocalMirror(null);
+          localMirrorRef.current = null;
+          snapshotRef.current = null;
+        }
+
+        return true;
+      }
+
+      const mutationPlan = buildMirrorWidgetMutationPlan(snapshot, draft);
+
+      if (!mutationPlan.hasChanges) {
+        if (exitEditMode) {
+          saveEditMode();
+          setLocalMirror(null);
+          localMirrorRef.current = null;
+          snapshotRef.current = null;
+        }
+
+        return true;
+      }
+
+      saveInFlightRef.current = true;
+
+      if (trigger === 'autosave') {
+        updateAutosaveStatus('saving');
+      }
+
+      // Exit edit mode immediately on manual save - no perceived lag for the user.
+      // localMirror stays set so displayedMirror keeps showing the correct state
+      // while mutations run in the background, then refetch so activeMirror is
+      // fresh before we clear localMirror (avoids the stale-data flicker).
+      if (exitEditMode) {
+        saveEditMode();
+      }
+
+      const mirrorId = draft.id;
+
+      try {
+        await Promise.all([
+          ...mutationPlan.removedWidgetIds.map((widgetId) =>
+            removeWidget({ mirrorId, widgetId }).unwrap(),
+          ),
+          ...mutationPlan.addedWidgets.map((widget) =>
+            addWidget({ mirrorId, body: widget }).unwrap(),
+          ),
+          ...mutationPlan.movedWidgets.map(({ widgetId, x, y }) =>
+            moveWidget({ mirrorId, widgetId, body: { x, y } }).unwrap(),
+          ),
+        ]);
+
+        if (exitEditMode) {
+          await refetchMirrors();
+          setLocalMirror(null);
+          localMirrorRef.current = null;
+          snapshotRef.current = null;
+          saveInFlightRef.current = false;
+          return true;
+        }
+
+        pendingAutosaveSyncMirrorIdRef.current = mirrorId;
+        await refetchMirrors();
+        return true;
+      } catch {
+        saveInFlightRef.current = false;
+        pendingAutosaveSyncMirrorIdRef.current = null;
+
+        if (trigger === 'autosave') {
+          updateAutosaveStatus('error');
+        }
+
+        return false;
+      }
+    },
+    [addWidget, moveWidget, refetchMirrors, removeWidget, saveEditMode, updateAutosaveStatus],
+  );
+
   // On Save: diff local state vs snapshot and flush only the changes.
   const handleSave = useCallback(async () => {
-    const snapshot = snapshotRef.current;
-    if (!localMirror || !snapshot) {
-      saveEditMode();
+    await flushMirrorChanges({ exitEditMode: true, trigger: 'manual' });
+  }, [flushMirrorChanges]);
+
+  // On Discard: simply throw away the local copy - server state is untouched.
+  const handleDiscard = useCallback(() => {
+    clearAutosaveStatusTimer();
+    updateAutosaveStatus('idle');
+    pendingAutosaveSyncMirrorIdRef.current = null;
+    saveInFlightRef.current = false;
+    setLocalMirror(null);
+    localMirrorRef.current = null;
+    snapshotRef.current = null;
+    discardEditMode();
+  }, [clearAutosaveStatusTimer, discardEditMode, updateAutosaveStatus]);
+
+  const handleToggleAutosave = useCallback(() => {
+    clearAutosaveStatusTimer();
+    updateAutosaveStatus('idle');
+    toggleAutosave();
+  }, [clearAutosaveStatusTimer, toggleAutosave, updateAutosaveStatus]);
+
+  // Autosave runs only while edit mode is active, autosave is enabled, and there
+  // are unsaved widget-layout changes in the current local draft.
+  useEffect(() => {
+    if (!isEditMode || !activeMirrorId || !isAutosaveEnabled) {
       return;
     }
 
-    const mirrorId = localMirror.id;
-    const promises: Promise<unknown>[] = [];
+    const intervalId = setInterval(() => {
+      const mutationPlan = buildMirrorWidgetMutationPlan(
+        snapshotRef.current,
+        localMirrorRef.current,
+      );
 
-    // Widgets that were removed during the session
-    const removedIds = snapshot.widgets
-      .filter((sw) => !localMirror.widgets.find((cw) => cw.id === sw.id))
-      .map((sw) => sw.id);
-    for (const widgetId of removedIds) {
-      promises.push(removeWidget({ mirrorId, widgetId }).unwrap());
-    }
-
-    // Widgets that were added (identified by temp IDs)
-    for (const w of localMirror.widgets.filter((w) => w.id.startsWith('temp-'))) {
-      promises.push(addWidget({ mirrorId, body: { type: w.type, x: w.x, y: w.y } }).unwrap());
-    }
-
-    // Existing widgets whose position changed
-    for (const w of localMirror.widgets) {
-      if (w.id.startsWith('temp-')) continue;
-      const orig = snapshot.widgets.find((sw) => sw.id === w.id);
-      if (orig && (orig.x !== w.x || orig.y !== w.y)) {
-        promises.push(moveWidget({ mirrorId, widgetId: w.id, body: { x: w.x, y: w.y } }).unwrap());
+      if (
+        !mutationPlan.hasChanges ||
+        saveInFlightRef.current ||
+        pendingAutosaveSyncMirrorIdRef.current
+      ) {
+        return;
       }
-    }
 
-    // Exit edit mode immediately — no perceived lag for the user.
-    // localMirror stays set so displayedMirror keeps showing the correct state
-    // while mutations run in the background, then refetch so activeMirror is
-    // fresh before we clear localMirror (avoids the stale-data flicker).
-    saveEditMode();
+      void flushMirrorChanges({ exitEditMode: false, trigger: 'autosave' });
+    }, AUTOSAVE_INTERVAL_MS);
 
-    Promise.all(promises)
-      .then(() => refetchMirrors())
-      .finally(() => {
-        setLocalMirror(null);
-        snapshotRef.current = null;
-      });
-  }, [localMirror, addWidget, removeWidget, moveWidget, saveEditMode, refetchMirrors]);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [activeMirrorId, flushMirrorChanges, isAutosaveEnabled, isEditMode]);
 
-  // On Discard: simply throw away the local copy – server state is untouched.
-  const handleDiscard = useCallback(() => {
-    setLocalMirror(null);
-    snapshotRef.current = null;
-    discardEditMode();
-  }, [discardEditMode]);
-
-  const handleDeleted = () => {
+  const handleDeleted = useCallback(() => {
     if (deletingMirror?.id === activeMirrorId) setActiveMirrorId(null);
     setDeletingMirror(null);
-  };
+  }, [activeMirrorId, deletingMirror?.id, setActiveMirrorId]);
 
   return (
     <div className="flex flex-col flex-1">
@@ -230,6 +397,9 @@ function MirrorContent() {
           onSave={handleSave}
           onDiscard={handleDiscard}
           onPreview={activeMirrorId ? () => navigate(`/preview/${activeMirrorId}`) : undefined}
+          autosaveEnabled={isAutosaveEnabled}
+          autosaveStatus={autosaveStatus}
+          onToggleAutosave={handleToggleAutosave}
         />
       </div>
     </div>
