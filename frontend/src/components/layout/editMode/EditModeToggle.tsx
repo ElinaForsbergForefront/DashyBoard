@@ -1,4 +1,4 @@
-import { LayoutGrid, Pencil } from 'lucide-react';
+import { Check, LayoutGrid, Pencil, X } from 'lucide-react';
 import { useEditModeContext } from '../../../context/EditModeContext';
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -96,18 +96,30 @@ export function EditModeToggle({
               <span>{autosavePresentation.label}</span>
             </div>
 
-            <button
-              type="button"
-              onClick={onToggleAutosave}
-              aria-pressed={autosaveEnabled}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-all cursor-pointer ${
-                autosaveEnabled
-                  ? 'border-primary/30 bg-primary/10 text-foreground hover:bg-primary/15'
-                  : 'border-border bg-surface text-foreground-secondary hover:bg-overlay hover:text-foreground'
-              }`}
-            >
-              {autosaveEnabled ? 'Turn autosave off' : 'Turn autosave on'}
-            </button>
+            <div className="flex items-center gap-3 rounded-full border border-border bg-surface/90 px-4 py-2 shadow-lg backdrop-blur-sm">
+              <span className="text-sm font-medium text-foreground-secondary">Autosave</span>
+              <button
+                type="button"
+                onClick={onToggleAutosave}
+                aria-label={`Turn autosave ${autosaveEnabled ? 'off' : 'on'}`}
+                role="switch"
+                aria-checked={autosaveEnabled}
+                className="cursor-pointer relative inline-flex h-7 w-12 items-center rounded-full border border-white/10 bg-glass backdrop-blur-sm transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                <div
+                  className={`relative inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-overlay shadow-md transition-all duration-300 ${
+                    autosaveEnabled ? 'translate-x-5 ml-0.5' : 'translate-x-0.5'
+                  }`}
+                  aria-hidden="true"
+                >
+                  {autosaveEnabled ? (
+                    <Check className="size-3.5 text-emerald-400" strokeWidth={2.5} />
+                  ) : (
+                    <X className="size-3.5 text-foreground-secondary" strokeWidth={2.5} />
+                  )}
+                </div>
+              </button>
+            </div>
           </div>
         )}
 

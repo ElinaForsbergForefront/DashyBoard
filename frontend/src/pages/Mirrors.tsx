@@ -23,7 +23,7 @@ import { useGetCurrentUserQuery } from '../api/endpoints/user';
 import { useMirrorAutosavePreference } from '../hooks/useMirrorAutosavePreference';
 import { buildMirrorWidgetMutationPlan } from '../utils/mirrorWidgetMutationPlan';
 
-const AUTOSAVE_INTERVAL_MS = 60_000;
+const AUTOSAVE_INTERVAL_MS = 15_000;
 const AUTOSAVE_STATUS_RESET_MS = 2_000;
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
