@@ -29,5 +29,6 @@ namespace DashyBoard.Application.Interfaces
 
         // Poke Queries
         Task<IReadOnlyList<PokeDto>> GetPokesAsync(Guid currentUserId, CancellationToken ct);
+        Task<IReadOnlyList<PokeDto>> GetSentPokesAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

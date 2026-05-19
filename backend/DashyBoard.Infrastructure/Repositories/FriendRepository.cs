@@ -402,6 +402,35 @@ namespace DashyBoard.Infrastructure.Repositories
             return pokes;
         }
 
+        public async Task<IReadOnlyList<PokeDto>> GetSentPokesAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var pokes = await _db.Pokes
+                .Where(p => p.FromUserId == userId && p.IsActive)
+                .Join(_db.Users,
+                    p => p.FromUserId,  
+                    u => u.Id,
+                    (p, fromUser) => new { Poke = p, FromUser = fromUser })
+                .Join(_db.Users,
+                    x => x.Poke.ToUserId,  
+                    u => u.Id,
+                    (x, toUser) => new PokeDto
+                    {
+                        Id = x.Poke.Id,
+                        FromUserId = x.Poke.FromUserId,
+                        FromUsername = x.FromUser.Username,  
+                        ToUserId = x.Poke.ToUserId,
+                        ToUsername = toUser.Username, 
+                        CreatedAtUtc = x.Poke.CreatedAtUtc,
+                        IsSeen = x.Poke.SeenAtUtc != null,
+                        IsActive = x.Poke.IsActive,
+                        CanDismiss = false
+                    })
+                .OrderByDescending(p => p.CreatedAtUtc)
+                .ToListAsync(cancellationToken);
+
+            return pokes;
+        }
+
         // ========== HELPER ==========
 
         private async Task<UserRelationship?> GetRelationshipBetweenUsersAsync(Guid user1Id, Guid user2Id, CancellationToken ct)

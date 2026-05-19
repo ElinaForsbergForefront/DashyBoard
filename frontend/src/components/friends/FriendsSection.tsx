@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import type { PokeDto } from '../../api/types/poke';
 import {
   useGetFriendListQuery,
   useGetPokesQuery,
+  useGetSentPokesQuery,
   useBlockUserMutation,
   useRemoveFriendMutation,
   useSendPokeMutation,
@@ -11,9 +10,9 @@ import {
 import { SectionHeader, IconButton, EmptyText } from './shared';
 
 export function FriendsSection() {
-  const [pokedUsers, setPokedUsers] = useState<Set<string>>(new Set());
   const { data: friends = [] } = useGetFriendListQuery();
   const { data: pokes = [] } = useGetPokesQuery();
+  const { data: sentPokes = [] } = useGetSentPokesQuery();
   const [blockUser] = useBlockUserMutation();
   const [removeFriend] = useRemoveFriendMutation();
   const [sendPoke] = useSendPokeMutation();
@@ -21,13 +20,11 @@ export function FriendsSection() {
 
   const handlePoke = async (username: string) => {
     await sendPoke(username);
-    setPokedUsers((prev) => new Set(prev).add(username));
   };
 
-  const handlePokeBack = async (poke: PokeDto) => {
-    await dismissPoke(poke.id);
-    await sendPoke(poke.fromUsername);
-    setPokedUsers((prev) => new Set(prev).add(poke.fromUsername));
+  const handlePokeBack = async (pokeId: string, fromUsername: string) => {
+    await dismissPoke(pokeId);
+    await sendPoke(fromUsername);
   };
 
   return (
@@ -36,8 +33,10 @@ export function FriendsSection() {
       <div className="space-y-2">
         {friends.length === 0 && <EmptyText text="No friends yet" />}
         {friends.map((friend) => {
+          // Incoming: someone poked me (API returns pokes I received)
           const incomingPoke = pokes.find((p) => p.fromUsername === friend.username && p.isActive);
-          const alreadyPoked = pokedUsers.has(friend.username);
+          // Outgoing: I poked this friend (matched by toUsername)
+          const outgoingPoke = sentPokes.find((p) => p.toUsername === friend.username && p.isActive);
 
           return (
             <div key={friend.username} className="overflow-hidden rounded-xl border border-border">
@@ -64,12 +63,12 @@ export function FriendsSection() {
                 <div className="flex items-center gap-1">
                   {incomingPoke ? (
                     <button
-                      onClick={() => handlePokeBack(incomingPoke)}
+                      onClick={() => handlePokeBack(incomingPoke.id, incomingPoke.fromUsername)}
                       className="rounded-lg bg-primary/15 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/25"
                     >
                       Poke back 👋
                     </button>
-                  ) : alreadyPoked ? (
+                  ) : outgoingPoke ? (
                     <span className="rounded-lg bg-overlay px-3 py-1.5 text-xs font-medium text-muted">
                       Poked ✓
                     </span>

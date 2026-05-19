@@ -186,6 +186,17 @@ namespace DashyBoard.Api.Controllers
             return Ok(pokes);
         }
 
+        [HttpGet("pokes/sent")]
+        [ProducesResponseType(typeof(IReadOnlyList<PokeDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSentPokes(CancellationToken ct)
+        {
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            var pokes = await _mediator.Send(new GetSentPokesQuery(userId.Value), ct);
+            return Ok(pokes);
+        }
+
         [HttpPost("pokes/{pokeId:guid}/seen")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> MarkPokeAsSeen(Guid pokeId, CancellationToken ct)
