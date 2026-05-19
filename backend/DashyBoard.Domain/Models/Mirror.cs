@@ -53,4 +53,14 @@ public class Mirror
 
         widget.Move(x, y);
     }
+
+    public void UpdateWidgetConfig(Guid widgetId, IReadOnlyDictionary<string, object?> config)
+    {
+        var widget = Widgets.FirstOrDefault(w => w.Id == widgetId);
+
+        if (widget is null)
+            throw new KeyNotFoundException($"Widget with id {widgetId} not found.");
+
+        widget.UpdateConfig(config);
+    }
 }

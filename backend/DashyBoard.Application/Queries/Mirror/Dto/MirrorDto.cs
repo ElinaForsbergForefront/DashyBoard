@@ -17,4 +17,30 @@ public sealed class WidgetDto
     public string Type { get; set; } = string.Empty;
     public double X { get; set; }
     public double Y { get; set; }
+    public WidgetConfigDto Config { get; set; } = new EmptyWidgetConfigDto();
+}
+
+public abstract record WidgetConfigDto;
+
+public sealed record EmptyWidgetConfigDto : WidgetConfigDto;
+
+public sealed record ClockWidgetConfigDto : WidgetConfigDto
+{
+    public string Timezone { get; init; } = string.Empty;
+}
+
+public sealed record WeatherWidgetConfigDto : WidgetConfigDto
+{
+    public string City { get; init; } = string.Empty;
+}
+
+public sealed record CurrencyWidgetConfigDto : WidgetConfigDto
+{
+    public string Symbol { get; init; } = string.Empty;
+}
+
+public sealed record TrafficWidgetConfigDto : WidgetConfigDto
+{
+    public string StationName { get; init; } = string.Empty;
+    public List<string> TransportModes { get; init; } = new();
 }
