@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ClockWidgetConfig } from '../api/types/mirror';
 import { useGetCurrentUserQuery } from '../api/endpoints/user';
 import { useGetTimezonesQuery } from '../api/endpoints/worldTime';
 
@@ -6,10 +7,7 @@ const CLOCK_TIMEZONE_STORAGE_KEY = 'dashyboard.clock.timezone';
 const BROWSER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 function normalizeText(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '_');
+  return value.toLowerCase().trim().replace(/\s+/g, '_');
 }
 
 function getDefaultTimezone(
@@ -47,33 +45,47 @@ function getDefaultTimezone(
   return availableTimezones[0] ?? (BROWSER_TIMEZONE || 'UTC');
 }
 
-export function useClockTimezone() {
+export function useClockTimezone(config?: Partial<ClockWidgetConfig>) {
   const [selectedTimezone, setSelectedTimezone] = useState<string>(BROWSER_TIMEZONE || 'UTC');
 
   const { data: user } = useGetCurrentUserQuery();
   const { data: timezoneDtos = [] } = useGetTimezonesQuery();
 
   const availableTimezones = useMemo(
-    () => timezoneDtos.map((entry) => entry.timeZone).filter((timezone): timezone is string => Boolean(timezone)),
+    () =>
+      timezoneDtos
+        .map((entry) => entry.timeZone)
+        .filter((timezone): timezone is string => Boolean(timezone)),
     [timezoneDtos],
   );
 
   useEffect(() => {
     if (availableTimezones.length === 0) return;
 
-    const storedTimezone = localStorage.getItem(CLOCK_TIMEZONE_STORAGE_KEY);
-    if (storedTimezone && availableTimezones.includes(storedTimezone)) {
-      setSelectedTimezone(storedTimezone);
+    const configuredTimezone = config?.timezone?.trim();
+    if (configuredTimezone) {
+      setSelectedTimezone(configuredTimezone);
       return;
+    }
+
+    if (!config) {
+      const storedTimezone = localStorage.getItem(CLOCK_TIMEZONE_STORAGE_KEY);
+      if (storedTimezone && availableTimezones.includes(storedTimezone)) {
+        setSelectedTimezone(storedTimezone);
+        return;
+      }
     }
 
     const inferredTimezone = getDefaultTimezone(user?.city, user?.country, availableTimezones);
     setSelectedTimezone(inferredTimezone);
-  }, [availableTimezones, user?.city, user?.country]);
+  }, [availableTimezones, config, user?.city, user?.country]);
 
   const handleTimezoneChange = (timezone: string) => {
     setSelectedTimezone(timezone);
-    localStorage.setItem(CLOCK_TIMEZONE_STORAGE_KEY, timezone);
+
+    if (!config) {
+      localStorage.setItem(CLOCK_TIMEZONE_STORAGE_KEY, timezone);
+    }
   };
 
   return {

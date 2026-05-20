@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { WeatherWidgetConfig } from '../api/types/mirror';
 import { useGeocodeAddressQuery } from '../api/endpoints/geocoding';
 import {
   WEATHER_LOCATION_STORAGE_KEY,
@@ -7,10 +8,23 @@ import {
   getInitialSearchLocation,
 } from '../utils/weather';
 
-export function useWeatherLocation() {
-  const [searchLocation, setSearchLocation] = useState(getInitialSearchLocation);
+export function useWeatherLocation(config?: Partial<WeatherWidgetConfig>) {
+  const configuredSearchLocation = useMemo(() => {
+    if (config) {
+      const configuredCity = config.city?.trim();
+      return configuredCity ? buildSearchLocation({ city: configuredCity }) : '';
+    }
+
+    return getInitialSearchLocation();
+  }, [config?.city]);
+
+  const [searchLocation, setSearchLocation] = useState(configuredSearchLocation);
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [weatherLocation, setWeatherLocation] = useState<string>('');
+
+  useEffect(() => {
+    setSearchLocation(configuredSearchLocation);
+  }, [configuredSearchLocation]);
 
   const {
     data: geocodeData,
@@ -29,7 +43,10 @@ export function useWeatherLocation() {
   const hasLocation = searchLocation.trim() !== '';
 
   const saveWeatherLocation = (location: WeatherLocationSelection) => {
-    localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(location));
+    if (!config) {
+      localStorage.setItem(WEATHER_LOCATION_STORAGE_KEY, JSON.stringify(location));
+    }
+
     setSearchLocation(buildSearchLocation(location));
   };
 
