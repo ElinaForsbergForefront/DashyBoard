@@ -2,23 +2,32 @@
 using DashyBoard.Application.Mappers.Weather;
 using DashyBoard.Application.Queries.Weather.Dto;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DashyBoard.Application.Queries.Weather
 {
     public sealed class GetCurrentWeatherQueryHandler : IRequestHandler<GetCurrentWeatherQuery, CurrentWeatherDto>
     {
         private readonly IWeatherApiClient _weatherClient;
+        private readonly IMemoryCache _cache;
 
-        public GetCurrentWeatherQueryHandler(IWeatherApiClient weatherClient)
+        public GetCurrentWeatherQueryHandler(IWeatherApiClient weatherClient, IMemoryCache cache)
         {
             _weatherClient = weatherClient;
+            _cache = cache;
         }
 
         public async Task<CurrentWeatherDto> Handle(GetCurrentWeatherQuery request, CancellationToken cancellationToken)
         {
+            string cacheKey = $"current-weather:{request.longi}:{request.lati}";
+            if (_cache.TryGetValue(cacheKey, out CurrentWeatherDto cached))
+            {
+                return cached;
+            }
+
             var raw = await _weatherClient.GetCurrentWeatherAsync(request.longi, request.lati, cancellationToken);
 
-            return new CurrentWeatherDto(
+            var result = new CurrentWeatherDto(
                 raw.Latitude,
                 raw.Longitude,
                 new WeatherData(
@@ -31,6 +40,9 @@ namespace DashyBoard.Application.Queries.Weather
                     raw.Current.Day
                 )
             );
+
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(30));
+            return result;
         }
     }
 }
