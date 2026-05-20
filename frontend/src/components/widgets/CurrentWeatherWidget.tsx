@@ -9,6 +9,8 @@ import { useWeatherLocation } from '../../hooks/useWeatherLocation';
 import { WeatherForm } from '../forms/WeatherForm';
 import type { WidgetViewProps } from './types';
 
+const CURRENT_WEATHER_POLLING_INTERVAL_MS = 60 * 60 * 1000;
+
 function toPrimaryLocationLabel(location: string): string {
   return location.split(',')[0]?.trim() ?? '';
 }
@@ -40,7 +42,11 @@ export function CurrentWeatherWidget({
     error: weatherError,
   } = useGetCurrentWeatherQuery(
     { longi: coordinates?.lon.toString() ?? '0', lati: coordinates?.lat.toString() ?? '0' },
-    { skip: !coordinates },
+    {
+      skip: !coordinates,
+      pollingInterval: CURRENT_WEATHER_POLLING_INTERVAL_MS,
+      skipPollingIfUnfocused: true,
+    },
   );
 
   const { theme } = useTheme();

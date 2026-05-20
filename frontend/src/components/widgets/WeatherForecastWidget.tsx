@@ -9,6 +9,8 @@ import { WeatherForm } from '../forms/WeatherForm';
 import type { WeatherForecastWidgetDto } from '../../api/types/mirror';
 import type { WidgetViewProps } from './types';
 
+const FORECAST_POLLING_INTERVAL_MS = 12 * 60 * 60 * 1000;
+
 function toPrimaryLocationLabel(location: string): string {
   return location.split(',')[0]?.trim() ?? '';
 }
@@ -46,7 +48,11 @@ export function WeatherForecastWidget({
     error: weatherError,
   } = useGetDailyWeatherQuery(
     { longi: coordinates?.lon.toString() ?? '0', lati: coordinates?.lat.toString() ?? '0' },
-    { skip: !coordinates },
+    {
+      skip: !coordinates,
+      pollingInterval: FORECAST_POLLING_INTERVAL_MS,
+      skipPollingIfUnfocused: true,
+    },
   );
 
   const { theme } = useTheme();
