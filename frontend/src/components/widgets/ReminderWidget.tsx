@@ -6,12 +6,12 @@ import { ReminderForm } from '../forms/ReminderForm';
 import { GlassCard } from '../ui/glass-card';
 import { useEditModeContext } from '../../context/EditModeContext';
 
-const dayLabelFormatter = new Intl.DateTimeFormat('en-US', {
+const dayLabelFormatter = new Intl.DateTimeFormat('sv-SE', {
   weekday: 'short',
   day: 'numeric',
   month: 'short',
 });
-const timeFormatter = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit' });
+const timeFormatter = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit' });
 
 function formatDueAt(dueAtUtc: string): string {
   const dueAt = new Date(dueAtUtc);

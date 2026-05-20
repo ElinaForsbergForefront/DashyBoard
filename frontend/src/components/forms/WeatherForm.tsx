@@ -77,7 +77,7 @@ export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
           type="text"
           value={city}
           onChange={(event) => setCity(event.target.value)}
-          placeholder="Ex: London"
+          placeholder="Ex: Oskarshamn"
           className="rounded-md border border-border bg-card px-2 py-2 text-sm text-foreground outline-none focus:border-primary"
           maxLength={50}
           autoComplete="off"

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { enUS } from 'react-day-picker/locale';
+import { sv } from 'react-day-picker/locale';
 
 interface DateTimePickerProps {
     value: string; // datetime-local format: "YYYY-MM-DDTHH:mm"
@@ -76,7 +76,7 @@ export function DateTimePicker({ value, onChange, placeholder = 'Select date & t
                 <div className="absolute z-50 mt-1 w-64 rounded-xl border border-border bg-card shadow-2xl">
                     <DayPicker
                         mode="single"
-                        locale={enUS}
+                        locale={sv}
                         selected={selectedDate}
                         onSelect={handleDaySelect}
                         defaultMonth={selectedDate ?? new Date()}

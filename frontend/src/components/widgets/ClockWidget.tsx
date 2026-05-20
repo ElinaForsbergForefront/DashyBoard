@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { sv } from 'date-fns/locale';
 import { toZonedTime } from 'date-fns-tz';
 import { useClockTimezone } from '../../hooks/useClockTimezone';
 import { ClockTimezoneForm } from '../forms/ClockTimezoneForm';
@@ -20,7 +20,7 @@ export function ClockWidget() {
 
   const zonedNow = toZonedTime(now, selectedTimezone);
   const timeLabel = format(zonedNow, 'HH:mm:ss');
-  const dateLabel = format(zonedNow, 'd MMM, yyyy', { locale: enUS });
+  const dateLabel = format(zonedNow, 'd MMM, yyyy', { locale: sv });
 
   return (
     <>

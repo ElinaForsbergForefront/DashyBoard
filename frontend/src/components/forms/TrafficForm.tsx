@@ -72,7 +72,7 @@ export function TrafficForm({ onSuccess }: TrafficFormProps = {}) {
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        placeholder="Ex: Central Station"
+                        placeholder="Ex: Tekniska högskolan"
                         className="flex-1 rounded-md border border-border bg-card px-2 py-2 text-sm text-foreground outline-none focus:border-primary"
                     />
                     <button
