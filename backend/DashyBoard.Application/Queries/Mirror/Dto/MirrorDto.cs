@@ -34,6 +34,11 @@ public sealed record WeatherWidgetConfigDto : WidgetConfigDto
     public string City { get; init; } = string.Empty;
 }
 
+public sealed record WeatherForecastWidgetConfigDto : WidgetConfigDto
+{
+    public string City { get; init; } = string.Empty;
+}
+
 public sealed record CurrencyWidgetConfigDto : WidgetConfigDto
 {
     public string Symbol { get; init; } = string.Empty;
