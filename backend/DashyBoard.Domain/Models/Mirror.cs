@@ -29,9 +29,9 @@ public class Mirror
         HeightCm = heightCm;
     }
 
-    public void AddWidget(string type, double x, double y)
+    public void AddWidget(string type, double x, double y, IReadOnlyDictionary<string, object?>? config = null)
     {
-        Widgets.Add(new Widget(type, x, y));
+        Widgets.Add(new Widget(type, x, y, config));
     }
 
     public void RemoveWidget(Guid widgetId)
