@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
 import { toZonedTime } from 'date-fns-tz';
-import { useClockTimezone } from '../../hooks/useClockTimezone';
-import { ClockTimezoneForm } from '../forms/ClockTimezoneForm';
-import { GlassCard } from '../ui/glass-card';
-import { useEditModeContext } from '../../context/EditModeContext';
+import { Pencil } from 'lucide-react';
+import { useClockTimezone } from '../../../hooks/useClockTimezone';
+import { useEditModeContext } from '../../../context/EditModeContext';
+import { GlassCard } from '../../ui/glass-card';
+import { ClockTimezoneForm } from '../../forms/ClockTimezoneForm';
 
-export function ClockWidget() {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+export function ClockMiniWidget() {
   const [now, setNow] = useState(() => new Date());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { selectedTimezone, availableTimezones, handleTimezoneChange } = useClockTimezone();
   const { isEditMode } = useEditModeContext();
 
@@ -20,26 +20,35 @@ export function ClockWidget() {
   }, []);
 
   const zonedNow = toZonedTime(now, selectedTimezone);
-  const timeLabel = format(zonedNow, 'HH:mm:ss');
-  const dateLabel = format(zonedNow, 'd MMM, yyyy', { locale: sv });
+  const timeLabel = format(zonedNow, 'HH:mm');
+  const dateLabel = format(zonedNow, 'd MMM');
+  const tzShort = selectedTimezone.split('/').pop()?.replace('_', ' ') ?? selectedTimezone;
 
   return (
     <>
-      <GlassCard className="glass-widget w-full h-full">
-        <div className="space-y-2 text-center">
-          <p className="text-5xl font-semibold text-foreground tracking-tight">{timeLabel}</p>
-          <p className="text-foreground-secondary">{dateLabel}</p>
-          <p className="text-small text-muted">{selectedTimezone.replace('_', ' ')}</p>
+      <GlassCard className="glass-widget-mini w-full h-full">
+        <div className="flex flex-col gap-1 h-full">
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[10px] text-muted leading-none truncate">{tzShort}</p>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="shrink-0 rounded p-0.5 text-muted hover:text-foreground transition-colors"
+                aria-label="Ändra tidszon"
+              >
+                <Pencil size={11} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col items-center justify-center flex-1 gap-1 text-center">
+            <p className="text-3xl font-semibold text-foreground tracking-tight leading-none">
+              {timeLabel}
+            </p>
+            <p className="text-xs text-foreground-secondary">{dateLabel}</p>
+          </div>
         </div>
-        {isEditMode && (
-          <button
-            type="button"
-            onClick={() => setIsEditModalOpen(true)}
-            className="mt-3 w-full rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
-          >
-            Ändra tidszon
-          </button>
-        )}
       </GlassCard>
 
       {isEditModalOpen && createPortal(
@@ -61,7 +70,6 @@ export function ClockWidget() {
                 Stäng
               </button>
             </div>
-
             <ClockTimezoneForm
               timezones={availableTimezones}
               selectedTimezone={selectedTimezone}

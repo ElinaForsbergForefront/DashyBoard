@@ -360,7 +360,7 @@ function MirrorContent() {
   }, [activeMirrorId, deletingMirror?.id, setActiveMirrorId]);
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 overflow-hidden">
       <MirrorSubNav
         activeMirrorId={activeMirrorId}
         onSelectMirror={setActiveMirrorId}

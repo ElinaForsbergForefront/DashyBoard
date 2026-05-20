@@ -10,6 +10,12 @@ import { WeatherForm } from '../forms/WeatherForm';
 import { CurrentWeatherWidget} from './CurrentWeatherWidget';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
 import { SpotifyWidget } from './spotify/SpotifyWidget';
+import { ClockMiniWidget } from './miniWidgets/ClockMiniWidget';
+import { WeatherMiniWidget } from './miniWidgets/WeatherMiniWidget';
+import { CurrencyMiniWidget } from './miniWidgets/CurrencyMiniWidget';
+import { ReminderMiniWidget } from './miniWidgets/ReminderMiniWidget';
+import { TrafficMiniWidget } from './miniWidgets/TrafficMiniWidget';
+import { SpotifyMiniWidget } from './miniWidgets/SpotifyMiniWidget';
 
 
 /**
@@ -35,6 +41,7 @@ export interface WidgetDefinition {
   component: ComponentType;
   configForm?: ComponentType;
   isPremium?: boolean;
+  isMini?: boolean;
 }
 
 export const widgetRegistry: WidgetDefinition[] = [
@@ -100,7 +107,68 @@ export const widgetRegistry: WidgetDefinition[] = [
     rows: 2,
     component: SpotifyWidget,
     isPremium: true,
-  }
+  },
+  // ── Mini variants ──────────────────────────────────────────────────
+  {
+    id: 'clock-mini',
+    name: 'Clock Mini',
+    description: 'Kompakt klocka — visar aktuell tid.',
+    cols: 1,
+    rows: 1,
+    component: ClockMiniWidget,
+    isMini: true,
+  },
+  {
+    id: 'weather-mini',
+    name: 'Weather Mini',
+    description: 'Kompakt väder — visar temperatur och ikon.',
+    cols: 1,
+    rows: 1,
+    component: WeatherMiniWidget,
+    configForm: WeatherForm,
+    isMini: true,
+  },
+  {
+    id: 'currency-mini',
+    name: 'Currency Mini',
+    description: 'Kompakt kurs — visar aktuellt pris.',
+    cols: 2,
+    rows: 1,
+    component: CurrencyMiniWidget,
+    configForm: CurrencyWidgetForm,
+    isPremium: true,
+    isMini: true,
+  },
+  {
+    id: 'reminder-mini',
+    name: 'Reminder Mini',
+    description: 'Kompakt reminder — visar nästa påminnelse.',
+    cols: 1,
+    rows: 1,
+    component: ReminderMiniWidget,
+    configForm: ReminderForm,
+    isMini: true,
+  },
+  {
+    id: 'traffic-mini',
+    name: 'Traffic Mini',
+    description: 'Kompakt trafik — visar nästa avgång.',
+    cols: 1,
+    rows: 1,
+    component: TrafficMiniWidget,
+    configForm: TrafficForm,
+    isMini: true,
+  },
+  {
+    id: 'spotify-mini',
+    name: 'Spotify Mini',
+    description: 'Kompakt Spotify — visar aktuell låt.',
+    cols: 1,
+    rows: 1,
+    component: SpotifyMiniWidget,
+    isPremium: true,
+    isMini: true,
+  },
 ];
 
 // Hjälptyp — härledd automatiskt från registret, ingen manuell union-typ behövs

@@ -56,10 +56,12 @@ function WidgetSection({
 export const Widgets = () => {
   return (
     <EditModeProvider initialEditMode={false}>
+      <div className="overflow-y-auto flex-1">
       <div className="max-w-5xl mx-auto space-y-12 px-6 py-8">
         <h1 className="text-3xl font-semibold text-foreground">Widgets</h1>
         <WidgetSection title="Included" widgets={included} />
         <WidgetSection title="Premium" widgets={premium} />
+      </div>
       </div>
     </EditModeProvider>
   );
