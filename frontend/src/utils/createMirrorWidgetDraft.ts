@@ -3,6 +3,7 @@ import type {
   CurrencyWidgetDto,
   MirrorWidgetDto,
   TrafficWidgetDto,
+  WeatherForecastWidgetDto,
   WeatherWidgetDto,
 } from '../api/types/mirror';
 import { getDefaultWidgetConfig } from '../components/widgets/widgetRegistry';
@@ -30,6 +31,14 @@ export function createMirrorWidgetDraft(
         y,
         config: getDefaultWidgetConfig(type) as WeatherWidgetDto['config'],
       };
+    case 'weather-forecast':
+      return {
+        id,
+        type,
+        x,
+        y,
+        config: getDefaultWidgetConfig(type) as WeatherForecastWidgetDto['config'],
+      };
     case 'currency':
       return {
         id,
@@ -48,7 +57,6 @@ export function createMirrorWidgetDraft(
       };
     case 'reminder':
     case 'spotify':
-    case 'weather-forecast':
       return {
         id,
         type,

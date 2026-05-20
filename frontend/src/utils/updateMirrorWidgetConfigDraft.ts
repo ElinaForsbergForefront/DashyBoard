@@ -7,6 +7,8 @@ import type {
   MirrorWidgetDto,
   TrafficWidgetConfig,
   TrafficWidgetDto,
+  WeatherForecastWidgetConfig,
+  WeatherForecastWidgetDto,
   WeatherWidgetConfig,
   WeatherWidgetDto,
 } from '../api/types/mirror';
@@ -28,6 +30,12 @@ export function updateMirrorWidgetConfigDraft(
         config: config as WeatherWidgetConfig,
       } satisfies WeatherWidgetDto;
 
+    case 'weather-forecast':
+      return {
+        ...widget,
+        config: config as WeatherForecastWidgetConfig,
+      } satisfies WeatherForecastWidgetDto;
+
     case 'currency':
       return {
         ...widget,
@@ -42,7 +50,6 @@ export function updateMirrorWidgetConfigDraft(
 
     case 'reminder':
     case 'spotify':
-    case 'weather-forecast':
       return widget;
 
     default:

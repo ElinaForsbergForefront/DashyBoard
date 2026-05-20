@@ -7,6 +7,8 @@ import type {
   CurrencyWidgetDto,
   TrafficWidgetConfig,
   TrafficWidgetDto,
+  WeatherForecastWidgetConfig,
+  WeatherForecastWidgetDto,
   WeatherWidgetConfig,
   WeatherWidgetDto,
 } from '../../api/types/mirror';
@@ -76,8 +78,19 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Visar väderprognos för vald plats.',
     cols: 2,
     rows: 3,
-    component: () => <WeatherForecastWidget />,
-    createDefaultConfig: () => ({}),
+    component: (props) => (
+      <WeatherForecastWidget {...props} widget={props.widget as WeatherForecastWidgetDto} />
+    ),
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <WeatherForm
+        initialConfig={initialConfig as WeatherForecastWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({
+      city: '',
+    }),
     isPremium: true,
   },
   {

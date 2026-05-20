@@ -10,6 +10,10 @@ export interface WeatherWidgetConfig {
   city: string;
 }
 
+export interface WeatherForecastWidgetConfig {
+  city: string;
+}
+
 export interface CurrencyWidgetConfig {
   symbol: string;
 }
@@ -29,16 +33,15 @@ interface WidgetBase<TType extends string, TConfig> {
 
 export type ClockWidgetDto = WidgetBase<'clock', ClockWidgetConfig>;
 export type WeatherWidgetDto = WidgetBase<'weather', WeatherWidgetConfig>;
+export type WeatherForecastWidgetDto = WidgetBase<'weather-forecast', WeatherForecastWidgetConfig>;
 export type CurrencyWidgetDto = WidgetBase<'currency', CurrencyWidgetConfig>;
 export type TrafficWidgetDto = WidgetBase<'traffic', TrafficWidgetConfig>;
-export type PassiveWidgetDto = WidgetBase<
-  'reminder' | 'spotify' | 'weather-forecast',
-  EmptyWidgetConfig
->;
+export type PassiveWidgetDto = WidgetBase<'reminder' | 'spotify', EmptyWidgetConfig>;
 
 export type MirrorWidgetDto =
   | ClockWidgetDto
   | WeatherWidgetDto
+  | WeatherForecastWidgetDto
   | CurrencyWidgetDto
   | TrafficWidgetDto
   | PassiveWidgetDto;

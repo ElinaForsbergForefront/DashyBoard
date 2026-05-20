@@ -5,8 +5,9 @@ import { useGetDailyWeatherQuery } from '../../api/endpoints/weather';
 import { createPortal } from 'react-dom';
 import { getWeatherTypeDisplay } from '../../utils/weather';
 import { useWeatherLocation } from '../../hooks/useWeatherLocation';
-import { WeatherLocationEditModal } from './weather/WeatherLocationEditModal';
-import { useEditModeContext } from '../../context/EditModeContext';
+import { WeatherForm } from '../forms/WeatherForm';
+import type { WeatherForecastWidgetDto } from '../../api/types/mirror';
+import type { WidgetViewProps } from './types';
 
 function toPrimaryLocationLabel(location: string): string {
   return location.split(',')[0]?.trim() ?? '';
@@ -23,18 +24,21 @@ function formatDayLabel(dateString: string): string {
   }
 }
 
-export function WeatherForecastWidget() {
+export function WeatherForecastWidget({
+  widget,
+  isEditMode = false,
+  onUpdateConfig,
+}: WidgetViewProps<WeatherForecastWidgetDto>) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { isEditMode } = useEditModeContext();
   const {
     searchLocation,
     coordinates,
     weatherLocation,
+    formattedWeatherLocation,
     isGeocoding,
     geocodeError,
     hasLocation,
-    saveWeatherLocation,
-  } = useWeatherLocation();
+  } = useWeatherLocation(widget.config);
 
   const {
     data: dailyWeather,
@@ -54,12 +58,10 @@ export function WeatherForecastWidget() {
       ? 'Kunde inte hämta väderprognosen för platsen.'
       : undefined;
 
-  const handleLocationSubmit = (newLocationCity: string) => {
-    saveWeatherLocation({ city: newLocationCity });
-    setIsEditModalOpen(false);
-  };
   const locationLabel =
-    toPrimaryLocationLabel(weatherLocation) || toPrimaryLocationLabel(searchLocation);
+    toPrimaryLocationLabel(formattedWeatherLocation) ||
+    toPrimaryLocationLabel(weatherLocation) ||
+    searchLocation;
 
   return (
     <>
@@ -67,7 +69,7 @@ export function WeatherForecastWidget() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground-secondary">Weather Forecast</h3>
-            {isEditMode && (
+            {isEditMode && onUpdateConfig && (
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
@@ -133,7 +135,7 @@ export function WeatherForecastWidget() {
 
           {!isLoading && !dailyWeather && !hasLocation && (
             <p className="text-xs text-muted">
-              Ingen plats vald ännu. Klicka på Edit för att lägga till.
+              Ingen plats vald ännu.
             </p>
           )}
 
@@ -146,12 +148,37 @@ export function WeatherForecastWidget() {
       </GlassCard>
 
       {isEditModalOpen &&
+        onUpdateConfig &&
         createPortal(
-          <WeatherLocationEditModal
-            title="Weather Forecast"
-            onClose={() => setIsEditModalOpen(false)}
-            onLocationSubmit={handleLocationSubmit}
-          />,
+          <div
+            className="fixed inset-0 z-80 flex items-center justify-center bg-black/60 p-4"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <GlassCard
+              className="glass-form w-full max-w-md"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-foreground">Edit weather forecast</h4>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+                >
+                  Close
+                </button>
+              </div>
+
+              <WeatherForm
+                initialConfig={{ city: widget.config?.city ?? '' }}
+                onSubmit={(config) => {
+                  onUpdateConfig(config);
+                  setIsEditModalOpen(false);
+                }}
+                onCancel={() => setIsEditModalOpen(false)}
+              />
+            </GlassCard>
+          </div>,
           document.body,
         )}
     </>
