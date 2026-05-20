@@ -1,6 +1,7 @@
-import { widgetRegistry } from '../components/widgets/widgetRegistry';
+import { widgetRegistry, type WidgetType } from '../components/widgets/widgetRegistry';
 import { EditModeProvider } from '../context/EditModeContext';
 import { GRID_UNIT_CM, REFERENCE_SCALE } from '../constants/grid';
+import { createMirrorWidgetDraft } from '../utils/createMirrorWidgetDraft';
 
 const included = widgetRegistry.filter((w) => !w.isPremium);
 const premium = widgetRegistry.filter((w) => w.isPremium);
@@ -17,6 +18,12 @@ function WidgetCard({ widget }: { widget: (typeof widgetRegistry)[number] }) {
   const Component = widget.component;
   const previewWidth = widget.cols * GRID_UNIT_CM * REFERENCE_SCALE;
   const previewHeight = widget.rows * GRID_UNIT_CM * REFERENCE_SCALE;
+  const previewWidget = createMirrorWidgetDraft(
+    `preview-${widget.id}`,
+    widget.id as WidgetType,
+    0,
+    0,
+  );
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -26,7 +33,7 @@ function WidgetCard({ widget }: { widget: (typeof widgetRegistry)[number] }) {
           className="pointer-events-none select-none"
           style={{ width: previewWidth, height: previewHeight }}
         >
-          <Component />
+          <Component widget={previewWidget} />
         </div>
       </div>
       <p className="text-sm font-medium text-foreground-secondary">{widget.name}</p>
@@ -34,13 +41,7 @@ function WidgetCard({ widget }: { widget: (typeof widgetRegistry)[number] }) {
   );
 }
 
-function WidgetSection({
-  title,
-  widgets,
-}: {
-  title: string;
-  widgets: typeof widgetRegistry;
-}) {
+function WidgetSection({ title, widgets }: { title: string; widgets: typeof widgetRegistry }) {
   return (
     <section className="space-y-6">
       <h2 className="text-lg font-semibold text-foreground">{title}</h2>

@@ -1,30 +1,32 @@
-﻿import type { ComponentType } from 'react';
-import { ClockWidget } from './ClockWidget';
-import { ReminderForm } from '../forms/ReminderForm';
-import { ReminderWidget } from './ReminderWidget';
-import { CurrencyWidget } from './CurrencyWidget';
+﻿import type { ReactNode } from 'react';
+import type {
+  AnyWidgetConfig,
+  ClockWidgetConfig,
+  ClockWidgetDto,
+  CurrencyWidgetConfig,
+  CurrencyWidgetDto,
+  TrafficWidgetConfig,
+  TrafficWidgetDto,
+  WeatherWidgetConfig,
+  WeatherWidgetDto,
+} from '../../api/types/mirror';
+import { ClockTimezoneForm } from '../forms/ClockTimezoneForm';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
 import { TrafficForm } from '../forms/TrafficForm';
-import { TrafficWidget } from './TrafficWidget';
 import { WeatherForm } from '../forms/WeatherForm';
-import { CurrentWeatherWidget} from './CurrentWeatherWidget';
-import { WeatherForecastWidget } from './WeatherForecastWidget';
+import type { WidgetSettingsFormProps, WidgetViewProps } from './types';
+import { ClockWidget } from './ClockWidget';
+import { CurrencyWidget } from './CurrencyWidget';
+import { CurrentWeatherWidget } from './CurrentWeatherWidget';
+import { ReminderWidget } from './ReminderWidget';
 import { SpotifyWidget } from './spotify/SpotifyWidget';
+import { TrafficWidget } from './TrafficWidget';
+import { WeatherForecastWidget } from './WeatherForecastWidget';
 
+const DEFAULT_CLOCK_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
-/**
- * Widget registry — det enda stället du behöver ändra för att lägga till en ny widget.
- *
- * Lägg till en ny widget så här:
- *
- *   {
- *     id: 'gold',
- *     name: 'Guld',
- *     description: 'Visar aktuellt guldpris.',
- *     component: GoldWidget,
- *     // configForm: GoldWidgetForm,  ← lägg till om widgeten behöver konfigformulär
- *   },
- */
+type WidgetComponent = (props: WidgetViewProps) => ReactNode;
+type WidgetConfigFormComponent = (props: WidgetSettingsFormProps) => ReactNode;
 
 export interface WidgetDefinition {
   id: string;
@@ -32,8 +34,9 @@ export interface WidgetDefinition {
   description: string;
   cols: number;
   rows: number;
-  component: ComponentType;
-  configForm?: ComponentType;
+  component: WidgetComponent;
+  configForm?: WidgetConfigFormComponent;
+  createDefaultConfig: () => AnyWidgetConfig;
   isPremium?: boolean;
 }
 
@@ -44,8 +47,8 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Skapa påminnelser som visas i reminder-widgeten.',
     cols: 2,
     rows: 2,
-    component: ReminderWidget,
-    configForm: ReminderForm,
+    component: () => <ReminderWidget />,
+    createDefaultConfig: () => ({}),
   },
   {
     id: 'weather',
@@ -53,8 +56,19 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Visar aktuellt väder för vald plats.',
     cols: 2,
     rows: 2,
-    component: CurrentWeatherWidget,
-    configForm: WeatherForm,
+    component: (props) => (
+      <CurrentWeatherWidget {...props} widget={props.widget as WeatherWidgetDto} />
+    ),
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <WeatherForm
+        initialConfig={initialConfig as WeatherWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({
+      city: '',
+    }),
   },
   {
     id: 'weather-forecast',
@@ -62,7 +76,8 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Visar väderprognos för vald plats.',
     cols: 2,
     rows: 3,
-    component: WeatherForecastWidget,
+    component: () => <WeatherForecastWidget />,
+    createDefaultConfig: () => ({}),
     isPremium: true,
   },
   {
@@ -71,8 +86,17 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Track any asset — currencies, crypto, stocks — with a live price chart.',
     cols: 3,
     rows: 2,
-    component: CurrencyWidget,
-    configForm: CurrencyWidgetForm,
+    component: (props) => <CurrencyWidget {...props} widget={props.widget as CurrencyWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <CurrencyWidgetForm
+        initialConfig={initialConfig as CurrencyWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({
+      symbol: '',
+    }),
     isPremium: true,
   },
   {
@@ -81,7 +105,17 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Visar aktuell tid baserat på vald tidszon.',
     cols: 2,
     rows: 2,
-    component: ClockWidget,
+    component: (props) => <ClockWidget {...props} widget={props.widget as ClockWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <ClockTimezoneForm
+        initialConfig={initialConfig as ClockWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({
+      timezone: DEFAULT_CLOCK_TIMEZONE,
+    }),
   },
   {
     id: 'traffic',
@@ -89,8 +123,18 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Shows departing public transport from a selected station.',
     cols: 3,
     rows: 3,
-    component: TrafficWidget, 
-    configForm: TrafficForm,
+    component: (props) => <TrafficWidget {...props} widget={props.widget as TrafficWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <TrafficForm
+        initialConfig={initialConfig as TrafficWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({
+      stationName: '',
+      transportModes: ['BUS', 'TRAM', 'TRAIN'],
+    }),
   },
   {
     id: 'spotify',
@@ -98,10 +142,20 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Visar vad du lyssnar på just nu.',
     cols: 2,
     rows: 2,
-    component: SpotifyWidget,
+    component: () => <SpotifyWidget />,
+    createDefaultConfig: () => ({}),
     isPremium: true,
-  }
+  },
 ];
 
-// Hjälptyp — härledd automatiskt från registret, ingen manuell union-typ behövs
+const widgetRegistryMap = new Map(widgetRegistry.map((widget) => [widget.id, widget]));
+
+export function getWidgetDefinition(widgetType: string) {
+  return widgetRegistryMap.get(widgetType) ?? null;
+}
+
+export function getDefaultWidgetConfig(widgetType: string): AnyWidgetConfig {
+  return getWidgetDefinition(widgetType)?.createDefaultConfig() ?? {};
+}
+
 export type WidgetType = (typeof widgetRegistry)[number]['id'];
