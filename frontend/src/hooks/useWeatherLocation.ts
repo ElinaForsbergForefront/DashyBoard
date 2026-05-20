@@ -21,6 +21,7 @@ export function useWeatherLocation(config?: Partial<WeatherWidgetConfig>) {
   const [searchLocation, setSearchLocation] = useState(configuredSearchLocation);
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [weatherLocation, setWeatherLocation] = useState<string>('');
+  const [formattedWeatherLocation, setFormattedWeatherLocation] = useState<string>('');
 
   useEffect(() => {
     setSearchLocation(configuredSearchLocation);
@@ -38,6 +39,7 @@ export function useWeatherLocation(config?: Partial<WeatherWidgetConfig>) {
     if (!geocodeData) return;
     setCoordinates({ lat: geocodeData.latitude, lon: geocodeData.longitude });
     setWeatherLocation(geocodeData.address ?? searchLocation);
+    setFormattedWeatherLocation(geocodeData.formattedAddress ?? geocodeData.address ?? '');
   }, [geocodeData, searchLocation]);
 
   const hasLocation = searchLocation.trim() !== '';
@@ -54,6 +56,7 @@ export function useWeatherLocation(config?: Partial<WeatherWidgetConfig>) {
     searchLocation,
     coordinates,
     weatherLocation,
+    formattedWeatherLocation,
     isGeocoding,
     geocodeError,
     hasLocation,

@@ -18,7 +18,7 @@ export function WeatherForm({ initialConfig, onSubmit, onCancel }: WeatherFormPr
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setDebouncedCity(trimmedCity);
-    }, 500);
+    }, 2000);
 
     return () => window.clearTimeout(timeoutId);
   }, [trimmedCity]);

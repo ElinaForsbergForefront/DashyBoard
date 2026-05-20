@@ -8,6 +8,10 @@ import { useWeatherLocation } from '../../hooks/useWeatherLocation';
 import { WeatherLocationEditModal } from './weather/WeatherLocationEditModal';
 import { useEditModeContext } from '../../context/EditModeContext';
 
+function toPrimaryLocationLabel(location: string): string {
+  return location.split(',')[0]?.trim() ?? '';
+}
+
 function formatDayLabel(dateString: string): string {
   const date = new Date(dateString);
   const today = new Date();
@@ -54,6 +58,8 @@ export function WeatherForecastWidget() {
     saveWeatherLocation({ city: newLocationCity });
     setIsEditModalOpen(false);
   };
+  const locationLabel =
+    toPrimaryLocationLabel(weatherLocation) || toPrimaryLocationLabel(searchLocation);
 
   return (
     <>
@@ -81,8 +87,7 @@ export function WeatherForecastWidget() {
           {!isLoading && dailyWeather && (
             <div className="flex flex-col space-y-2 flex-1">
               <p className="text-xs text-muted shrink-0">
-                {(weatherLocation || searchLocation).charAt(0).toUpperCase() +
-                  (weatherLocation || searchLocation).slice(1)}
+                {locationLabel.charAt(0).toUpperCase() + locationLabel.slice(1)}
               </p>
               <div className="space-y-1 overflow-y-auto subtle-scrollbar pr-4 flex-1">
                 {dailyWeather.daily.time.map((date, index) => {
