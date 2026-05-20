@@ -24,7 +24,13 @@ public static class MongoDbConfigurator
             BsonClassMap.RegisterClassMap<Widget>(cm =>
             {
                 cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
                 cm.MapIdMember(w => w.Id).SetSerializer(new GuidSerializer(BsonType.String));
+                cm.MapCreator(w => new Widget(
+                    w.Type,
+                    w.X,
+                    w.Y,
+                    w.Config));
             });
         }
     }

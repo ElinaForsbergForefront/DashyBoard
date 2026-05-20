@@ -31,7 +31,11 @@ public class Mirror
 
     public void AddWidget(string type, double x, double y, IReadOnlyDictionary<string, object?>? config = null)
     {
-        Widgets.Add(new Widget(type, x, y, config));
+        Widgets.Add(new Widget(
+            type,
+            x,
+            y,
+            config is null ? null : new Dictionary<string, object?>(config)));
     }
 
     public void RemoveWidget(Guid widgetId)

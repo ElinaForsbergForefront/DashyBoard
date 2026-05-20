@@ -17,7 +17,7 @@ public sealed class WidgetDto
     public string Type { get; set; } = string.Empty;
     public double X { get; set; }
     public double Y { get; set; }
-    public WidgetConfigDto Config { get; set; } = new EmptyWidgetConfigDto();
+    public object Config { get; set; } = new EmptyWidgetConfigDto();
 }
 
 public abstract record WidgetConfigDto;

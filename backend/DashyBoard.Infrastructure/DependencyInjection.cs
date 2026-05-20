@@ -1,18 +1,14 @@
-using DashyBoard.Application.Interfaces;         
-using DashyBoard.Domain.Configuration;
+using DashyBoard.Application.Interfaces;
 using DashyBoard.Infrastructure.Clients;
 using DashyBoard.Infrastructure.Configuration;
 using DashyBoard.Infrastructure.External;
 using DashyBoard.Infrastructure.External.Location;
 using DashyBoard.Infrastructure.Repositories;
 using DashyBoard.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using DashyBoard.Infrastructure.Services;
 using MongoDB.Driver;
-
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DashyBoard.Infrastructure;
 

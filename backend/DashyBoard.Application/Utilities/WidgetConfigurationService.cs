@@ -97,7 +97,7 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
         return new Dictionary<string, object?>
         {
             ["stationName"] = ReadOptionalString(config, "stationName")?.Trim() ?? string.Empty,
-            ["transportModes"] = transportModes,
+            ["transportModes"] = transportModes.ToArray(),
         };
     }
 
