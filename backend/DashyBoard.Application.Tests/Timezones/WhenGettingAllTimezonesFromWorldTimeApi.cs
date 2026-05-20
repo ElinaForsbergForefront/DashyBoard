@@ -20,7 +20,7 @@ public class WhenGettingAllTimezonesFromWorldTimeApi
         };
 
         // This test verifies that the handler calls the client correctly
-        // och returnerar den data som den f�r tillbaka.
+        // and returns the data that it receives.
         var mockClient = new Mock<IWorldTimeApiClient>();
         mockClient
             .Setup(x => x.GetAllTimezonesAsync(It.IsAny<CancellationToken>()))
