@@ -338,7 +338,7 @@ namespace DashyBoard.Infrastructure.Repositories
                 };
             }
 
-            // Om den andra användaren har blockerat mig, returnera null (jag kan inte se dem)
+            // If the other user has blocked me, return null (I cannot see them)
             if (relationship.Status == UserRelationshipStatus.Blocked 
                 && relationship.ActionByUserId != currentUserId)
             {

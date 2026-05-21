@@ -65,7 +65,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// CORS m�ste komma F�RE SecurityHeaders
+// CORS must come BEFORE SecurityHeaders
 app.UseCors("AllowFrontend");
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();

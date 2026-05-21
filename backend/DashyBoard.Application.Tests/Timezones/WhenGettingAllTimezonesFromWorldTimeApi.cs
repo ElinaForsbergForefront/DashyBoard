@@ -19,8 +19,8 @@ public class WhenGettingAllTimezonesFromWorldTimeApi
             new TimezoneDto("Australia/Sydney")
         };
 
-        // Testet verifiera att handlern anropar klienten korrekt
-        // och returnerar den data som den får tillbaka.
+        // This test verifies that the handler calls the client correctly
+        // and returns the data that it receives.
         var mockClient = new Mock<IWorldTimeApiClient>();
         mockClient
             .Setup(x => x.GetAllTimezonesAsync(It.IsAny<CancellationToken>()))

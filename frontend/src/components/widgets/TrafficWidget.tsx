@@ -8,7 +8,7 @@ import { useEditModeContext } from '../../context/EditModeContext';
 
 import { BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
 
-    const scheduledFormatter = new Intl.DateTimeFormat('sv-SE', {
+    const scheduledFormatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit'
     });

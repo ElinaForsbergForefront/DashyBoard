@@ -120,7 +120,7 @@ namespace DashyBoard.Api.Controllers
             if (string.IsNullOrWhiteSpace(sub))
                 return Unauthorized();
 
-            // Hämta current user id
+            // Get the current user id
             var currentUser = await _mediator.Send(new GetUserBySubQuery(sub), ct);
             
             var users = await _mediator.Send(new SearchUsersQuery(q, currentUser.Id), ct);
