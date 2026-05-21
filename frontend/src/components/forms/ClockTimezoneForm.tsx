@@ -40,15 +40,15 @@ export function ClockTimezoneForm({
   };
 
   if (timezones.length === 0) {
-    return <div className="p-2 text-sm text-destructive">Inga tidszoner är tillgängliga</div>;
+    return <div className="p-2 text-sm text-destructive">No timezones available</div>;
   }
 
   return (
     <FormCard onSubmit={onSubmit}>
-      <p className="text-sm font-medium text-foreground">Tidszon</p>
+      <p className="text-sm font-medium text-foreground">Timezone</p>
 
       <label className="flex flex-col gap-1 text-xs text-muted">
-        Välj tidszon
+        Select timezone
         <select
           value={pendingTimezone}
           onChange={(event) => setPendingTimezone(event.target.value)}
@@ -66,7 +66,7 @@ export function ClockTimezoneForm({
         type="submit"
         className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white"
       >
-        Klar
+        Done
       </button>
     </FormCard>
   );

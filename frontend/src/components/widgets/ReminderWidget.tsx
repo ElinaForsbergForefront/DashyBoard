@@ -15,7 +15,7 @@ const timeFormatter = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute
 
 function formatDueAt(dueAtUtc: string): string {
   const dueAt = new Date(dueAtUtc);
-  return `${dayLabelFormatter.format(dueAt)} kl ${timeFormatter.format(dueAt)}`;
+  return `${dayLabelFormatter.format(dueAt)} at ${timeFormatter.format(dueAt)}`;
 }
 
 function sortUpcoming(reminders: ReminderDto[]): ReminderDto[] {
@@ -55,11 +55,11 @@ export function ReminderWidget() {
             </div>
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Laddar reminders...</p>}
+          {isLoading && <p className="text-xs text-muted">Loading reminders...</p>}
 
-          {isError && <p className="text-xs text-muted">Kunde inte hämta reminders just nu.</p>}
+          {isError && <p className="text-xs text-muted">Could not fetch reminders right now.</p>}
 
-          {showEmptyState && <p className="text-xs text-muted">Inga aktiva reminders ännu.</p>}
+          {showEmptyState && <p className="text-xs text-muted">No active reminders yet.</p>}
 
           {!isLoading && !isError && visibleReminders.length > 0 && (
             <div className="space-y-2">
@@ -94,13 +94,13 @@ function ReminderEditModal({ onClose }: { onClose: () => void }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-foreground">Skapa reminder</h4>
+          <h4 className="text-sm font-semibold text-foreground">Create reminder</h4>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
           >
-            Stäng
+            Close
           </button>
         </div>
 

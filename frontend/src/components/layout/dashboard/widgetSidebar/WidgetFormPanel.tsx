@@ -15,7 +15,7 @@ export function WidgetFormPanel({ selectedWidget }: WidgetFormPanelProps) {
   if (!activeWidget) {
     return (
       <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted text-center">
-        Välj en widget för att fortsätta.
+        Select a widget to continue.
       </div>
     );
   }
@@ -23,7 +23,7 @@ export function WidgetFormPanel({ selectedWidget }: WidgetFormPanelProps) {
   if (!activeWidget.configForm) {
     return (
       <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted">
-        <p>Den här widgeten behöver ingen konfiguration.</p>
+        <p>This widget requires no configuration.</p>
       </div>
     );
   }

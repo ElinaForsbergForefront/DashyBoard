@@ -34,13 +34,13 @@ export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
 
   const cityError =
     !trimmedCity
-      ? 'Ange en stad'
+      ? 'Enter a city'
       : trimmedCity.length < 2
-        ? 'Skriv minst 2 bokstäver'
+        ? 'Enter at least 2 characters'
         : isWaitingForValidation || isValidatingCity
           ? ''
         : geocodeError
-          ? 'Staden kunde inte hittas'
+          ? 'City could not be found'
           : '';
 
   const isSubmitDisabled =
@@ -48,8 +48,8 @@ export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
 
   const cityHelperText =
     isWaitingForValidation || isValidatingCity
-      ? 'Validerar stad...'
-      : 'Ange en stad som existerar';
+      ? 'Validating city...'
+      : 'Enter an existing city';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -60,19 +60,19 @@ export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
     try {
       const submittedCity = city.trim();
       setCity('');
-      setFeedback('Väder-konfigurationen sparades.');
+      setFeedback('Weather configuration saved.');
       onSuccess?.(submittedCity);
     } catch {
-      setFeedback('Kunde inte konfigurera väder. Försök igen.');
+      setFeedback('Could not configure weather. Please try again.');
     }
   };
 
   return (
     <FormCard onSubmit={handleSubmit}>
-      <p className="text-sm font-medium text-foreground">Väder Configuration</p>
+      <p className="text-sm font-medium text-foreground">Weather Configuration</p>
 
       <label className="flex flex-col gap-1 text-xs text-muted">
-        Stad
+        City
         <input
           type="text"
           value={city}
@@ -91,7 +91,7 @@ export function WeatherForm({ onSuccess }: WeatherFormProps = {}) {
         disabled={isSubmitDisabled}
         className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
-        {isValidatingCity ? 'Validerar...' : 'Konfigurera väder'}
+        {isValidatingCity ? 'Validating...' : 'Configure weather'}
       </button>
 
       {feedback && <p className="text-xs text-muted">{feedback}</p>}
