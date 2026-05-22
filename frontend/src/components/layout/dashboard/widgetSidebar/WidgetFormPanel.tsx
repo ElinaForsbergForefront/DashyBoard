@@ -16,7 +16,7 @@ export function WidgetFormPanel({
   if (!widget) {
     return (
       <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted text-center">
-        Välj en widget på mirrorn för att ändra inställningar.
+        Select a widget to continue.
       </div>
     );
   }
@@ -30,7 +30,7 @@ export function WidgetFormPanel({
           <h3 className="text-sm font-semibold text-foreground">
             {definition?.name ?? widget.type}
           </h3>
-          <p className="text-xs text-muted">Widget-ID: {widget.id}</p>
+          <p className="text-xs text-muted">Widget ID: {widget.id}</p>
         </div>
 
         <button
@@ -38,7 +38,7 @@ export function WidgetFormPanel({
           onClick={onClearSelectedWidget}
           className="rounded-md border border-border px-2 py-1 text-xs text-muted transition hover:text-foreground"
         >
-          Stäng
+          Close
         </button>
       </div>
 

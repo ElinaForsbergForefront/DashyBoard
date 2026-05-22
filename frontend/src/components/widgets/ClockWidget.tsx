@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { toZonedTime } from 'date-fns-tz';
 import type { ClockWidgetDto } from '../../api/types/mirror';
 import { ClockTimezoneForm } from '../forms/ClockTimezoneForm';
@@ -43,7 +43,7 @@ export function ClockWidget({
 
   const zonedNow = toZonedTime(now, selectedTimezone);
   const timeLabel = format(zonedNow, 'HH:mm:ss');
-  const dateLabel = format(zonedNow, 'd MMM, yyyy', { locale: sv });
+  const dateLabel = format(zonedNow, 'd MMM, yyyy', { locale: enUS });
 
   return (
     <>
@@ -63,7 +63,7 @@ export function ClockWidget({
             onClick={() => setIsEditModalOpen(true)}
             className="mt-3 w-full rounded-md border border-border bg-overlay px-2 py-1 text-xs text-foreground-secondary transition hover:bg-glass"
           >
-            Edit
+            Change timezone
           </button>
         )}
       </GlassCard>
@@ -80,7 +80,7 @@ export function ClockWidget({
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-foreground">Edit clock</h4>
+                <h4 className="text-sm font-semibold text-foreground">Change timezone</h4>
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}

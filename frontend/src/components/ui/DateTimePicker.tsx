@@ -34,10 +34,10 @@ function formatDisplay(value: string): string {
         day: 'numeric',
         month: 'short',
     }).format(date);
-    return timePart ? `${dayLabel} kl ${timePart}` : dayLabel;
+    return timePart ? `${dayLabel} at ${timePart}` : dayLabel;
 }
 
-export function DateTimePicker({ value, onChange, placeholder = 'Välj datum & tid' }: DateTimePickerProps) {
+export function DateTimePicker({ value, onChange, placeholder = 'Select date & time' }: DateTimePickerProps) {
     const [open, setOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const { date: selectedDate, time } = toDateParts(value);
@@ -106,7 +106,7 @@ export function DateTimePicker({ value, onChange, placeholder = 'Välj datum & t
                     />
 
                     <div className="mx-3 mb-3 flex items-center justify-between gap-3 border-t border-border pt-3">
-                        <span className="text-xs text-muted">Tid</span>
+                        <span className="text-xs text-muted">Time</span>
                         <input
                             type="time"
                             value={time}
@@ -121,7 +121,7 @@ export function DateTimePicker({ value, onChange, placeholder = 'Välj datum & t
                             onClick={() => setOpen(false)}
                             className="w-full rounded-md bg-primary py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity"
                         >
-                            Klar
+                            Done
                         </button>
                     </div>
                 </div>
