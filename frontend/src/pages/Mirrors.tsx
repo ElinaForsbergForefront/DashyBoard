@@ -105,8 +105,8 @@ function MirrorContent() {
     if (stateId) setActiveMirrorId(stateId);
   }, [location.state, setActiveMirrorId]);
 
-  // Fallback: if edit mode was persisted via localStorage and the mirror data
-  // arrives after mount, initialise the local copy automatically.
+  // If edit mode is active and the mirror data arrives after mount,
+  // initialise the local copy automatically.
   useEffect(() => {
     if (isEditMode && activeMirror && snapshotRef.current === null) {
       const snapshot = structuredClone(activeMirror);
@@ -354,10 +354,57 @@ function MirrorContent() {
     };
   }, [activeMirrorId, flushMirrorChanges, isAutosaveEnabled, isEditMode]);
 
+  // Warn on full-page reload/close while editing so users do not accidentally lose draft changes.
+  useEffect(() => {
+    if (!isEditMode) {
+      return;
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isEditMode]);
+
   const handleDeleted = useCallback(() => {
-    if (deletingMirror?.id === activeMirrorId) setActiveMirrorId(null);
+    const deletedMirrorId = deletingMirror?.id;
+
+    if (!deletedMirrorId) {
+      setDeletingMirror(null);
+      return;
+    }
+
+    const removedActiveOrDraftMirror =
+      deletedMirrorId === activeMirrorId || localMirrorRef.current?.id === deletedMirrorId;
+
+    if (removedActiveOrDraftMirror) {
+      clearAutosaveStatusTimer();
+      updateAutosaveStatus('idle');
+      pendingAutosaveSyncMirrorIdRef.current = null;
+      saveInFlightRef.current = false;
+      setLocalMirror(null);
+      localMirrorRef.current = null;
+      snapshotRef.current = null;
+      discardEditMode();
+      setActiveMirrorId(null);
+      navigate('/');
+    }
+
     setDeletingMirror(null);
-  }, [activeMirrorId, deletingMirror?.id, setActiveMirrorId]);
+  }, [
+    activeMirrorId,
+    clearAutosaveStatusTimer,
+    deletingMirror?.id,
+    discardEditMode,
+    navigate,
+    setActiveMirrorId,
+    updateAutosaveStatus,
+  ]);
 
   return (
     <div className="flex flex-col flex-1">
