@@ -37,7 +37,7 @@ export function WidgetPicker({
         <p className="text-sm font-medium">{widget.name}</p>
         {widget.isMini && (
           <span className="shrink-0 rounded px-1 py-0.5 text-[10px] font-medium bg-overlay text-muted">
-            {widget.cols}×{widget.rows}
+            {widget.cols}Ã—{widget.rows}
           </span>
         )}
       </div>
@@ -47,8 +47,7 @@ export function WidgetPicker({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted">1. Välj widget</p>
-
+      <p className="text-xs text-muted">1. Select widget</p>
       <div className="flex flex-col gap-2">
         {normalWidgets.map(renderButton)}
       </div>
