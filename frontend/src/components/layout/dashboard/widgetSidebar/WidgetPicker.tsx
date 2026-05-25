@@ -1,19 +1,15 @@
+import { useState } from 'react';
 import { widgetOptions } from './types.ts';
 import type { WidgetType } from './types.ts';
 
 interface WidgetPickerProps {
-  selectedWidget: WidgetType | null;
-  onSelectWidget: (widget: WidgetType) => void;
   onAddWidget: (widget: WidgetType) => void;
   canAddWidget: boolean;
 }
 
-export function WidgetPicker({
-  selectedWidget,
-  onSelectWidget,
-  onAddWidget,
-  canAddWidget,
-}: WidgetPickerProps) {
+export function WidgetPicker({ onAddWidget, canAddWidget }: WidgetPickerProps) {
+  const [selectedWidgetType, setSelectedWidgetType] = useState<WidgetType | null>(null);
+
   return (
     <div className="space-y-2">
       <p className="text-xs text-muted">1. Select widget</p>
@@ -23,13 +19,13 @@ export function WidgetPicker({
             key={widget.id}
             type="button"
             onClick={() => {
-              onSelectWidget(widget.id);
+              setSelectedWidgetType(widget.id);
               if (canAddWidget) {
                 onAddWidget(widget.id);
               }
             }}
             className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${
-              selectedWidget === widget.id
+              selectedWidgetType === widget.id
                 ? 'border-primary bg-primary/10 text-foreground'
                 : 'border-border bg-surface text-muted hover:text-foreground'
             }`}

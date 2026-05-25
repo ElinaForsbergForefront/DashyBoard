@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DashyBoard.Application.Interfaces;
+using DashyBoard.Application.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DashyBoard.Application
 {
@@ -19,6 +21,7 @@ namespace DashyBoard.Application
         {
             // Registers all IRequestHandler implementations in the Application assembly
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+            services.AddScoped<IWidgetConfigurationService, WidgetConfigurationService>();
     
             return services;
         }

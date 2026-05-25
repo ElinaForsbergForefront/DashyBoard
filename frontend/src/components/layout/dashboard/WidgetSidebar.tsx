@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useEditModeContext } from '../../../context/EditModeContext';
 import { WidgetPicker } from './widgetSidebar/WidgetPicker.tsx';
 import type { WidgetType } from './widgetSidebar/types.ts';
@@ -13,14 +12,11 @@ export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps)
 
   return (
     <>
-      {/* Desktop: always visible inline */}
-      <aside className="hidden lg:flex w-60 min-h-full bg-card border-r border-border flex-col gap-4 p-4 shrink-0">
+      <aside className="hidden lg:flex w-72 min-h-full bg-card border-r border-border flex-col gap-4 p-4 shrink-0 overflow-y-auto">
         <SidebarContent onAddWidget={onAddWidget} canAddWidget={canAddWidget} />
       </aside>
 
-      {/* Mobile: slide-in overlay */}
       <>
-        {/* Backdrop */}
         <div
           onClick={toggleSidebar}
           className={`lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
@@ -28,9 +24,8 @@ export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps)
           }`}
         />
 
-        {/* Drawer */}
         <aside
-          className={`lg:hidden fixed top-0 left-0 z-50 h-full w-72 bg-card border-r border-border flex flex-col gap-4 p-4 transition-transform duration-300 ${
+          className={`lg:hidden fixed top-0 left-0 z-50 h-full w-80 bg-card border-r border-border flex flex-col gap-4 p-4 transition-transform duration-300 overflow-y-auto ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -44,6 +39,7 @@ export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps)
               <CloseIcon />
             </button>
           </div>
+
           <SidebarContent
             hideHeading
             onAddWidget={(widget) => {
@@ -76,18 +72,12 @@ function SidebarContent({
   onAddWidget: (widget: WidgetType) => void;
   canAddWidget: boolean;
 }) {
-  const [selectedWidget, setSelectedWidget] = useState<WidgetType | null>(null);
-
   return (
     <>
       {!hideHeading && <SidebarHeading />}
-      <div className="flex flex-col gap-3">
-        <WidgetPicker
-          selectedWidget={selectedWidget}
-          onSelectWidget={setSelectedWidget}
-          onAddWidget={onAddWidget}
-          canAddWidget={canAddWidget}
-        />
+
+      <div className="flex flex-col gap-4">
+        <WidgetPicker onAddWidget={onAddWidget} canAddWidget={canAddWidget} />
       </div>
     </>
   );

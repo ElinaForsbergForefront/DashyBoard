@@ -75,10 +75,11 @@ export function ReminderWidget() {
         </div>
       </GlassCard>
 
-      {isEditModalOpen && createPortal(
-        <ReminderEditModal onClose={() => setIsEditModalOpen(false)} />,
-        document.body,
-      )}
+      {isEditModalOpen &&
+        createPortal(
+          <ReminderEditModal onClose={() => setIsEditModalOpen(false)} />,
+          document.body,
+        )}
     </>
   );
 }
@@ -86,7 +87,7 @@ export function ReminderWidget() {
 function ReminderEditModal({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-80 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
     >
       <div

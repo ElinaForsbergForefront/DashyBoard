@@ -29,9 +29,13 @@ public class Mirror
         HeightCm = heightCm;
     }
 
-    public void AddWidget(string type, double x, double y)
+    public void AddWidget(string type, double x, double y, IReadOnlyDictionary<string, object?>? config = null)
     {
-        Widgets.Add(new Widget(type, x, y));
+        Widgets.Add(new Widget(
+            type,
+            x,
+            y,
+            config is null ? null : new Dictionary<string, object?>(config)));
     }
 
     public void RemoveWidget(Guid widgetId)
@@ -52,5 +56,15 @@ public class Mirror
             throw new KeyNotFoundException($"Widget with id {widgetId} not found.");
 
         widget.Move(x, y);
+    }
+
+    public void UpdateWidgetConfig(Guid widgetId, IReadOnlyDictionary<string, object?> config)
+    {
+        var widget = Widgets.FirstOrDefault(w => w.Id == widgetId);
+
+        if (widget is null)
+            throw new KeyNotFoundException($"Widget with id {widgetId} not found.");
+
+        widget.UpdateConfig(config);
     }
 }

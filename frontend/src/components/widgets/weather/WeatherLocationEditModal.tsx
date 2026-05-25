@@ -7,10 +7,14 @@ type WeatherLocationEditModalProps = {
   onLocationSubmit: (city: string) => void;
 };
 
-export function WeatherLocationEditModal({ title, onClose, onLocationSubmit }: WeatherLocationEditModalProps) {
+export function WeatherLocationEditModal({
+  title,
+  onClose,
+  onLocationSubmit,
+}: WeatherLocationEditModalProps) {
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-80 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
     >
       <GlassCard
@@ -29,10 +33,12 @@ export function WeatherLocationEditModal({ title, onClose, onLocationSubmit }: W
         </div>
 
         <WeatherForm
-          onSuccess={(city) => {
-            onLocationSubmit(city);
+          initialConfig={{ city: '' }}
+          onSubmit={(config) => {
+            onLocationSubmit(config.city);
             onClose();
           }}
+          onCancel={onClose}
         />
       </GlassCard>
     </div>
