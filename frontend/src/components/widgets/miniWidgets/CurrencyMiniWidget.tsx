@@ -49,7 +49,7 @@ export function CurrencyMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<C
                     type="button"
                     onClick={() => setIsEditModalOpen(true)}
                     className="shrink-0 rounded p-0.5 text-muted hover:text-foreground transition-colors"
-                    aria-label="Byt tillgång"
+                    aria-label="Change asset"
                   >
                     <Pencil size={11} />
                   </button>
@@ -113,13 +113,13 @@ export function CurrencyMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<C
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-foreground">Byt tillgång</h4>
+                <h4 className="text-sm font-semibold text-foreground">Change asset</h4>
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
                   className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
                 >
-                  Stäng
+                  Close
                 </button>
               </div>
               <CurrencySearchList

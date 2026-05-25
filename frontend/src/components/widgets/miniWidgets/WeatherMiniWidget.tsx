@@ -40,14 +40,14 @@ export function WeatherMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<We
             <p className="text-[10px] text-muted truncate leading-none">
               {cityName
                 ? cityName.charAt(0).toUpperCase() + cityName.slice(1)
-                : 'Väder'}
+                : 'Weather'}
             </p>
             {isEditMode && (
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
                 className="shrink-0 rounded p-0.5 text-muted hover:text-foreground transition-colors"
-                aria-label="Ändra plats"
+                aria-label="Change location"
               >
                 <Pencil size={11} />
               </button>
@@ -58,7 +58,7 @@ export function WeatherMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<We
             {isFetching && <p className="text-xs text-muted">…</p>}
 
             {!isFetching && !hasLocation && (
-              <p className="text-[10px] text-muted">Ingen plats</p>
+              <p className="text-[10px] text-muted">No location</p>
             )}
 
             {!isFetching && currentWeather && (
@@ -71,7 +71,7 @@ export function WeatherMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<We
                   <p className="text-[10px] text-muted leading-none">{weatherTypeLabel}</p>
                 )}
                 <p className="text-[10px] text-muted leading-none">
-                  Känns {Math.round(currentWeather.current.apparent_temperature)}°
+                  Feels {Math.round(currentWeather.current.apparent_temperature)}°
                 </p>
               </>
             )}

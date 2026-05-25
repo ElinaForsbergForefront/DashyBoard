@@ -141,7 +141,7 @@ export function SpotifyMiniWidget() {
             <SpotifyLogo />
             <span className="text-xs font-semibold text-foreground">Spotify</span>
           </div>
-          <p className="text-[10px] text-muted">Ingenting spelas</p>
+          <p className="text-[10px] text-muted">Nothing playing</p>
         </div>
       </GlassCard>
     );

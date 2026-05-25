@@ -82,7 +82,7 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-foreground-secondary">Local traffic</p>
               <p className="text-[10px] text-muted truncate leading-snug">
-                {stationName ?? 'Ingen station'}
+                {stationName ?? 'No station'}
               </p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
@@ -95,7 +95,7 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
                   type="button"
                   onClick={() => setIsEditModalOpen(true)}
                   className="rounded p-0.5 text-muted hover:text-foreground transition-colors"
-                  aria-label="Välj station"
+                  aria-label="Select station"
                 >
                   <Pencil size={11} />
                 </button>
@@ -105,7 +105,7 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
           {/* States */}
           {siteId && isLoading && <p className="text-[10px] text-muted">…</p>}
           {siteId && !isLoading && !next && (
-            <p className="text-[10px] text-muted">Inga avgångar</p>
+            <p className="text-[10px] text-muted">No departures</p>
           )}
 
           {/* Departure cards — same style as the large widget */}
@@ -121,7 +121,7 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
                         <span className="truncate">{next.direction}</span>
                       </div>
                       {next.canceled && (
-                        <p className="text-[10px] text-destructive leading-none">Inställd</p>
+                        <p className="text-[10px] text-destructive leading-none">Cancelled</p>
                       )}
                       {!next.canceled && Math.round(next.delay / 60) > 0 && (
                         <p className="text-[10px] text-warning leading-none">
@@ -148,7 +148,7 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
                         <span className="truncate">{second.direction}</span>
                       </div>
                       {second.canceled && (
-                        <p className="text-[10px] text-destructive leading-none">Inställd</p>
+                        <p className="text-[10px] text-destructive leading-none">Cancelled</p>
                       )}
                       {!second.canceled && Math.round(second.delay / 60) > 0 && (
                         <p className="text-[10px] text-warning leading-none">
@@ -179,13 +179,13 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-foreground">Välj station</h4>
+                <h4 className="text-sm font-semibold text-foreground">Select station</h4>
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
                   className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
                 >
-                  Stäng
+                  Close
                 </button>
               </div>
               <TrafficForm onSuccess={handleFormSuccess} />

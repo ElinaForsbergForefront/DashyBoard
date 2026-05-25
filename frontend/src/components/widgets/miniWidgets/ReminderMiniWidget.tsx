@@ -59,7 +59,7 @@ export function ReminderMiniWidget() {
           {isLoading && <p className="text-[10px] text-muted">…</p>}
 
           {!isLoading && upcoming.length === 0 && (
-            <p className="text-[10px] text-muted">Inga aktiva</p>
+            <p className="text-[10px] text-muted">No active reminders</p>
           )}
 
           {!isLoading && next && (
@@ -90,7 +90,7 @@ export function ReminderMiniWidget() {
                   onClick={() => setIsEditModalOpen(false)}
                   className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
                 >
-                  Stäng
+                  Close
                 </button>
               </div>
               <ReminderForm onSuccess={() => setIsEditModalOpen(false)} />
