@@ -17,5 +17,5 @@ export function createMirrorWidgetDraft(
     x,
     y,
     config: getDefaultWidgetConfig(type),
-  };
+  } as unknown as MirrorWidgetDto;
 }
