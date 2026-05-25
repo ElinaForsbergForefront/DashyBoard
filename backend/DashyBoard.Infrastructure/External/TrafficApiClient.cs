@@ -19,7 +19,18 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
     public async Task<IReadOnlyList<StationDto>> GetStopByNameAsync(string name, CancellationToken ct = default)
     {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"stops/name/{name}?key={_apiKey}", ct);
+        var response = await _http.GetAsync($"stops/name/{name}?key={_apiKey}", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return [];
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
+        var doc = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
         return doc?.RootElement
             .GetProperty("stop_groups")
             .EnumerateArray()
@@ -53,7 +64,23 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
     public async Task<IReadOnlyList<TimetableEntryDto>> GetDeparturesAsync(string siteId, CancellationToken ct = default)
     {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}?key={_apiKey}", ct);
+        var response = await _http.GetAsync($"departures/{siteId}?key={_apiKey}", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new InvalidOperationException(
+                    $"No departures found for siteId '{siteId}'. " +
+                    $"This may indicate the siteId is invalid or requires a stop group ID instead of a stop ID. " +
+                    $"API response: {errorContent}");
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
+        var doc = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
         return doc?.RootElement
             .GetProperty("departures")
             .EnumerateArray()
@@ -81,7 +108,23 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
     public async Task<IReadOnlyList<TimetableEntryDto>> GetDeparturesSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
     {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"departures/{siteId}/{dateTime}?key={_apiKey}", ct);
+        var response = await _http.GetAsync($"departures/{siteId}/{dateTime}?key={_apiKey}", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new InvalidOperationException(
+                    $"No departures found for siteId '{siteId}' at time '{dateTime}'. " +
+                    $"This may indicate the siteId is invalid or requires a stop group ID instead of a stop ID. " +
+                    $"API response: {errorContent}");
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
+        var doc = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
         return doc?.RootElement
             .GetProperty("departures")
             .EnumerateArray()
@@ -111,7 +154,23 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
     public async Task<IReadOnlyList<TimetableEntryDto>> GetArrivalsAsync(string siteId, CancellationToken ct = default)
     {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"arrivals/{siteId}?key={_apiKey}", ct);
+        var response = await _http.GetAsync($"arrivals/{siteId}?key={_apiKey}", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new InvalidOperationException(
+                    $"No arrivals found for siteId '{siteId}'. " +
+                    $"This may indicate the siteId is invalid or requires a stop group ID instead of a stop ID. " +
+                    $"API response: {errorContent}");
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
+        var doc = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
         return doc?.RootElement
             .GetProperty("arrivals")
             .EnumerateArray()
@@ -137,7 +196,23 @@ public sealed class TrafficApiClient : ITrafficApiClient
 
     public async Task<IReadOnlyList<TimetableEntryDto>> GetArrivalsSpecificTimeAsync(string siteId, string dateTime, CancellationToken ct = default)
     {
-        var doc = await _http.GetFromJsonAsync<JsonDocument>($"arrivals/{siteId}?key={_apiKey}", ct);
+        var response = await _http.GetAsync($"arrivals/{siteId}?key={_apiKey}", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new InvalidOperationException(
+                    $"No arrivals found for siteId '{siteId}' at time '{dateTime}'. " +
+                    $"This may indicate the siteId is invalid or requires a stop group ID instead of a stop ID. " +
+                    $"API response: {errorContent}");
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
+        var doc = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
         return doc?.RootElement
             .GetProperty("arrivals")
             .EnumerateArray()
@@ -160,5 +235,48 @@ public sealed class TrafficApiClient : ITrafficApiClient
             .ToList() ?? [];
     }
 
+    public async Task<IReadOnlyList<StationDto>> GetAllStopsAsync(CancellationToken ct = default)
+    {
+        var response = await _http.GetAsync($"stops?key={_apiKey}", ct);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return [];
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
+        var doc = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
+        return doc?.RootElement
+            .GetProperty("stop_groups")
+            .EnumerateArray()
+            .SelectMany(g =>
+            {
+                var groupId = g.GetProperty("id").GetString()
+                    ?? throw new InvalidOperationException("Stop group is missing an id");  
+                var groupName = g.GetProperty("name").GetString()
+                    ?? throw new InvalidOperationException("Stop group is missing a name");
+                var modes = g.GetProperty("transport_modes")
+                    .EnumerateArray()
+                    .Select(m => m.GetString()!)
+                    .ToList();
+
+                return g.GetProperty("stops")
+                    .EnumerateArray()
+                    .Select(s => new StationDto(
+                        groupId,
+                        groupName,
+                        s.GetProperty("id").GetString()!,
+                        s.GetProperty("name").GetString()!,
+                        s.GetProperty("lat").GetDouble(),
+                        s.GetProperty("lon").GetDouble(),
+                        modes
+                    ));
+            })
+            .GroupBy(s => s.Id)
+            .Select(g => g.Last())
+            .ToList() ?? [];
+    }
 }

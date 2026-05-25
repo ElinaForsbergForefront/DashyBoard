@@ -95,8 +95,8 @@ export function TrafficWidget({
     data: departures = [],
     isLoading: isLoadingDepartures,
     isError: isDeparturesError,
-  } = useGetDeparturesQuery(matchedStop?.id ?? '', {
-    skip: !matchedStop?.id,
+  } = useGetDeparturesQuery(matchedStop?.groupId ?? '', {
+    skip: !matchedStop?.groupId,
   });
 
   useEffect(() => {

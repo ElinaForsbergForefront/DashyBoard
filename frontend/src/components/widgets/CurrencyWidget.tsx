@@ -5,6 +5,8 @@ import type { CurrencyWidgetDto } from '../../api/types/mirror';
 import { useGetCurrencyChartQuery } from '../../api/endpoints/currency';
 import { GlassCard } from '../ui/glass-card';
 import { CurrencyWidgetForm } from '../forms/CurrencyWidgetForm';
+import { INTERVALS } from '../constants/currency';
+import type { IntervalPreset } from '../constants/currency';
 import { CurrencyChartTooltip } from './currency/CurrencyChartTooltip';
 import {
   buildStartDate,
@@ -22,8 +24,12 @@ export function CurrencyWidget({
   onEditingStateChange,
 }: WidgetViewProps<CurrencyWidgetDto>) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedInterval, setSelectedInterval] = useState<IntervalPreset>(INTERVALS[0]);
   const symbol = widget.config.symbol?.trim() ?? '';
-  const start = useMemo(() => buildStartDate(1), []);
+  const start = useMemo(
+    () => buildStartDate(selectedInterval.daysBack),
+    [selectedInterval.daysBack],
+  );
 
   useEffect(() => {
     onEditingStateChange?.(widget.id, isEditModalOpen);
@@ -32,7 +38,7 @@ export function CurrencyWidget({
   const { data, isLoading, isError } = useGetCurrencyChartQuery(
     {
       symbol,
-      interval: '30m',
+      interval: selectedInterval.value,
       start,
     },
     { skip: !symbol },
@@ -94,7 +100,7 @@ export function CurrencyWidget({
             </div>
           )}
 
-          <div className="h-36 w-full">
+          <div className={isEditMode ? 'h-24 w-full' : 'h-36 w-full'}>
             {!symbol && (
               <div className="flex h-full items-center justify-center">
                 <p className="text-xs text-muted">No symbol selected yet.</p>
@@ -124,7 +130,7 @@ export function CurrencyWidget({
                   </defs>
                   <XAxis
                     dataKey="timestamp"
-                    tickFormatter={(ts: number) => formatTimestamp(ts, 1)}
+                    tickFormatter={(ts: number) => formatTimestamp(ts, selectedInterval.daysBack)}
                     tick={{ fontSize: 10, fill: 'var(--color-muted)' }}
                     axisLine={false}
                     tickLine={false}
@@ -155,6 +161,26 @@ export function CurrencyWidget({
               </ResponsiveContainer>
             )}
           </div>
+
+          {isEditMode && (
+            <div className="flex gap-1">
+              {INTERVALS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => setSelectedInterval(preset)}
+                  className={`cursor-pointer flex-1 rounded-lg py-1 text-xs font-medium transition
+                    ${
+                      selectedInterval.label === preset.label
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-muted hover:bg-overlay hover:text-foreground-secondary'
+                    }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </GlassCard>
 
