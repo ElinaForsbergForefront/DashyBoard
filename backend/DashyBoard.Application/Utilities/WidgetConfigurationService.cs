@@ -22,10 +22,10 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
 
         return normalizedType switch
         {
-            "clock" => BuildClockConfig(config),
-            "weather" => BuildWeatherConfig(config),
-            "currency" => BuildCurrencyConfig(config),
-            "traffic" => BuildTrafficConfig(config),
+            "clock" or "clock-mini" => BuildClockConfig(config),
+            "weather" or "weather-mini" => BuildWeatherConfig(config),
+            "currency" or "currency-mini" => BuildCurrencyConfig(config),
+            "traffic" or "traffic-mini" => BuildTrafficConfig(config),
             _ => BuildEmptyConfig(config, normalizedType),
         };
     }
@@ -36,19 +36,19 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
 
         return normalizedType switch
         {
-            "clock" => new ClockWidgetConfigDto
+            "clock" or "clock-mini" => new ClockWidgetConfigDto
             {
                 Timezone = ReadPersistedString(persistedConfig, "timezone"),
             },
-            "weather" => new WeatherWidgetConfigDto
+            "weather" or "weather-mini" => new WeatherWidgetConfigDto
             {
                 City = ReadPersistedString(persistedConfig, "city"),
             },
-            "currency" => new CurrencyWidgetConfigDto
+            "currency" or "currency-mini" => new CurrencyWidgetConfigDto
             {
                 Symbol = ReadPersistedString(persistedConfig, "symbol"),
             },
-            "traffic" => new TrafficWidgetConfigDto
+            "traffic" or "traffic-mini" => new TrafficWidgetConfigDto
             {
                 StationName = ReadPersistedString(persistedConfig, "stationName"),
                 TransportModes = ReadPersistedStringList(persistedConfig, "transportModes", DefaultTrafficTransportModes).ToList(),

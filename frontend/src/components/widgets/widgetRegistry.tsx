@@ -56,7 +56,7 @@ export interface WidgetDefinition {
   rows: number;
   component: WidgetComponent;
   configForm?: WidgetConfigFormComponent;
-  createDefaultConfig: () => AnyWidgetConfig;
+  createDefaultConfig?: () => AnyWidgetConfig;
   isPremium?: boolean;
   isMini?: boolean;
 }
@@ -148,7 +148,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     configForm: ({ initialConfig, onSubmit, onCancel }) => (
       <TrafficForm
         initialConfig={initialConfig as TrafficWidgetConfig}
-        onSubmit={(config) => onSubmit(config)}
+        onSuccess={({ siteId, stationName, transportModes }) =>
+          onSubmit({ stationName, transportModes, siteId } as TrafficWidgetConfig)
+        }
         onCancel={onCancel}
       />
     ),
@@ -174,7 +176,8 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Kompakt klocka — visar aktuell tid.',
     cols: 1,
     rows: 1,
-    component: ClockMiniWidget,
+    component: (props) => <ClockMiniWidget {...props} widget={props.widget as ClockWidgetDto} />,
+    createDefaultConfig: () => ({ timezone: '' }),
     isMini: true,
   },
   {
@@ -183,8 +186,15 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Kompakt väder — visar temperatur och ikon.',
     cols: 1,
     rows: 1,
-    component: WeatherMiniWidget,
-    configForm: WeatherForm,
+    component: (props) => <WeatherMiniWidget {...props} widget={props.widget as WeatherWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <WeatherForm
+        initialConfig={initialConfig as WeatherWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({ city: '' }),
     isMini: true,
   },
   {
@@ -193,8 +203,15 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Kompakt kurs — visar aktuellt pris.',
     cols: 2,
     rows: 1,
-    component: CurrencyMiniWidget,
-    configForm: CurrencyWidgetForm,
+    component: (props) => <CurrencyMiniWidget {...props} widget={props.widget as CurrencyWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <CurrencyWidgetForm
+        initialConfig={initialConfig as CurrencyWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({ symbol: '' }),
     isPremium: true,
     isMini: true,
   },
@@ -205,7 +222,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     cols: 1,
     rows: 1,
     component: ReminderMiniWidget,
-    configForm: ReminderForm,
+    createDefaultConfig: () => ({}),
     isMini: true,
   },
   {
@@ -214,8 +231,17 @@ export const widgetRegistry: WidgetDefinition[] = [
     description: 'Kompakt trafik — visar nästa avgång.',
     cols: 1,
     rows: 1,
-    component: TrafficMiniWidget,
-    configForm: TrafficForm,
+    component: (props) => <TrafficMiniWidget {...props} widget={props.widget as TrafficWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <TrafficForm
+        initialConfig={initialConfig as TrafficWidgetConfig}
+        onSuccess={({ siteId, stationName, transportModes }) =>
+          onSubmit({ stationName, transportModes, siteId } as TrafficWidgetConfig)
+        }
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({ stationName: '', transportModes: ['BUS', 'TRAM', 'TRAIN'] }),
     isMini: true,
   },
   {
@@ -225,9 +251,16 @@ export const widgetRegistry: WidgetDefinition[] = [
     cols: 1,
     rows: 1,
     component: SpotifyMiniWidget,
+    createDefaultConfig: () => ({}),
     isPremium: true,
     isMini: true,
   },
 ];
 
 export type WidgetType = (typeof widgetRegistry)[number]['id'];
+
+export function getDefaultWidgetConfig(type: string): AnyWidgetConfig {
+  const definition = widgetRegistry.find((w) => w.id === type);
+  if (!definition?.createDefaultConfig) return {};
+  return definition.createDefaultConfig();
+}

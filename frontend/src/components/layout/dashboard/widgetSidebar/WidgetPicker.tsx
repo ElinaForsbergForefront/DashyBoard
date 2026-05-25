@@ -3,6 +3,8 @@ import { widgetOptions } from './types.ts';
 import type { WidgetType } from './types.ts';
 
 interface WidgetPickerProps {
+  selectedWidget: WidgetType | null;
+  onSelectWidget: (widget: WidgetType) => void;
   onAddWidget: (widget: WidgetType) => void;
   canAddWidget: boolean;
 }

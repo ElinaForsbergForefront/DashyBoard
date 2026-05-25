@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Pencil, BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type LucideIcon } from 'lucide-react';
-import { useGetDeparturesQuery } from '../../../api/endpoints/traffic';
+import { useGetDeparturesQuery, useGetStopsByNameQuery } from '../../../api/endpoints/traffic';
 import { GlassCard } from '../../ui/glass-card';
 import { TrafficForm } from '../../forms/TrafficForm';
+import type { WidgetViewProps } from '../types';
+import type { TrafficWidgetDto } from '../../../api/types/mirror';
 
 const transportIcons: Record<string, LucideIcon> = {
   BUS: BusFrontIcon,
@@ -16,10 +18,25 @@ const departureTimeFormatter = new Intl.DateTimeFormat('sv-SE', {
   minute: '2-digit',
 });
 
-export function TrafficMiniWidget() {
-  const [siteId, setSiteId] = useState<string | null>(null);
-  const [stationName, setStationName] = useState<string | null>(null);
+export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<TrafficWidgetDto>) {
+  const [siteId, setSiteId] = useState<string | null>(widget.config.siteId ?? null);
+  const [stationName, setStationName] = useState<string | null>(widget.config.stationName || null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Auto-resolve siteId from stationName when it's missing (e.g. config saved before siteId was tracked)
+  const { data: autoStops } = useGetStopsByNameQuery(widget.config.stationName ?? '', {
+    skip: !!siteId || !widget.config.stationName,
+  });
+  useEffect(() => {
+    if (siteId || !autoStops?.length) return;
+    const resolvedId = autoStops[0].groupId ?? autoStops[0].id;
+    setSiteId(resolvedId);
+    onUpdateConfig?.({
+      stationName: widget.config.stationName,
+      transportModes: widget.config.transportModes,
+      siteId: resolvedId,
+    });
+  }, [autoStops, siteId]);
 
   const { data: departures = [], isLoading } = useGetDeparturesQuery(siteId ?? '', {
     skip: !siteId,
@@ -48,6 +65,11 @@ export function TrafficMiniWidget() {
     setSiteId(config.siteId);
     setStationName(config.stationName);
     setIsEditModalOpen(false);
+    onUpdateConfig?.({
+      siteId: config.siteId,
+      stationName: config.stationName,
+      transportModes: config.transportModes,
+    });
   };
 
   return (

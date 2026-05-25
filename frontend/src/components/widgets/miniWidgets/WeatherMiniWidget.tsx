@@ -8,11 +8,13 @@ import { getWeatherTypeDisplay } from '../../../utils/weather';
 import { useWeatherLocation } from '../../../hooks/useWeatherLocation';
 import { useEditModeContext } from '../../../context/EditModeContext';
 import { WeatherLocationEditModal } from '../weather/WeatherLocationEditModal';
+import type { WidgetViewProps } from '../types';
+import type { WeatherWidgetDto } from '../../../api/types/mirror';
 
-export function WeatherMiniWidget() {
+export function WeatherMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<WeatherWidgetDto>) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { isEditMode } = useEditModeContext();
-  const { coordinates, hasLocation, weatherLocation, searchLocation, saveWeatherLocation } = useWeatherLocation();
+  const { coordinates, hasLocation, weatherLocation, searchLocation, saveWeatherLocation } = useWeatherLocation(widget.config);
   const { theme } = useTheme();
 
   const { data: currentWeather, isFetching } = useGetCurrentWeatherQuery(
@@ -82,7 +84,10 @@ export function WeatherMiniWidget() {
           <WeatherLocationEditModal
             title="Weather Mini"
             onClose={() => setIsEditModalOpen(false)}
-            onLocationSubmit={(city) => saveWeatherLocation({ city })}
+            onLocationSubmit={(city) => {
+              saveWeatherLocation({ city });
+              onUpdateConfig?.({ city });
+            }}
           />,
           document.body,
         )}

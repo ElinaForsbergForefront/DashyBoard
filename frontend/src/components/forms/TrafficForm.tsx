@@ -4,20 +4,26 @@ import type { TrafficWidgetConfig } from '../../api/types/mirror';
 import { useGetStopsByNameQuery } from '../../api/endpoints/traffic';
 import type { StationDto } from '../../api/types/traffic';
 import { FormCard } from '../ui/form-card';
-import type { WidgetSettingsFormProps } from '../widgets/types';
 
-type TrafficFormProps = WidgetSettingsFormProps<TrafficWidgetConfig>;
+type SuccessConfig = { siteId: string; stationName: string; transportModes: string[] };
+
+type TrafficFormProps = {
+  initialConfig?: TrafficWidgetConfig;
+  onSuccess?: (config: SuccessConfig) => void;
+  onSubmit?: (config: TrafficWidgetConfig) => void;
+  onCancel?: () => void;
+};
 
 const DEFAULT_TRANSPORT_MODES = ['BUS', 'TRAM', 'TRAIN'];
 
-export function TrafficForm({ initialConfig, onSubmit, onCancel }: TrafficFormProps) {
-  const [searchInput, setSearchInput] = useState(initialConfig.stationName);
+export function TrafficForm({ initialConfig, onSuccess, onSubmit, onCancel }: TrafficFormProps) {
+  const [searchInput, setSearchInput] = useState(initialConfig?.stationName ?? '');
   const [submittedName, setSubmittedName] = useState('');
   const [selectedStop, setSelectedStop] = useState<StationDto | null>(null);
-  const [stationName, setStationName] = useState(initialConfig.stationName);
+  const [stationName, setStationName] = useState(initialConfig?.stationName ?? '');
   const [transportModes, setTransportModes] = useState(
-    initialConfig.transportModes.length > 0
-      ? initialConfig.transportModes
+    (initialConfig?.transportModes?.length ?? 0) > 0
+      ? initialConfig!.transportModes
       : DEFAULT_TRANSPORT_MODES,
   );
 
@@ -57,10 +63,18 @@ export function TrafficForm({ initialConfig, onSubmit, onCancel }: TrafficFormPr
       return;
     }
 
-    onSubmit({
-      stationName: chosenStationName.trim(),
-      transportModes,
-    });
+    if (onSuccess) {
+      onSuccess({
+        siteId: selectedStop?.groupId ?? selectedStop?.id ?? '',
+        stationName: chosenStationName.trim(),
+        transportModes,
+      });
+    } else if (onSubmit) {
+      onSubmit({
+        stationName: chosenStationName.trim(),
+        transportModes,
+      });
+    }
   };
 
   return (

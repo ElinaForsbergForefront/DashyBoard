@@ -8,9 +8,11 @@ import { INTERVALS } from '../../constants/currency';
 import { buildStartDate, formatPrice, getPriceChange } from '../../../utils/currency';
 import { CurrencySearchList } from '../currency/CurrencySearchList';
 import { Area, AreaChart, ResponsiveContainer, YAxis } from 'recharts';
+import type { WidgetViewProps } from '../types';
+import type { CurrencyWidgetDto } from '../../../api/types/mirror';
 
-export function CurrencyMiniWidget() {
-  const [symbol, setSymbol] = useState('ETH-USD');
+export function CurrencyMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<CurrencyWidgetDto>) {
+  const [symbol, setSymbol] = useState(widget.config.symbol || 'ETH-USD');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { isEditMode } = useEditModeContext();
   const activePreset = INTERVALS[0];
@@ -124,6 +126,7 @@ export function CurrencyMiniWidget() {
                 autoFocus
                 onSelect={(newSymbol) => {
                   setSymbol(newSymbol);
+                  onUpdateConfig?.({ symbol: newSymbol });
                   setIsEditModalOpen(false);
                 }}
               />

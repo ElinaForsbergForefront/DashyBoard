@@ -7,12 +7,19 @@ import { useClockTimezone } from '../../../hooks/useClockTimezone';
 import { useEditModeContext } from '../../../context/EditModeContext';
 import { GlassCard } from '../../ui/glass-card';
 import { ClockTimezoneForm } from '../../forms/ClockTimezoneForm';
+import type { WidgetViewProps } from '../types';
+import type { ClockWidgetDto } from '../../../api/types/mirror';
 
-export function ClockMiniWidget() {
+export function ClockMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<ClockWidgetDto>) {
   const [now, setNow] = useState(() => new Date());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { selectedTimezone, availableTimezones, handleTimezoneChange } = useClockTimezone();
+  const { selectedTimezone, availableTimezones, handleTimezoneChange: baseHandleTimezoneChange } = useClockTimezone(widget.config);
   const { isEditMode } = useEditModeContext();
+
+  const handleTimezoneChange = (timezone: string) => {
+    baseHandleTimezoneChange(timezone);
+    onUpdateConfig?.({ timezone });
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);

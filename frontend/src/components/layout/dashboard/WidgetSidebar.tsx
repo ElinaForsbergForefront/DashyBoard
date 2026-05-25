@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useEditModeContext } from '../../../context/EditModeContext';
 import { WidgetPicker } from './widgetSidebar/WidgetPicker.tsx';
 import type { WidgetType } from './widgetSidebar/types.ts';
@@ -73,6 +74,8 @@ function SidebarContent({
   onAddWidget: (widget: WidgetType) => void;
   canAddWidget: boolean;
 }) {
+  const [selectedWidget, setSelectedWidget] = useState<WidgetType | null>(null);
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {!hideHeading && (
