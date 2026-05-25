@@ -1,11 +1,12 @@
-﻿using DashyBoard.Application.Commands.Mirror;
+﻿using System.Security.Claims;
+using System.Text.Json;
+using DashyBoard.Application.Commands.Mirror;
 using DashyBoard.Application.Commands.Widget;
 using DashyBoard.Application.Queries.Mirror;
 using DashyBoard.Application.Queries.Mirror.Dto;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace DashyBoard.Api.Controllers;
 
@@ -79,7 +80,10 @@ public class MirrorController : ControllerBase
     [ProducesResponseType(typeof(MirrorDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> AddWidget(Guid mirrorId, [FromBody] AddWidgetRequest request, CancellationToken ct)
     {
-        var result = await _mediator.Send(new AddWidgetCommand(mirrorId, request.Type, request.X, request.Y), ct);
+        var result = await _mediator.Send(
+            new AddWidgetCommand(mirrorId, request.Type, request.X, request.Y, request.Config),
+            ct);
+
         return Ok(result);
     }
 
@@ -88,6 +92,21 @@ public class MirrorController : ControllerBase
     public async Task<IActionResult> MoveWidget(Guid mirrorId, Guid widgetId, [FromBody] MoveWidgetRequest request, CancellationToken ct)
     {
         var result = await _mediator.Send(new MoveWidgetCommand(mirrorId, widgetId, request.X, request.Y), ct);
+        return Ok(result);
+    }
+
+    [HttpPut("{mirrorId:guid}/widget/{widgetId:guid}/config")]
+    [ProducesResponseType(typeof(MirrorDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateWidgetConfig(
+        Guid mirrorId,
+        Guid widgetId,
+        [FromBody] UpdateWidgetConfigRequest request,
+        CancellationToken ct)
+    {
+        var result = await _mediator.Send(
+            new UpdateWidgetConfigCommand(mirrorId, widgetId, request.Config),
+            ct);
+
         return Ok(result);
     }
 
@@ -101,5 +120,6 @@ public class MirrorController : ControllerBase
 }
 
 public record CreateMirrorRequest(string Name, double WidthCm, double HeightCm);
-public record AddWidgetRequest(string Type, double X, double Y);
+public record AddWidgetRequest(string Type, double X, double Y, JsonElement? Config);
 public record MoveWidgetRequest(double X, double Y);
+public record UpdateWidgetConfigRequest(JsonElement? Config);

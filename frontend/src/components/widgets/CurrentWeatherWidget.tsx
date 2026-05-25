@@ -1,26 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { GlassCard } from '../ui/glass-card';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetCurrentWeatherQuery } from '../../api/endpoints/weather';
 import { getWeatherTypeDisplay } from '../../utils/weather';
-import type { WeatherLocationSelection } from '../../utils/weather';
+import type { WeatherWidgetDto } from '../../api/types/mirror';
 import { useWeatherLocation } from '../../hooks/useWeatherLocation';
-import { WeatherLocationEditModal } from './weather/WeatherLocationEditModal';
-import { useEditModeContext } from '../../context/EditModeContext';
+import { WeatherForm } from '../forms/WeatherForm';
+import type { WidgetViewProps } from './types';
 
-export function CurrentWeatherWidget() {
+export function CurrentWeatherWidget({
+  widget,
+  isEditMode = false,
+  onUpdateConfig,
+  onEditingStateChange,
+}: WidgetViewProps<WeatherWidgetDto>) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { isEditMode } = useEditModeContext();
-  const {
-    searchLocation,
-    coordinates,
-    weatherLocation,
-    isGeocoding,
-    geocodeError,
-    hasLocation,
-    saveWeatherLocation,
-  } = useWeatherLocation();
+  const { searchLocation, coordinates, weatherLocation, isGeocoding, geocodeError, hasLocation } =
+    useWeatherLocation(widget.config);
+
+  useEffect(() => {
+    onEditingStateChange?.(widget.id, isEditModalOpen);
+  }, [isEditModalOpen, onEditingStateChange, widget.id]);
 
   const {
     data: currentWeather,
@@ -32,7 +33,8 @@ export function CurrentWeatherWidget() {
   );
 
   const { theme } = useTheme();
-  const rawWeatherType = currentWeather?.current.weatherType ?? currentWeather?.current.weather_code;
+  const rawWeatherType =
+    currentWeather?.current.weatherType ?? currentWeather?.current.weather_code;
   const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(
     rawWeatherType,
     theme,
@@ -41,15 +43,10 @@ export function CurrentWeatherWidget() {
 
   const isLoading = isGeocoding || isFetchingWeather;
   const errorMessage = geocodeError
-    ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
+    ? 'Could not resolve location. Make sure you enter a city or town.'
     : weatherError
-      ? 'Kunde inte hämta vädret för platsen.'
+      ? 'Could not fetch weather for the location.'
       : undefined;
-
-  const handleLocationSubmit = (newLocation: WeatherLocationSelection) => {
-    saveWeatherLocation(newLocation);
-    setIsEditModalOpen(false);
-  };
 
   return (
     <>
@@ -57,7 +54,7 @@ export function CurrentWeatherWidget() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground-secondary">Weather</h3>
-            {isEditMode && (
+            {isEditMode && onUpdateConfig && (
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
@@ -68,10 +65,10 @@ export function CurrentWeatherWidget() {
             )}
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Hämtar aktuellt väder…</p>}
+          {isLoading && <p className="text-xs text-muted">Fetching current weather…</p>}
 
           {!isLoading && !currentWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {!isLoading && currentWeather && (
@@ -79,11 +76,10 @@ export function CurrentWeatherWidget() {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-foreground-secondary">
-                    {(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}
+                    {(weatherLocation || searchLocation).charAt(0).toUpperCase() +
+                      (weatherLocation || searchLocation).slice(1)}
                   </p>
-                  {weatherTypeLabel && (
-                    <p className="text-xs text-muted">{weatherTypeLabel}</p>
-                  )}
+                  {weatherTypeLabel && <p className="text-xs text-muted">{weatherTypeLabel}</p>}
                   <p className="text-4xl font-semibold text-foreground tracking-tight">
                     {Math.round(currentWeather.current.temperature_2m)}°C
                   </p>
@@ -92,21 +88,22 @@ export function CurrentWeatherWidget() {
                   <img src={weatherIcon} alt={weatherTypeLabel} className="h-20 w-20" />
                 )}
               </div>
+
               <div className="grid grid-cols-2 gap-2 text-xs text-muted">
                 <div>
-                  <p className="font-semibold text-foreground">Känns som</p>
+                  <p className="font-semibold text-foreground">Feels like</p>
                   <p>{Math.round(currentWeather.current.apparent_temperature)}°C</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Vind</p>
+                  <p className="font-semibold text-foreground">Wind</p>
                   <p>{currentWeather.current.wind_speed_10m} km/h</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Nederbörd</p>
+                  <p className="font-semibold text-foreground">Precipitation</p>
                   <p>{currentWeather.current.precipitation} mm</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Sannolikhet</p>
+                  <p className="font-semibold text-foreground">Probability</p>
                   <p>{currentWeather.current.precipitation_probability}%</p>
                 </div>
               </div>
@@ -114,25 +111,51 @@ export function CurrentWeatherWidget() {
           )}
 
           {!isLoading && !currentWeather && !hasLocation && (
-            <p className="text-xs text-muted">Ingen plats vald ännu. Klicka på Edit för att lägga till.</p>
+            <p className="text-xs text-muted">No location selected yet. Click Edit to add one.</p>
           )}
 
           {!isLoading && !currentWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {errorMessage && <p className="text-xs text-muted">{errorMessage}</p>}
         </div>
       </GlassCard>
 
-      {isEditModalOpen && createPortal(
-        <WeatherLocationEditModal
-          title="Weather"
-          onClose={() => setIsEditModalOpen(false)}
-          onLocationSubmit={(city) => handleLocationSubmit({ city })}
-        />,
-        document.body,
-      )}
+      {isEditModalOpen &&
+        onUpdateConfig &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-80 flex items-center justify-center bg-black/60 p-4"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <GlassCard
+              className="glass-form w-full max-w-md"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-foreground">Edit weather</h4>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+                >
+                  Close
+                </button>
+              </div>
+
+              <WeatherForm
+                initialConfig={widget.config}
+                onSubmit={(config) => {
+                  onUpdateConfig(config);
+                  setIsEditModalOpen(false);
+                }}
+                onCancel={() => setIsEditModalOpen(false)}
+              />
+            </GlassCard>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

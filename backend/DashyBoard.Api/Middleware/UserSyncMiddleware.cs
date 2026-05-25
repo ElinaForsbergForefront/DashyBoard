@@ -73,9 +73,19 @@ public class UserSyncMiddleware
 
         var (username, displayName, country, city) = ParseUserMetadata(context);
 
-        await userSyncService.SyncUserFromAuthAsync(sub, email, username, displayName, country, city, context.RequestAborted);
-
-        _cache.Set(cacheKey, true, TimeSpan.FromHours(1));
+        // Use an independent cancellation token for the sync operation with a timeout
+        // This prevents middleware timeouts from affecting the main request handlers
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        try
+        {
+            await userSyncService.SyncUserFromAuthAsync(sub, email, username, displayName, country, city, cts.Token);
+            _cache.Set(cacheKey, true, TimeSpan.FromHours(1));
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("User sync operation timed out for user {Sub}", sub);
+            // Don't cache if sync timed out, allowing retry on next request
+        }
     }
 
     private static (string? sub, string? email) ExtractUserClaims(HttpContext context)

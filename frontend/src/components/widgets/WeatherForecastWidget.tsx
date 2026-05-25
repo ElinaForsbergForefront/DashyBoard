@@ -45,9 +45,9 @@ export function WeatherForecastWidget() {
 
   const isLoading = isGeocoding || isFetchingWeather;
   const errorMessage = geocodeError
-    ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
+    ? 'Could not resolve location. Make sure you enter a city or town.'
     : weatherError
-      ? 'Kunde inte hämta väderprognosen för platsen.'
+      ? 'Could not fetch the weather forecast for the location.'
       : undefined;
 
   const handleLocationSubmit = (newLocationCity: string) => {
@@ -72,21 +72,27 @@ export function WeatherForecastWidget() {
             )}
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Hämtar väderprognos…</p>}
+          {isLoading && <p className="text-xs text-muted">Fetching weather forecast…</p>}
 
           {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {!isLoading && dailyWeather && (
             <div className="flex flex-col space-y-2 flex-1">
-              <p className="text-xs text-muted text-xs flex-shrink-0">{(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}</p>
+              <p className="text-xs text-muted shrink-0">
+                {(weatherLocation || searchLocation).charAt(0).toUpperCase() +
+                  (weatherLocation || searchLocation).slice(1)}
+              </p>
               <div className="space-y-1 overflow-y-auto subtle-scrollbar pr-4 flex-1">
                 {dailyWeather.daily.time.map((date, index) => {
                   const weatherType = dailyWeather.daily.weather_code?.[index];
                   const maxTemp = dailyWeather.daily.temperature_2m_max?.[index];
                   const minTemp = dailyWeather.daily.temperature_2m_min?.[index];
-                  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(weatherType, theme);
+                  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(
+                    weatherType,
+                    theme,
+                  );
                   const dayLabel = formatDayLabel(date);
 
                   return (
@@ -121,25 +127,26 @@ export function WeatherForecastWidget() {
           )}
 
           {!isLoading && !dailyWeather && !hasLocation && (
-            <p className="text-xs text-muted">Ingen plats vald ännu. Klicka på Edit för att lägga till.</p>
+            <p className="text-xs text-muted">No location selected yet. Click Edit to add one.</p>
           )}
 
           {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {errorMessage && <p className="text-xs text-muted">{errorMessage}</p>}
         </div>
       </GlassCard>
 
-      {isEditModalOpen && createPortal(
-        <WeatherLocationEditModal
-          title="Weather Forecast"
-          onClose={() => setIsEditModalOpen(false)}
-          onLocationSubmit={handleLocationSubmit}
-        />,
-        document.body,
-      )}
+      {isEditModalOpen &&
+        createPortal(
+          <WeatherLocationEditModal
+            title="Weather Forecast"
+            onClose={() => setIsEditModalOpen(false)}
+            onLocationSubmit={handleLocationSubmit}
+          />,
+          document.body,
+        )}
     </>
   );
 }

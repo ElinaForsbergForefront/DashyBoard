@@ -8,10 +8,14 @@ namespace DashyBoard.Infrastructure.Repositories;
 public sealed class MirrorRepository : IMirrorRepository
 {
     private readonly IMongoCollection<Mirror> _collection;
+    private readonly IWidgetConfigurationService _widgetConfigurationService;
 
-    public MirrorRepository(IMongoDatabase database)
+    public MirrorRepository(
+        IMongoDatabase database,
+        IWidgetConfigurationService widgetConfigurationService)
     {
         _collection = database.GetCollection<Mirror>("mirrors");
+        _widgetConfigurationService = widgetConfigurationService;
     }
 
     public async Task<MirrorDto> GetMirrorByIdAsync(Guid id, CancellationToken ct)
@@ -59,14 +63,20 @@ public sealed class MirrorRepository : IMirrorRepository
             throw new KeyNotFoundException($"Mirror with id {id} not found.");
     }
 
-    public async Task<MirrorDto> AddWidgetAsync(Guid mirrorId, string type, double x, double y, CancellationToken ct)
+    public async Task<MirrorDto> AddWidgetAsync(
+        Guid mirrorId,
+        string type,
+        double x,
+        double y,
+        IReadOnlyDictionary<string, object?> config,
+        CancellationToken ct)
     {
         var mirror = await _collection
             .Find(m => m.Id == mirrorId)
             .FirstOrDefaultAsync(ct)
             ?? throw new KeyNotFoundException($"Mirror with id {mirrorId} not found.");
 
-        mirror.AddWidget(type, x, y);
+        mirror.AddWidget(type, x, y, config);
 
         await _collection.ReplaceOneAsync(m => m.Id == mirrorId, mirror, cancellationToken: ct);
 
@@ -101,7 +111,25 @@ public sealed class MirrorRepository : IMirrorRepository
         return MapToDto(mirror);
     }
 
-    private static MirrorDto MapToDto(Mirror mirror) => new()
+    public async Task<MirrorDto> UpdateWidgetConfigAsync(
+        Guid mirrorId,
+        Guid widgetId,
+        IReadOnlyDictionary<string, object?> config,
+        CancellationToken ct)
+    {
+        var mirror = await _collection
+            .Find(m => m.Id == mirrorId)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new KeyNotFoundException($"Mirror with id {mirrorId} not found.");
+
+        mirror.UpdateWidgetConfig(widgetId, config);
+
+        await _collection.ReplaceOneAsync(m => m.Id == mirrorId, mirror, cancellationToken: ct);
+
+        return MapToDto(mirror);
+    }
+
+    private MirrorDto MapToDto(Mirror mirror) => new()
     {
         Id = mirror.Id,
         UserSub = mirror.UserSub,
@@ -112,11 +140,12 @@ public sealed class MirrorRepository : IMirrorRepository
         Widgets = mirror.Widgets.Select(MapWidgetToDto).ToList()
     };
 
-    private static WidgetDto MapWidgetToDto(Widget widget) => new()
+    private WidgetDto MapWidgetToDto(Widget widget) => new()
     {
         Id = widget.Id,
         Type = widget.Type,
         X = widget.X,
-        Y = widget.Y
+        Y = widget.Y,
+        Config = _widgetConfigurationService.BuildDto(widget.Type, widget.Config),
     };
 }

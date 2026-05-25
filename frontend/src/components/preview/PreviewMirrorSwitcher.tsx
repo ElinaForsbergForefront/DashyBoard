@@ -10,7 +10,15 @@ interface Props {
   goTo: (id: string) => void;
 }
 
-export function PreviewMirrorSwitcher({ mirrors, mirrorId, currentIndex, isDark, ui, uiVisible, goTo }: Props) {
+export function PreviewMirrorSwitcher({
+  mirrors,
+  mirrorId,
+  currentIndex,
+  isDark,
+  ui,
+  uiVisible,
+  goTo,
+}: Props) {
   if (mirrors.length === 0) return null;
 
   return (
@@ -50,7 +58,7 @@ export function PreviewMirrorSwitcher({ mirrors, mirrorId, currentIndex, isDark,
               key={m.id}
               type="button"
               onClick={() => goTo(m.id)}
-              className={`group flex-shrink-0 flex flex-col gap-1 px-4 py-2.5 rounded-xl text-left cursor-pointer backdrop-blur-md border transition-all duration-300 ${
+              className={`group shrink-0 flex flex-col gap-1 px-4 py-2.5 rounded-xl text-left cursor-pointer backdrop-blur-md border transition-all duration-300 ${
                 isDark
                   ? isActive
                     ? 'bg-white/15 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
@@ -63,13 +71,19 @@ export function PreviewMirrorSwitcher({ mirrors, mirrorId, currentIndex, isDark,
               <span
                 className={`text-xs font-semibold tracking-wide transition-colors duration-200 ${
                   isDark
-                    ? isActive ? 'text-white' : 'text-white/50 group-hover:text-white/80'
-                    : isActive ? 'text-black/80' : 'text-black/40 group-hover:text-black/70'
+                    ? isActive
+                      ? 'text-white'
+                      : 'text-white/50 group-hover:text-white/80'
+                    : isActive
+                      ? 'text-black/80'
+                      : 'text-black/40 group-hover:text-black/70'
                 }`}
               >
                 {m.name}
               </span>
-              <span className={`text-[10px] font-mono ${isDark ? 'text-white/25' : 'text-black/25'}`}>
+              <span
+                className={`text-[10px] font-mono ${isDark ? 'text-white/25' : 'text-black/25'}`}
+              >
                 {m.widthCm}×{m.heightCm} cm
               </span>
             </button>
