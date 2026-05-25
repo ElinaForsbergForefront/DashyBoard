@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { widgetOptions } from './types.ts';
 import type { WidgetType } from './types.ts';
 
