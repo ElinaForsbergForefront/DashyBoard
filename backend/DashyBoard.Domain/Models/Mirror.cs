@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace DashyBoard.Domain.Models;
 public class Mirror
 {
@@ -10,6 +12,7 @@ public class Mirror
 
     public List<Widget> Widgets { get; private set; } = new();
 
+    [BsonConstructor]
     private Mirror() { }
 
     public Mirror(string userSub, string name, double widthCm, double heightCm)
