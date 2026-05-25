@@ -13,7 +13,7 @@ import type { ClockWidgetDto } from '../../../api/types/mirror';
 export function ClockMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<ClockWidgetDto>) {
   const [now, setNow] = useState(() => new Date());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { selectedTimezone, availableTimezones, handleTimezoneChange: baseHandleTimezoneChange } = useClockTimezone(widget.config);
+  const { selectedTimezone, handleTimezoneChange: baseHandleTimezoneChange } = useClockTimezone(widget.config);
   const { isEditMode } = useEditModeContext();
 
   const handleTimezoneChange = (timezone: string) => {
@@ -78,10 +78,12 @@ export function ClockMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Cloc
               </button>
             </div>
             <ClockTimezoneForm
-              timezones={availableTimezones}
-              selectedTimezone={selectedTimezone}
-              onTimezoneChange={handleTimezoneChange}
-              onSuccess={() => setIsEditModalOpen(false)}
+              initialConfig={{ timezone: selectedTimezone }}
+              onSubmit={(config) => {
+                handleTimezoneChange(config.timezone);
+                setIsEditModalOpen(false);
+              }}
+              onCancel={() => setIsEditModalOpen(false)}
             />
           </GlassCard>
         </div>,

@@ -13,7 +13,7 @@ export function createMirrorWidgetDraft(
   }
   return {
     id,
-    type,
+    type: type as MirrorWidgetDto['type'],
     x,
     y,
     config: getDefaultWidgetConfig(type),

@@ -264,3 +264,7 @@ export function getDefaultWidgetConfig(type: string): AnyWidgetConfig {
   if (!definition?.createDefaultConfig) return {};
   return definition.createDefaultConfig();
 }
+
+export function getWidgetDefinition(type: string): WidgetDefinition | undefined {
+  return widgetRegistry.find((w) => w.id === type);
+}
