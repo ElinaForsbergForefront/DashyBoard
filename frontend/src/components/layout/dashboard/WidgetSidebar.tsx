@@ -58,7 +58,7 @@ function SidebarHeading() {
   return (
     <div>
       <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">Widgets</h2>
-      <p className="text-xs text-muted">Lägg till widgets till mirrorn.</p>
+      <p className="text-xs text-muted">Click to add to mirror</p>
     </div>
   );
 }

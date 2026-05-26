@@ -59,9 +59,9 @@ export function WeatherForecastWidget({
 
   const isLoading = isGeocoding || isFetchingWeather;
   const errorMessage = geocodeError
-    ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
+    ? 'Could not resolve location. Make sure you enter a city or town.'
     : weatherError
-      ? 'Kunde inte hämta väderprognosen för platsen.'
+      ? 'Could not fetch the weather forecast for the location.'
       : undefined;
 
   const locationLabel =
@@ -86,10 +86,10 @@ export function WeatherForecastWidget({
             )}
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Hämtar väderprognos…</p>}
+          {isLoading && <p className="text-xs text-muted">Fetching weather forecast…</p>}
 
           {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {!isLoading && dailyWeather && (
@@ -141,12 +141,12 @@ export function WeatherForecastWidget({
 
           {!isLoading && !dailyWeather && !hasLocation && (
             <p className="text-xs text-muted">
-              Ingen plats vald ännu.
+              No location selected yet. Click Edit to add one
             </p>
           )}
 
           {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {errorMessage && <p className="text-xs text-muted">{errorMessage}</p>}

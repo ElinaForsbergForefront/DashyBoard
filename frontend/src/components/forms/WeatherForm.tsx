@@ -36,15 +36,15 @@ export function WeatherForm({ initialConfig, onSubmit, onCancel }: WeatherFormPr
   const hasValidCurrentCity = isCityUnchanged || (hasCurrentCityValidation && !!geocodeData);
 
   const cityError = !trimmedCity
-    ? 'Ange en stad'
+    ? 'Enter a city'
     : trimmedCity.length < 2
-      ? 'Skriv minst 2 bokstäver'
+      ? 'Enter at least 2 characters'
       : isCityUnchanged
         ? ''
         : isWaitingForValidation || isValidatingCity
           ? ''
           : geocodeError
-            ? 'Staden kunde inte hittas'
+            ? 'City could not be found'
             : '';
 
   const isSubmitDisabled =
@@ -57,8 +57,8 @@ export function WeatherForm({ initialConfig, onSubmit, onCancel }: WeatherFormPr
   const cityHelperText = isCityUnchanged
     ? ''
     : isWaitingForValidation || isValidatingCity
-      ? 'Validerar stad...'
-      : 'Ange en stad som existerar';
+      ? 'Validating city...'
+      : 'Enter an existing city';
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -72,10 +72,10 @@ export function WeatherForm({ initialConfig, onSubmit, onCancel }: WeatherFormPr
 
   return (
     <FormCard onSubmit={handleSubmit}>
-      <p className="text-sm font-medium text-foreground">Weather</p>
+      <p className="text-sm font-medium text-foreground">Weather Configuration</p>
 
       <label className="flex flex-col gap-1 text-xs text-muted">
-        Stad
+        City
         <input
           type="text"
           value={city}
@@ -97,7 +97,7 @@ export function WeatherForm({ initialConfig, onSubmit, onCancel }: WeatherFormPr
           disabled={isSubmitDisabled}
           className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
-          {isValidatingCity ? 'Validerar...' : 'Spara'}
+          {isValidatingCity ? 'Validating...' : 'Save'}
         </button>
         {onCancel && (
           <button
@@ -105,7 +105,7 @@ export function WeatherForm({ initialConfig, onSubmit, onCancel }: WeatherFormPr
             onClick={onCancel}
             className="rounded-md border border-border px-3 py-2 text-sm text-foreground"
           >
-            Avbryt
+            Cancel
           </button>
         )}
       </div>

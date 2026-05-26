@@ -28,7 +28,7 @@ export function WeatherLocationEditModal({
             onClick={onClose}
             className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
           >
-            Stäng
+            Close
           </button>
         </div>
 

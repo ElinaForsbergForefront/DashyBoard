@@ -12,7 +12,7 @@ export function WidgetPicker({ onAddWidget, canAddWidget }: WidgetPickerProps) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted">1. Välj widget</p>
+      <p className="text-xs text-muted">1. Select widget</p>
       <div className="flex flex-col gap-2">
         {widgetOptions.map((widget) => (
           <button
@@ -37,7 +37,7 @@ export function WidgetPicker({ onAddWidget, canAddWidget }: WidgetPickerProps) {
         ))}
       </div>
       {!canAddWidget && (
-        <p className="text-xs text-muted">Välj först en mirror för att lägga till widget.</p>
+        <p className="text-xs text-muted">Select a mirror first to add a widget.</p>
       )}
     </div>
   );
