@@ -1,0 +1,94 @@
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
+import { Pencil } from 'lucide-react';
+import { useClockTimezone } from '../../../hooks/useClockTimezone';
+import { useEditModeContext } from '../../../context/EditModeContext';
+import { GlassCard } from '../../ui/glass-card';
+import { ClockTimezoneForm } from '../../forms/ClockTimezoneForm';
+import type { WidgetViewProps } from '../types';
+import type { ClockWidgetDto } from '../../../api/types/mirror';
+
+export function ClockMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<ClockWidgetDto>) {
+  const [now, setNow] = useState(() => new Date());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { selectedTimezone, handleTimezoneChange: baseHandleTimezoneChange } = useClockTimezone(widget.config);
+  const { isEditMode } = useEditModeContext();
+
+  const handleTimezoneChange = (timezone: string) => {
+    baseHandleTimezoneChange(timezone);
+    onUpdateConfig?.({ timezone });
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const zonedNow = toZonedTime(now, selectedTimezone);
+  const timeLabel = format(zonedNow, 'HH:mm');
+  const dateLabel = format(zonedNow, 'd MMM');
+  const tzShort = selectedTimezone.split('/').pop()?.replace('_', ' ') ?? selectedTimezone;
+
+  return (
+    <>
+      <GlassCard className="glass-widget-mini w-full h-full">
+        <div className="flex flex-col gap-1 h-full">
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[10px] text-muted leading-none truncate">{tzShort}</p>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="shrink-0 rounded p-0.5 text-muted hover:text-foreground transition-colors"
+                aria-label="Change timezone"
+              >
+                <Pencil size={11} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col items-center justify-center flex-1 gap-1 text-center">
+            <p className="text-3xl font-semibold text-foreground tracking-tight leading-none">
+              {timeLabel}
+            </p>
+            <p className="text-xs text-foreground-secondary">{dateLabel}</p>
+          </div>
+        </div>
+      </GlassCard>
+
+      {isEditModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setIsEditModalOpen(false)}
+        >
+          <GlassCard
+            className="glass-form w-full max-w-md"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-foreground">Change timezone</h4>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+              >
+                Close
+              </button>
+            </div>
+            <ClockTimezoneForm
+              initialConfig={{ timezone: selectedTimezone }}
+              onSubmit={(config) => {
+                handleTimezoneChange(config.timezone);
+                setIsEditModalOpen(false);
+              }}
+              onCancel={() => setIsEditModalOpen(false)}
+            />
+          </GlassCard>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}

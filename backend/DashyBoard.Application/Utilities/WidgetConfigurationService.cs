@@ -37,11 +37,11 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
 
         return normalizedType switch
         {
-            "clock" => new ClockWidgetConfigDto
+            "clock" or "clock-mini" => new ClockWidgetConfigDto
             {
                 Timezone = ReadPersistedString(persistedConfig, "timezone"),
             },
-            "weather" => new WeatherWidgetConfigDto
+            "weather" or "weather-mini" => new WeatherWidgetConfigDto
             {
                 City = ReadPersistedString(persistedConfig, "city"),
             },
@@ -49,11 +49,11 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
             {
                 City = ReadPersistedString(persistedConfig, "city"),
             },
-            "currency" => new CurrencyWidgetConfigDto
+            "currency" or "currency-mini" => new CurrencyWidgetConfigDto
             {
                 Symbol = ReadPersistedString(persistedConfig, "symbol"),
             },
-            "traffic" => new TrafficWidgetConfigDto
+            "traffic" or "traffic-mini" => new TrafficWidgetConfigDto
             {
                 StationName = ReadPersistedString(persistedConfig, "stationName"),
                 TransportModes = ReadPersistedStringList(persistedConfig, "transportModes", DefaultTrafficTransportModes).ToList(),
