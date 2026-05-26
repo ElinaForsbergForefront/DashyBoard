@@ -5,6 +5,7 @@ import { useGetCurrencyChartQuery } from '../../../api/endpoints/currency';
 import { GlassCard } from '../../ui/glass-card';
 import { useEditModeContext } from '../../../context/EditModeContext';
 import { INTERVALS } from '../../constants/currency';
+import type { IntervalPreset } from '../../constants/currency';
 import { buildStartDate, formatPrice, getPriceChange } from '../../../utils/currency';
 import { CurrencySearchList } from '../currency/CurrencySearchList';
 import { Area, AreaChart, ResponsiveContainer, YAxis } from 'recharts';
@@ -14,13 +15,13 @@ import type { CurrencyWidgetDto } from '../../../api/types/mirror';
 export function CurrencyMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<CurrencyWidgetDto>) {
   const [symbol, setSymbol] = useState(widget.config.symbol || 'ETH-USD');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedInterval, setSelectedInterval] = useState<IntervalPreset>(INTERVALS[0]);
   const { isEditMode } = useEditModeContext();
-  const activePreset = INTERVALS[0];
-  const start = useMemo(() => buildStartDate(activePreset.daysBack), [activePreset.daysBack]);
+  const start = useMemo(() => buildStartDate(selectedInterval.daysBack), [selectedInterval.daysBack]);
 
   const { data, isLoading, isError } = useGetCurrencyChartQuery({
     symbol,
-    interval: activePreset.value,
+    interval: selectedInterval.value,
     start,
   });
 
@@ -98,6 +99,27 @@ export function CurrencyMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<C
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Interval selector */}
+          {isEditMode && (
+            <div className="flex gap-0.5 shrink-0">
+              {INTERVALS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => setSelectedInterval(preset)}
+                  className={`cursor-pointer flex-1 rounded py-0.5 text-[10px] font-medium transition
+                    ${
+                      selectedInterval.label === preset.label
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-muted hover:bg-overlay hover:text-foreground-secondary'
+                    }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
