@@ -1,4 +1,6 @@
-﻿namespace DashyBoard.Domain.Models;
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace DashyBoard.Domain.Models;
 
 public sealed class Widget
 {
@@ -8,6 +10,7 @@ public sealed class Widget
     public double Y { get; private set; }
     public Dictionary<string, object?> Config { get; private set; } = new();
 
+    [BsonConstructor]
     private Widget()
     {
         Config = new Dictionary<string, object?>();
