@@ -22,6 +22,12 @@ import { ReminderWidget } from './ReminderWidget';
 import { SpotifyWidget } from './spotify/SpotifyWidget';
 import { TrafficWidget } from './TrafficWidget';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
+import { ClockMiniWidget } from './miniWidgets/ClockMiniWidget';
+import { WeatherMiniWidget } from './miniWidgets/WeatherMiniWidget';
+import { CurrencyMiniWidget } from './miniWidgets/CurrencyMiniWidget';
+import { ReminderMiniWidget } from './miniWidgets/ReminderMiniWidget';
+import { TrafficMiniWidget } from './miniWidgets/TrafficMiniWidget';
+import { SpotifyMiniWidget } from './miniWidgets/SpotifyMiniWidget';
 
 const DEFAULT_CLOCK_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
@@ -50,8 +56,9 @@ export interface WidgetDefinition {
   rows: number;
   component: WidgetComponent;
   configForm?: WidgetConfigFormComponent;
-  createDefaultConfig: () => AnyWidgetConfig;
+  createDefaultConfig?: () => AnyWidgetConfig;
   isPremium?: boolean;
+  isMini?: boolean;
 }
 
 export const widgetRegistry: WidgetDefinition[] = [
@@ -141,7 +148,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     configForm: ({ initialConfig, onSubmit, onCancel }) => (
       <TrafficForm
         initialConfig={initialConfig as TrafficWidgetConfig}
-        onSubmit={(config) => onSubmit(config)}
+        onSuccess={({ siteId, stationName, transportModes }) =>
+          onSubmit({ stationName, transportModes, siteId } as TrafficWidgetConfig)
+        }
         onCancel={onCancel}
       />
     ),
@@ -160,16 +169,102 @@ export const widgetRegistry: WidgetDefinition[] = [
     createDefaultConfig: () => ({}),
     isPremium: true,
   },
+  // ── Mini variants ──────────────────────────────────────────────────
+  {
+    id: 'clock-mini',
+    name: 'Clock Mini',
+    description: 'Kompakt klocka — visar aktuell tid.',
+    cols: 1,
+    rows: 1,
+    component: (props) => <ClockMiniWidget {...props} widget={props.widget as ClockWidgetDto} />,
+    createDefaultConfig: () => ({ timezone: '' }),
+    isMini: true,
+  },
+  {
+    id: 'weather-mini',
+    name: 'Weather Mini',
+    description: 'Kompakt väder — visar temperatur och ikon.',
+    cols: 1,
+    rows: 1,
+    component: (props) => <WeatherMiniWidget {...props} widget={props.widget as WeatherWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <WeatherForm
+        initialConfig={initialConfig as WeatherWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({ city: '' }),
+    isMini: true,
+  },
+  {
+    id: 'currency-mini',
+    name: 'Currency Mini',
+    description: 'Kompakt kurs — visar aktuellt pris.',
+    cols: 2,
+    rows: 1,
+    component: (props) => <CurrencyMiniWidget {...props} widget={props.widget as CurrencyWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <CurrencyWidgetForm
+        initialConfig={initialConfig as CurrencyWidgetConfig}
+        onSubmit={(config) => onSubmit(config)}
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({ symbol: '' }),
+    isPremium: true,
+    isMini: true,
+  },
+  {
+    id: 'reminder-mini',
+    name: 'Reminder Mini',
+    description: 'Kompakt reminder — visar nästa påminnelse.',
+    cols: 1,
+    rows: 1,
+    component: ReminderMiniWidget,
+    createDefaultConfig: () => ({}),
+    isMini: true,
+  },
+  {
+    id: 'traffic-mini',
+    name: 'Traffic Mini',
+    description: 'Kompakt trafik — visar nästa avgång.',
+    cols: 1,
+    rows: 1,
+    component: (props) => <TrafficMiniWidget {...props} widget={props.widget as TrafficWidgetDto} />,
+    configForm: ({ initialConfig, onSubmit, onCancel }) => (
+      <TrafficForm
+        initialConfig={initialConfig as TrafficWidgetConfig}
+        onSuccess={({ siteId, stationName, transportModes }) =>
+          onSubmit({ stationName, transportModes, siteId } as TrafficWidgetConfig)
+        }
+        onCancel={onCancel}
+      />
+    ),
+    createDefaultConfig: () => ({ stationName: '', transportModes: ['BUS', 'TRAM', 'TRAIN'] }),
+    isMini: true,
+  },
+  {
+    id: 'spotify-mini',
+    name: 'Spotify Mini',
+    description: 'Kompakt Spotify — visar aktuell låt.',
+    cols: 1,
+    rows: 1,
+    component: SpotifyMiniWidget,
+    createDefaultConfig: () => ({}),
+    isPremium: true,
+    isMini: true,
+  },
 ];
 
-const widgetRegistryMap = new Map(widgetRegistry.map((widget) => [widget.id, widget]));
-
-export function getWidgetDefinition(widgetType: string) {
-  return widgetRegistryMap.get(widgetType) ?? null;
-}
-
-export function getDefaultWidgetConfig(widgetType: string): AnyWidgetConfig {
-  return getWidgetDefinition(widgetType)?.createDefaultConfig() ?? {};
-}
-
 export type WidgetType = (typeof widgetRegistry)[number]['id'];
+
+export function getDefaultWidgetConfig(type: string): AnyWidgetConfig {
+  const definition = widgetRegistry.find((w) => w.id === type);
+  if (!definition?.createDefaultConfig) return {};
+  return definition.createDefaultConfig();
+}
+
+export function getWidgetDefinition(type: string): WidgetDefinition | undefined {
+  return widgetRegistry.find((w) => w.id === type);
+}

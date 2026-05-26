@@ -1,11 +1,5 @@
-import type {
-  ClockWidgetDto,
-  CurrencyWidgetDto,
-  MirrorWidgetDto,
-  TrafficWidgetDto,
-  WeatherWidgetDto,
-} from '../api/types/mirror';
-import { getDefaultWidgetConfig } from '../components/widgets/widgetRegistry';
+import type { MirrorWidgetDto } from '../api/types/mirror';
+import { getDefaultWidgetConfig, widgetRegistry } from '../components/widgets/widgetRegistry';
 
 export function createMirrorWidgetDraft(
   id: string,
@@ -13,50 +7,15 @@ export function createMirrorWidgetDraft(
   x: number,
   y: number,
 ): MirrorWidgetDto {
-  switch (type) {
-    case 'clock':
-      return {
-        id,
-        type,
-        x,
-        y,
-        config: getDefaultWidgetConfig(type) as ClockWidgetDto['config'],
-      };
-    case 'weather':
-      return {
-        id,
-        type,
-        x,
-        y,
-        config: getDefaultWidgetConfig(type) as WeatherWidgetDto['config'],
-      };
-    case 'currency':
-      return {
-        id,
-        type,
-        x,
-        y,
-        config: getDefaultWidgetConfig(type) as CurrencyWidgetDto['config'],
-      };
-    case 'traffic':
-      return {
-        id,
-        type,
-        x,
-        y,
-        config: getDefaultWidgetConfig(type) as TrafficWidgetDto['config'],
-      };
-    case 'reminder':
-    case 'spotify':
-    case 'weather-forecast':
-      return {
-        id,
-        type,
-        x,
-        y,
-        config: {},
-      };
-    default:
-      throw new Error(`Unsupported widget type: ${type}`);
+  const definition = widgetRegistry.find((w) => w.id === type);
+  if (!definition) {
+    throw new Error(`Unsupported widget type: ${type}`);
   }
+  return {
+    id,
+    type: type as MirrorWidgetDto['type'],
+    x,
+    y,
+    config: getDefaultWidgetConfig(type),
+  } as unknown as MirrorWidgetDto;
 }

@@ -17,6 +17,7 @@ export interface CurrencyWidgetConfig {
 export interface TrafficWidgetConfig {
   stationName: string;
   transportModes: string[];
+  siteId?: string;
 }
 
 interface WidgetBase<TType extends string, TConfig> {
