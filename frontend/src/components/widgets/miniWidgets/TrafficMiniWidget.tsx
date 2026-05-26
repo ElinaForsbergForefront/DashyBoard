@@ -4,6 +4,7 @@ import { Pencil, BusFrontIcon, HelpCircle, TrainFrontIcon, TramFrontIcon, type L
 import { useGetDeparturesQuery, useGetStopsByNameQuery } from '../../../api/endpoints/traffic';
 import { GlassCard } from '../../ui/glass-card';
 import { TrafficForm } from '../../forms/TrafficForm';
+import { useEditModeContext } from '../../../context/EditModeContext';
 import type { WidgetViewProps } from '../types';
 import type { TrafficWidgetDto } from '../../../api/types/mirror';
 
@@ -19,6 +20,7 @@ const departureTimeFormatter = new Intl.DateTimeFormat('sv-SE', {
 });
 
 export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<TrafficWidgetDto>) {
+  const { isEditMode } = useEditModeContext();
   const [siteId, setSiteId] = useState<string | null>(widget.config.siteId ?? null);
   const [stationName, setStationName] = useState<string | null>(widget.config.stationName || null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -91,7 +93,8 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
                   {uniqueDepartures.length}
                 </span>
               )}
-              <button
+              {isEditMode && (
+                <button
                   type="button"
                   onClick={() => setIsEditModalOpen(true)}
                   className="rounded p-0.5 text-muted hover:text-foreground transition-colors"
@@ -99,6 +102,7 @@ export function TrafficMiniWidget({ widget, onUpdateConfig }: WidgetViewProps<Tr
                 >
                   <Pencil size={11} />
                 </button>
+              )}
             </div>
           </div>
 
