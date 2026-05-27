@@ -16,7 +16,9 @@ function MirrorContent() {
     editingMirror,
     deletingMirror,
     pendingMirrorSwitch,
+    pendingRouteLabel,
     isResolvingMirrorSwitch,
+    isResolvingRouteChange,
     canAddMirror,
     isAutosaveEnabled,
     autosaveStatus,
@@ -31,6 +33,9 @@ function MirrorContent() {
     handleClosePendingMirrorSwitch,
     handleDiscardAndSwitch,
     handleSaveAndSwitch,
+    handleClosePendingRoute,
+    handleDiscardAndNavigate,
+    handleSaveAndNavigate,
     handleEnterEditMode,
     handleSave,
     handleDiscard,
@@ -63,7 +68,9 @@ function MirrorContent() {
         deletingMirror={deletingMirror}
         activeMirror={activeMirror}
         pendingMirrorSwitch={pendingMirrorSwitch}
+        pendingRouteLabel={pendingRouteLabel}
         isResolvingMirrorSwitch={isResolvingMirrorSwitch}
+        isResolvingRouteChange={isResolvingRouteChange}
         onCloseCreateModal={closeCreateModal}
         onCloseEditModal={closeEditMirrorModal}
         onCloseDeleteModal={closeDeleteMirrorModal}
@@ -71,6 +78,9 @@ function MirrorContent() {
         onClosePendingMirrorSwitch={handleClosePendingMirrorSwitch}
         onDiscardAndSwitch={handleDiscardAndSwitch}
         onSaveAndSwitch={handleSaveAndSwitch}
+        onClosePendingRoute={handleClosePendingRoute}
+        onDiscardAndNavigate={handleDiscardAndNavigate}
+        onSaveAndNavigate={handleSaveAndNavigate}
       />
 
       <div className="flex flex-1 overflow-hidden">

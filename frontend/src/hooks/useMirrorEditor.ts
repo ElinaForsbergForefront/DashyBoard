@@ -7,6 +7,7 @@ import { useActiveMirror } from '../context/ActiveMirrorContext';
 import { useEditModeContext } from '../context/EditModeContext';
 import { useMirrorDraft } from './useMirrorDraft';
 import { useMirrorPersistence } from './useMirrorPersistence';
+import { useMirrorRouteGuard } from './useMirrorRouteGuard';
 import { useMirrorSessionLifecycle } from './useMirrorSessionLifecycle';
 import { useMirrorSwitchGuard } from './useMirrorSwitchGuard';
 
@@ -115,6 +116,21 @@ export function useMirrorEditor() {
       }),
   });
 
+  const {
+    pendingRouteLabel,
+    isResolvingRouteChange,
+    handleClosePendingRoute,
+    handleDiscardAndNavigate,
+    handleSaveAndNavigate,
+  } = useMirrorRouteGuard({
+    isEditMode,
+    hasUnsavedChanges,
+    isBusy: isPersistenceBusy,
+    resetEditorState,
+    discardEditMode,
+    saveBeforeNavigate: () => flushMirrorChanges({ exitEditMode: true, trigger: 'manual' }),
+  });
+
   const handleEnterEditMode = useCallback(() => {
     if (!activeMirror) {
       return;
@@ -154,7 +170,9 @@ export function useMirrorEditor() {
     editingMirror,
     deletingMirror,
     pendingMirrorSwitch,
+    pendingRouteLabel,
     isResolvingMirrorSwitch,
+    isResolvingRouteChange,
     canAddMirror,
     isAutosaveEnabled,
     autosaveStatus,
@@ -169,6 +187,9 @@ export function useMirrorEditor() {
     handleClosePendingMirrorSwitch,
     handleDiscardAndSwitch,
     handleSaveAndSwitch,
+    handleClosePendingRoute,
+    handleDiscardAndNavigate,
+    handleSaveAndNavigate,
     handleEnterEditMode,
     handleSave,
     handleDiscard,

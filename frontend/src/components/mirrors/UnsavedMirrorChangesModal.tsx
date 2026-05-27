@@ -3,7 +3,8 @@ import type { MirrorDto } from '../../api/types/mirror';
 
 interface UnsavedMirrorChangesModalProps {
   currentMirror: MirrorDto | null;
-  nextMirror: MirrorDto;
+  nextLabel: string;
+  destinationType?: 'mirror' | 'page';
   isSaving: boolean;
   onClose: () => void;
   onDiscard: () => void;
@@ -12,13 +13,23 @@ interface UnsavedMirrorChangesModalProps {
 
 export const UnsavedMirrorChangesModal = ({
   currentMirror,
-  nextMirror,
+  nextLabel,
+  destinationType = 'mirror',
   isSaving,
   onClose,
   onDiscard,
   onSave,
-}: UnsavedMirrorChangesModalProps) =>
-  createPortal(
+}: UnsavedMirrorChangesModalProps) => {
+  const isMirrorDestination = destinationType === 'mirror';
+  const heading = isMirrorDestination
+    ? 'Switch mirror without losing work?'
+    : 'Leave this page without losing work?';
+  const currentLabel = isMirrorDestination ? 'Current Mirror' : 'Current Draft';
+  const nextCardLabel = isMirrorDestination ? 'Next Mirror' : 'Destination';
+  const discardLabel = isMirrorDestination ? 'Discard And Switch' : 'Discard And Leave';
+  const saveLabel = isMirrorDestination ? 'Save And Switch' : 'Save And Leave';
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-md">
       <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
         <div className="border-b border-border bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0))] px-6 py-5">
@@ -39,12 +50,10 @@ export const UnsavedMirrorChangesModal = ({
               <p className="mb-1 text-xs font-semibold uppercase tracking-[0.22em] text-amber-300/80">
                 Unsaved Changes
               </p>
-              <h2 className="text-xl font-semibold text-foreground">
-                Switch mirror without losing work?
-              </h2>
+              <h2 className="text-xl font-semibold text-foreground">{heading}</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
                 You have pending layout changes{currentMirror ? ` on ${currentMirror.name}` : ''}.
-                Choose what should happen before opening {nextMirror.name}.
+                Choose what should happen before opening {nextLabel}.
               </p>
             </div>
           </div>
@@ -52,7 +61,7 @@ export const UnsavedMirrorChangesModal = ({
           <div className="grid gap-3 rounded-2xl border border-border/80 bg-background/35 p-4 sm:grid-cols-2">
             <div className="rounded-xl border border-border/80 bg-surface/80 p-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
-                Current Mirror
+                {currentLabel}
               </p>
               <p className="mt-2 truncate text-sm font-medium text-foreground">
                 {currentMirror?.name ?? 'Current mirror'}
@@ -60,9 +69,9 @@ export const UnsavedMirrorChangesModal = ({
             </div>
             <div className="rounded-xl border border-primary/25 bg-primary/8 p-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/80">
-                Next Mirror
+                {nextCardLabel}
               </p>
-              <p className="mt-2 truncate text-sm font-medium text-foreground">{nextMirror.name}</p>
+              <p className="mt-2 truncate text-sm font-medium text-foreground">{nextLabel}</p>
             </div>
           </div>
         </div>
@@ -82,7 +91,7 @@ export const UnsavedMirrorChangesModal = ({
             disabled={isSaving}
             className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition-all hover:bg-white/6 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Discard And Switch
+            {discardLabel}
           </button>
           <button
             type="button"
@@ -90,10 +99,11 @@ export const UnsavedMirrorChangesModal = ({
             disabled={isSaving}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSaving ? 'Saving...' : 'Save And Switch'}
+            {isSaving ? 'Saving...' : saveLabel}
           </button>
         </div>
       </div>
     </div>,
     document.body,
   );
+};

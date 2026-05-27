@@ -10,7 +10,9 @@ interface MirrorEditorModalsProps {
   deletingMirror: MirrorDto | null;
   activeMirror: MirrorDto | null;
   pendingMirrorSwitch: MirrorDto | null;
+  pendingRouteLabel: string | null;
   isResolvingMirrorSwitch: boolean;
+  isResolvingRouteChange: boolean;
   onCloseCreateModal: () => void;
   onCloseEditModal: () => void;
   onCloseDeleteModal: () => void;
@@ -18,6 +20,9 @@ interface MirrorEditorModalsProps {
   onClosePendingMirrorSwitch: () => void;
   onDiscardAndSwitch: () => void;
   onSaveAndSwitch: () => void;
+  onClosePendingRoute: () => void;
+  onDiscardAndNavigate: () => void;
+  onSaveAndNavigate: () => void;
 }
 
 export function MirrorEditorModals({
@@ -26,7 +31,9 @@ export function MirrorEditorModals({
   deletingMirror,
   activeMirror,
   pendingMirrorSwitch,
+  pendingRouteLabel,
   isResolvingMirrorSwitch,
+  isResolvingRouteChange,
   onCloseCreateModal,
   onCloseEditModal,
   onCloseDeleteModal,
@@ -34,6 +41,9 @@ export function MirrorEditorModals({
   onClosePendingMirrorSwitch,
   onDiscardAndSwitch,
   onSaveAndSwitch,
+  onClosePendingRoute,
+  onDiscardAndNavigate,
+  onSaveAndNavigate,
 }: MirrorEditorModalsProps) {
   return (
     <>
@@ -49,11 +59,22 @@ export function MirrorEditorModals({
       {pendingMirrorSwitch && (
         <UnsavedMirrorChangesModal
           currentMirror={activeMirror}
-          nextMirror={pendingMirrorSwitch}
+          nextLabel={pendingMirrorSwitch.name}
           isSaving={isResolvingMirrorSwitch}
           onClose={onClosePendingMirrorSwitch}
           onDiscard={onDiscardAndSwitch}
           onSave={onSaveAndSwitch}
+        />
+      )}
+      {pendingRouteLabel && (
+        <UnsavedMirrorChangesModal
+          currentMirror={activeMirror}
+          nextLabel={pendingRouteLabel}
+          destinationType="page"
+          isSaving={isResolvingRouteChange}
+          onClose={onClosePendingRoute}
+          onDiscard={onDiscardAndNavigate}
+          onSave={onSaveAndNavigate}
         />
       )}
     </>
