@@ -22,11 +22,11 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
 
         return normalizedType switch
         {
-            "clock" => BuildClockConfig(config),
-            "weather" => BuildWeatherConfig(config),
+            "clock" or "clock-mini" => BuildClockConfig(config),
+            "weather" or "weather-mini" => BuildWeatherConfig(config),
+            "currency" or "currency-mini" => BuildCurrencyConfig(config),
+            "traffic" or "traffic-mini" => BuildTrafficConfig(config),
             "weather-forecast" => BuildWeatherConfig(config),
-            "currency" => BuildCurrencyConfig(config),
-            "traffic" => BuildTrafficConfig(config),
             _ => BuildEmptyConfig(config, normalizedType),
         };
     }
