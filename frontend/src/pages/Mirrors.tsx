@@ -47,7 +47,6 @@ function MirrorContent() {
   const snapshotRef = useRef<MirrorDto | null>(null);
   const localMirrorRef = useRef<MirrorDto | null>(null);
   const saveInFlightRef = useRef(false);
-  const pendingAutosaveSyncMirrorIdRef = useRef<string | null>(null);
   const autosaveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { isAutosaveEnabled, toggleAutosave } = useMirrorAutosavePreference();
@@ -122,23 +121,6 @@ function MirrorContent() {
       setLocalMirror(structuredClone(activeMirror));
     }
   }, [isEditMode, activeMirror]);
-
-  useEffect(() => {
-    const pendingMirrorId = pendingAutosaveSyncMirrorIdRef.current;
-
-    if (!pendingMirrorId || !activeMirror || activeMirror.id !== pendingMirrorId) {
-      return;
-    }
-
-    const freshMirror = structuredClone(activeMirror);
-    snapshotRef.current = freshMirror;
-    localMirrorRef.current = structuredClone(activeMirror);
-    setLocalMirror(structuredClone(activeMirror));
-
-    pendingAutosaveSyncMirrorIdRef.current = null;
-    saveInFlightRef.current = false;
-    updateAutosaveStatus('saved');
-  }, [activeMirror, updateAutosaveStatus]);
 
   const startEditSession = useCallback(
     (mirror: MirrorDto) => {
@@ -247,25 +229,29 @@ function MirrorContent() {
 
   const applyMutationPlanSequentially = useCallback(
     async (mirrorId: string, mutationPlan: ReturnType<typeof buildMirrorWidgetMutationPlan>) => {
+      let latestMirror: MirrorDto | null = null;
+
       for (const widgetId of mutationPlan.removedWidgetIds) {
-        await removeWidget({ mirrorId, widgetId }).unwrap();
+        latestMirror = await removeWidget({ mirrorId, widgetId }).unwrap();
       }
 
       for (const widget of mutationPlan.addedWidgets) {
-        await addWidget({ mirrorId, body: widget }).unwrap();
+        latestMirror = await addWidget({ mirrorId, body: widget }).unwrap();
       }
 
       for (const { widgetId, x, y } of mutationPlan.movedWidgets) {
-        await moveWidget({ mirrorId, widgetId, body: { x, y } }).unwrap();
+        latestMirror = await moveWidget({ mirrorId, widgetId, body: { x, y } }).unwrap();
       }
 
       for (const { widgetId, config } of mutationPlan.updatedWidgetConfigs) {
-        await updateWidgetConfig({
+        latestMirror = await updateWidgetConfig({
           mirrorId,
           widgetId,
           body: { config },
         }).unwrap();
       }
+
+      return latestMirror;
     },
     [addWidget, moveWidget, removeWidget, updateWidgetConfig],
   );
@@ -278,7 +264,7 @@ function MirrorContent() {
       exitEditMode: boolean;
       trigger: 'manual' | 'autosave';
     }) => {
-      if (saveInFlightRef.current || pendingAutosaveSyncMirrorIdRef.current) {
+      if (saveInFlightRef.current) {
         return false;
       }
 
@@ -311,9 +297,7 @@ function MirrorContent() {
 
       saveInFlightRef.current = true;
 
-      if (trigger === 'manual') {
-        updateAutosaveStatus('saving');
-      } else if (trigger === 'autosave') {
+      if (trigger === 'autosave') {
         updateAutosaveStatus('saving');
       }
 
@@ -324,7 +308,7 @@ function MirrorContent() {
       const mirrorId = draft.id;
 
       try {
-        await applyMutationPlanSequentially(mirrorId, mutationPlan);
+        const syncedMirror = await applyMutationPlanSequentially(mirrorId, mutationPlan);
 
         if (exitEditMode) {
           await refetchMirrors();
@@ -332,16 +316,22 @@ function MirrorContent() {
           localMirrorRef.current = null;
           snapshotRef.current = null;
           saveInFlightRef.current = false;
-          updateAutosaveStatus('saved');
           return true;
         }
 
-        pendingAutosaveSyncMirrorIdRef.current = mirrorId;
-        await refetchMirrors();
+        if (syncedMirror) {
+          const freshMirror = structuredClone(syncedMirror);
+          snapshotRef.current = freshMirror;
+          localMirrorRef.current = structuredClone(syncedMirror);
+          setLocalMirror(structuredClone(syncedMirror));
+        }
+
+        saveInFlightRef.current = false;
+        updateAutosaveStatus('saved');
+        void refetchMirrors();
         return true;
       } catch {
         saveInFlightRef.current = false;
-        pendingAutosaveSyncMirrorIdRef.current = null;
 
         if (trigger === 'autosave') {
           updateAutosaveStatus('error');
@@ -369,7 +359,6 @@ function MirrorContent() {
   const handleDiscard = useCallback(() => {
     clearAutosaveStatusTimer();
     updateAutosaveStatus('idle');
-    pendingAutosaveSyncMirrorIdRef.current = null;
     saveInFlightRef.current = false;
     setEditingWidgetIds([]);
     setLocalMirror(null);
@@ -395,12 +384,7 @@ function MirrorContent() {
         localMirrorRef.current,
       );
 
-      if (
-        hasOpenWidgetEditor ||
-        !mutationPlan.hasChanges ||
-        saveInFlightRef.current ||
-        pendingAutosaveSyncMirrorIdRef.current
-      ) {
+      if (hasOpenWidgetEditor || !mutationPlan.hasChanges || saveInFlightRef.current) {
         return;
       }
 
@@ -445,13 +429,36 @@ function MirrorContent() {
           <WidgetSidebar onAddWidget={handleAddWidget} canAddWidget={Boolean(activeMirrorId)} />
         )}
 
-        <MirrorCanvas
-          mirror={displayedMirror}
-          onRemoveWidget={handleRemoveWidget}
-          onMoveWidget={handleMoveWidget}
-          onUpdateWidgetConfig={handleUpdateWidgetConfig}
-          onWidgetEditorStateChange={handleWidgetEditorStateChange}
-        />
+        <div className="relative flex min-w-0 flex-1 overflow-hidden">
+          {autosaveStatus !== 'idle' && (
+            <div className="pointer-events-none absolute left-1/2 top-6 z-40 -translate-x-1/2 px-4">
+              <div
+                className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-lg backdrop-blur-sm transition-all duration-300 ${
+                  autosaveStatus === 'saved'
+                    ? 'border-emerald-300/50 bg-emerald-500/18 text-emerald-50'
+                    : autosaveStatus === 'saving'
+                      ? 'border-emerald-300/40 bg-emerald-500/12 text-emerald-100'
+                      : 'border-red-300/50 bg-red-500/14 text-red-100'
+                }`}
+                aria-live="polite"
+              >
+                {autosaveStatus === 'saved'
+                  ? 'Autosaved'
+                  : autosaveStatus === 'saving'
+                    ? 'Saving changes...'
+                    : 'Autosave failed'}
+              </div>
+            </div>
+          )}
+
+          <MirrorCanvas
+            mirror={displayedMirror}
+            onRemoveWidget={handleRemoveWidget}
+            onMoveWidget={handleMoveWidget}
+            onUpdateWidgetConfig={handleUpdateWidgetConfig}
+            onWidgetEditorStateChange={handleWidgetEditorStateChange}
+          />
+        </div>
 
         <EditModeToggle
           disabled={!activeMirror}
@@ -460,7 +467,6 @@ function MirrorContent() {
           onDiscard={handleDiscard}
           onPreview={activeMirrorId ? () => navigate(`/preview/${activeMirrorId}`) : undefined}
           autosaveEnabled={isAutosaveEnabled}
-          autosaveStatus={autosaveStatus}
           onToggleAutosave={handleToggleAutosave}
         />
       </div>
