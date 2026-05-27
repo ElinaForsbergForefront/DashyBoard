@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { useBlocker, type BlockerFunction } from 'react-router-dom';
 
 interface UseMirrorRouteGuardOptions {
   isEditMode: boolean;
@@ -44,22 +44,22 @@ export function useMirrorRouteGuard({
 }: UseMirrorRouteGuardOptions) {
   const [isResolvingRouteChange, setIsResolvingRouteChange] = useState(false);
 
-  const blocker = useBlocker(
-    useCallback(
-      ({ currentLocation, nextLocation }) => {
-        if (!isEditMode || !hasUnsavedChanges()) {
-          return false;
-        }
+  const shouldBlockRouteChange = useCallback<BlockerFunction>(
+    ({ currentLocation, nextLocation }) => {
+      if (!isEditMode || !hasUnsavedChanges()) {
+        return false;
+      }
 
-        return (
-          currentLocation.pathname !== nextLocation.pathname ||
-          currentLocation.search !== nextLocation.search ||
-          currentLocation.hash !== nextLocation.hash
-        );
-      },
-      [hasUnsavedChanges, isEditMode],
-    ),
+      return (
+        currentLocation.pathname !== nextLocation.pathname ||
+        currentLocation.search !== nextLocation.search ||
+        currentLocation.hash !== nextLocation.hash
+      );
+    },
+    [hasUnsavedChanges, isEditMode],
   );
+
+  const blocker = useBlocker(shouldBlockRouteChange);
 
   const pendingRouteLabel = useMemo(() => {
     if (blocker.state !== 'blocked' || !blocker.location) {
