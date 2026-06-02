@@ -14,20 +14,20 @@ export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps)
   return (
     <>
       {/* Desktop: always visible inline */}
-      <aside className="hidden lg:flex w-60 bg-card border-r border-border flex-col shrink-0 overflow-hidden">
+      <aside className="hidden xl:flex w-60 bg-card border-r border-border flex-col shrink-0 overflow-hidden">
         <SidebarContent onAddWidget={onAddWidget} canAddWidget={canAddWidget} />
       </aside>
 
       <>
         <div
           onClick={toggleSidebar}
-          className={`lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
+          className={`xl:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
             isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
         />
 
         <aside
-          className={`lg:hidden fixed top-0 left-0 z-50 h-full w-72 bg-card border-r border-border flex flex-col overflow-hidden transition-transform duration-300 ${
+          className={`xl:hidden fixed top-0 left-0 z-50 h-full w-72 bg-card border-r border-border flex flex-col overflow-hidden transition-transform duration-300 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >

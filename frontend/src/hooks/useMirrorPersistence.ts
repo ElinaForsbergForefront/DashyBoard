@@ -12,7 +12,7 @@ import type { MirrorDto } from '../api/types/mirror';
 const AUTOSAVE_INTERVAL_MS = 15_000;
 const AUTOSAVE_STATUS_RESET_MS = 2_000;
 
-export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'saved-manual' | 'error';
 
 interface UseMirrorPersistenceOptions {
   isEditMode: boolean;
@@ -65,7 +65,7 @@ export function useMirrorPersistence({
       clearAutosaveStatusTimer();
       setAutosaveStatus(nextStatus);
 
-      if (nextStatus === 'saved') {
+      if (nextStatus === 'saved' || nextStatus === 'saved-manual') {
         setLastSavedAt(new Date());
         autosaveStatusTimeoutRef.current = setTimeout(() => {
           setAutosaveStatus('idle');
@@ -160,7 +160,7 @@ export function useMirrorPersistence({
           await refetchMirrors();
           clearDraft();
           resetPersistenceState();
-          updateAutosaveStatus('saved');
+          updateAutosaveStatus(trigger === 'manual' ? 'saved-manual' : 'saved');
           return true;
         }
 
@@ -168,7 +168,7 @@ export function useMirrorPersistence({
           await refetchMirrors();
           clearDraft();
           resetPersistenceState();
-          updateAutosaveStatus('saved');
+          updateAutosaveStatus(trigger === 'manual' ? 'saved-manual' : 'saved');
           return true;
         }
 
