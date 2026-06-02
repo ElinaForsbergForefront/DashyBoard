@@ -20,7 +20,7 @@ namespace DashyBoard.Application.Queries.Weather
         public async Task<DailyWeatherForecastDto> Handle(GetDailyWeatherForecastQuery request, CancellationToken cancellationToken)
         {
             string cacheKey = $"daily-weather:{request.longi}:{request.lati}";
-            if (_cache.TryGetValue(cacheKey, out DailyWeatherForecastDto cached))
+            if (_cache.TryGetValue(cacheKey, out DailyWeatherForecastDto? cached) && cached is not null)
             {
                 return cached;
             }

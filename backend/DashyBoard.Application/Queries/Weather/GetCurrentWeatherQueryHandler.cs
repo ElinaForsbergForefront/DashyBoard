@@ -20,11 +20,10 @@ namespace DashyBoard.Application.Queries.Weather
         public async Task<CurrentWeatherDto> Handle(GetCurrentWeatherQuery request, CancellationToken cancellationToken)
         {
             string cacheKey = $"current-weather:{request.longi}:{request.lati}";
-            if (_cache.TryGetValue(cacheKey, out CurrentWeatherDto cached))
+            if (_cache.TryGetValue(cacheKey, out CurrentWeatherDto? cached) && cached is not null)
             {
-                return cached;
+            return cached;
             }
-
             var raw = await _weatherClient.GetCurrentWeatherAsync(request.longi, request.lati, cancellationToken);
 
             var result = new CurrentWeatherDto(
