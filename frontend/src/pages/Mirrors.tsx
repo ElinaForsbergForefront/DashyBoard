@@ -1,5 +1,4 @@
 import { WidgetSidebar } from '../components/layout/dashboard/WidgetSidebar';
-import { EditModeToggle } from '../components/layout/editMode/EditModeToggle';
 import { MirrorEditorModals } from '../components/mirrors/MirrorEditorModals';
 import { MirrorSubNav } from '../components/layout/navigation/sub-navigation/MirrorSubNav';
 import { EditModeProvider } from '../context/EditModeContext';
@@ -22,6 +21,7 @@ function MirrorContent() {
     canAddMirror,
     isAutosaveEnabled,
     autosaveStatus,
+    lastSavedAt,
     openCreateModal,
     closeCreateModal,
     openEditMirrorModal,
@@ -45,7 +45,6 @@ function MirrorContent() {
     handleMoveWidget,
     handleUpdateWidgetConfig,
     handleWidgetEditorStateChange,
-    previewMirror,
     canAddWidget,
   } = useMirrorEditor();
 
@@ -60,6 +59,13 @@ function MirrorContent() {
         onEditMirror={openEditMirrorModal}
         onDeleteMirror={openDeleteMirrorModal}
         canAddMirror={canAddMirror}
+        isEditMode={isEditMode}
+        onSave={handleSave}
+        onDiscard={handleDiscard}
+        onEnterEditMode={handleEnterEditMode}
+        autosaveEnabled={isAutosaveEnabled}
+        onToggleAutosave={handleToggleAutosave}
+        lastSavedAt={lastSavedAt}
       />
 
       <MirrorEditorModals
@@ -116,16 +122,6 @@ function MirrorContent() {
             onWidgetEditorStateChange={handleWidgetEditorStateChange}
           />
         </div>
-
-        <EditModeToggle
-          disabled={!activeMirror}
-          onEnterEditMode={handleEnterEditMode}
-          onSave={handleSave}
-          onDiscard={handleDiscard}
-          onPreview={previewMirror}
-          autosaveEnabled={isAutosaveEnabled}
-          onToggleAutosave={handleToggleAutosave}
-        />
       </div>
     </div>
   );

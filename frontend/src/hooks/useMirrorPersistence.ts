@@ -40,6 +40,7 @@ export function useMirrorPersistence({
   refetchMirrors,
 }: UseMirrorPersistenceOptions) {
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   const saveInFlightRef = useRef(false);
   const pendingAutosaveSyncMirrorIdRef = useRef<string | null>(null);
@@ -64,7 +65,13 @@ export function useMirrorPersistence({
       clearAutosaveStatusTimer();
       setAutosaveStatus(nextStatus);
 
-      if (nextStatus === 'saved' || nextStatus === 'error') {
+      if (nextStatus === 'saved') {
+        setLastSavedAt(new Date());
+        autosaveStatusTimeoutRef.current = setTimeout(() => {
+          setAutosaveStatus('idle');
+          autosaveStatusTimeoutRef.current = null;
+        }, AUTOSAVE_STATUS_RESET_MS);
+      } else if (nextStatus === 'error') {
         autosaveStatusTimeoutRef.current = setTimeout(() => {
           setAutosaveStatus('idle');
           autosaveStatusTimeoutRef.current = null;
@@ -248,6 +255,7 @@ export function useMirrorPersistence({
 
   return {
     autosaveStatus,
+    lastSavedAt,
     isAutosaveEnabled,
     isPersistenceBusy: saveInFlightRef.current || pendingAutosaveSyncMirrorIdRef.current !== null,
     resetPersistenceState,
