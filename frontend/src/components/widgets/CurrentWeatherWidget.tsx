@@ -9,6 +9,12 @@ import { useWeatherLocation } from '../../hooks/useWeatherLocation';
 import { WeatherForm } from '../forms/WeatherForm';
 import type { WidgetViewProps } from './types';
 
+const CURRENT_WEATHER_POLLING_INTERVAL_MS = 60 * 60 * 1000;
+
+function toPrimaryLocationLabel(location: string): string {
+  return location.split(',')[0]?.trim() ?? '';
+}
+
 export function CurrentWeatherWidget({
   widget,
   isEditMode = false,
@@ -16,8 +22,15 @@ export function CurrentWeatherWidget({
   onEditingStateChange,
 }: WidgetViewProps<WeatherWidgetDto>) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { searchLocation, coordinates, weatherLocation, isGeocoding, geocodeError, hasLocation } =
-    useWeatherLocation(widget.config);
+  const {
+    searchLocation,
+    coordinates,
+    weatherLocation,
+    formattedWeatherLocation,
+    isGeocoding,
+    geocodeError,
+    hasLocation,
+  } = useWeatherLocation(widget.config);
 
   useEffect(() => {
     onEditingStateChange?.(widget.id, isEditModalOpen);
@@ -29,7 +42,11 @@ export function CurrentWeatherWidget({
     error: weatherError,
   } = useGetCurrentWeatherQuery(
     { longi: coordinates?.lon.toString() ?? '0', lati: coordinates?.lat.toString() ?? '0' },
-    { skip: !coordinates },
+    {
+      skip: !coordinates,
+      pollingInterval: CURRENT_WEATHER_POLLING_INTERVAL_MS,
+      skipPollingIfUnfocused: true,
+    },
   );
 
   const { theme } = useTheme();
@@ -47,6 +64,10 @@ export function CurrentWeatherWidget({
     : weatherError
       ? 'Could not fetch weather for the location.'
       : undefined;
+  const locationLabel =
+    toPrimaryLocationLabel(formattedWeatherLocation) ||
+    toPrimaryLocationLabel(weatherLocation) ||
+    searchLocation;
 
   return (
     <>
@@ -76,8 +97,7 @@ export function CurrentWeatherWidget({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-foreground-secondary">
-                    {(weatherLocation || searchLocation).charAt(0).toUpperCase() +
-                      (weatherLocation || searchLocation).slice(1)}
+                    {locationLabel.charAt(0).toUpperCase() + locationLabel.slice(1)}
                   </p>
                   {weatherTypeLabel && <p className="text-xs text-muted">{weatherTypeLabel}</p>}
                   <p className="text-4xl font-semibold text-foreground tracking-tight">

@@ -26,6 +26,7 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
             "weather" or "weather-mini" => BuildWeatherConfig(config),
             "currency" or "currency-mini" => BuildCurrencyConfig(config),
             "traffic" or "traffic-mini" => BuildTrafficConfig(config),
+            "weather-forecast" => BuildWeatherConfig(config),
             _ => BuildEmptyConfig(config, normalizedType),
         };
     }
@@ -41,6 +42,10 @@ public sealed class WidgetConfigurationService : IWidgetConfigurationService
                 Timezone = ReadPersistedString(persistedConfig, "timezone"),
             },
             "weather" or "weather-mini" => new WeatherWidgetConfigDto
+            {
+                City = ReadPersistedString(persistedConfig, "city"),
+            },
+            "weather-forecast" => new WeatherForecastWidgetConfigDto
             {
                 City = ReadPersistedString(persistedConfig, "city"),
             },
