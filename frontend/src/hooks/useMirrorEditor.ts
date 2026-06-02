@@ -46,6 +46,7 @@ export function useMirrorEditor() {
 
   const {
     autosaveStatus,
+    lastSavedAt,
     isAutosaveEnabled,
     isPersistenceBusy,
     resetPersistenceState,
@@ -176,6 +177,7 @@ export function useMirrorEditor() {
     canAddMirror,
     isAutosaveEnabled,
     autosaveStatus,
+    lastSavedAt,
     openCreateModal: () => setShowCreateModal(true),
     closeCreateModal: () => setShowCreateModal(false),
     openEditMirrorModal: setEditingMirror,

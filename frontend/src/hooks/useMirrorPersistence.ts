@@ -12,7 +12,7 @@ import type { MirrorDto } from '../api/types/mirror';
 const AUTOSAVE_INTERVAL_MS = 15_000;
 const AUTOSAVE_STATUS_RESET_MS = 2_000;
 
-export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'saved-manual' | 'error';
 
 interface UseMirrorPersistenceOptions {
   isEditMode: boolean;
@@ -40,6 +40,7 @@ export function useMirrorPersistence({
   refetchMirrors,
 }: UseMirrorPersistenceOptions) {
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   const saveInFlightRef = useRef(false);
   const pendingAutosaveSyncMirrorIdRef = useRef<string | null>(null);
@@ -64,7 +65,13 @@ export function useMirrorPersistence({
       clearAutosaveStatusTimer();
       setAutosaveStatus(nextStatus);
 
-      if (nextStatus === 'saved' || nextStatus === 'error') {
+      if (nextStatus === 'saved' || nextStatus === 'saved-manual') {
+        setLastSavedAt(new Date());
+        autosaveStatusTimeoutRef.current = setTimeout(() => {
+          setAutosaveStatus('idle');
+          autosaveStatusTimeoutRef.current = null;
+        }, AUTOSAVE_STATUS_RESET_MS);
+      } else if (nextStatus === 'error') {
         autosaveStatusTimeoutRef.current = setTimeout(() => {
           setAutosaveStatus('idle');
           autosaveStatusTimeoutRef.current = null;
@@ -153,7 +160,7 @@ export function useMirrorPersistence({
           await refetchMirrors();
           clearDraft();
           resetPersistenceState();
-          updateAutosaveStatus('saved');
+          updateAutosaveStatus(trigger === 'manual' ? 'saved-manual' : 'saved');
           return true;
         }
 
@@ -161,7 +168,7 @@ export function useMirrorPersistence({
           await refetchMirrors();
           clearDraft();
           resetPersistenceState();
-          updateAutosaveStatus('saved');
+          updateAutosaveStatus(trigger === 'manual' ? 'saved-manual' : 'saved');
           return true;
         }
 
@@ -248,6 +255,7 @@ export function useMirrorPersistence({
 
   return {
     autosaveStatus,
+    lastSavedAt,
     isAutosaveEnabled,
     isPersistenceBusy: saveInFlightRef.current || pendingAutosaveSyncMirrorIdRef.current !== null,
     resetPersistenceState,

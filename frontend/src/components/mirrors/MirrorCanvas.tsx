@@ -120,7 +120,7 @@ export const MirrorCanvas = ({
               onPointerDown={(event) => event.stopPropagation()}
               onClick={() => memoizedOnRemoveWidget(widget.id)}
               aria-label={`Remove ${definition.name}`}
-              className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white opacity-0 shadow group-hover:opacity-100 transition-opacity"
+              className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow transition-opacity opacity-100 xl:opacity-0 xl:group-hover:opacity-100"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                 <path
