@@ -2,23 +2,32 @@
 using DashyBoard.Application.Mappers.Weather;
 using DashyBoard.Application.Queries.Weather.Dto;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DashyBoard.Application.Queries.Weather
 {
     public sealed class GetHourlyWeatherForecastQueryHandler : IRequestHandler<GetHourlyWeatherForecastQuery, HourlyWeatherForecastDto>
     {
         private readonly IWeatherApiClient _weatherClient;
+        private readonly IMemoryCache _cache;
 
-        public GetHourlyWeatherForecastQueryHandler(IWeatherApiClient weatherClient)
+        public GetHourlyWeatherForecastQueryHandler(IWeatherApiClient weatherClient, IMemoryCache cache)
         {
             _weatherClient = weatherClient;
+            _cache = cache;
         }
 
         public async Task<HourlyWeatherForecastDto> Handle(GetHourlyWeatherForecastQuery request, CancellationToken cancellationToken)
         {
+            string cacheKey = $"hourly-weather:{request.longi}:{request.lati}";
+            if (_cache.TryGetValue(cacheKey, out HourlyWeatherForecastDto? cached) && cached is not null)
+            {
+                return cached;
+            }
+
             var raw = await _weatherClient.GetHourlyWeatherForecastAsync(request.longi, request.lati, cancellationToken);
 
-            return new HourlyWeatherForecastDto(
+            var result = new HourlyWeatherForecastDto(
                 raw.Latitude,
                 raw.Longitude,
                 new HourlyForecastData(
@@ -30,6 +39,8 @@ namespace DashyBoard.Application.Queries.Weather
                     raw.Hourly.PrecipitationProbability
                 )
             );
+            _cache.Set(cacheKey, result, TimeSpan.FromHours(1));
+            return result;
         }
     }
 }

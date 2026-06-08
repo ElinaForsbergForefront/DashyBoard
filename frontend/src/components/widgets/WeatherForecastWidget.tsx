@@ -5,8 +5,15 @@ import { useGetDailyWeatherQuery } from '../../api/endpoints/weather';
 import { createPortal } from 'react-dom';
 import { getWeatherTypeDisplay } from '../../utils/weather';
 import { useWeatherLocation } from '../../hooks/useWeatherLocation';
-import { WeatherLocationEditModal } from './weather/WeatherLocationEditModal';
-import { useEditModeContext } from '../../context/EditModeContext';
+import { WeatherForm } from '../forms/WeatherForm';
+import type { WeatherForecastWidgetDto } from '../../api/types/mirror';
+import type { WidgetViewProps } from './types';
+
+const FORECAST_POLLING_INTERVAL_MS = 12 * 60 * 60 * 1000;
+
+function toPrimaryLocationLabel(location: string): string {
+  return location.split(',')[0]?.trim() ?? '';
+}
 
 function formatDayLabel(dateString: string): string {
   const date = new Date(dateString);
@@ -19,18 +26,21 @@ function formatDayLabel(dateString: string): string {
   }
 }
 
-export function WeatherForecastWidget() {
+export function WeatherForecastWidget({
+  widget,
+  isEditMode = false,
+  onUpdateConfig,
+}: WidgetViewProps<WeatherForecastWidgetDto>) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { isEditMode } = useEditModeContext();
   const {
     searchLocation,
     coordinates,
     weatherLocation,
+    formattedWeatherLocation,
     isGeocoding,
     geocodeError,
     hasLocation,
-    saveWeatherLocation,
-  } = useWeatherLocation();
+  } = useWeatherLocation(widget.config);
 
   const {
     data: dailyWeather,
@@ -38,22 +48,26 @@ export function WeatherForecastWidget() {
     error: weatherError,
   } = useGetDailyWeatherQuery(
     { longi: coordinates?.lon.toString() ?? '0', lati: coordinates?.lat.toString() ?? '0' },
-    { skip: !coordinates },
+    {
+      skip: !coordinates,
+      pollingInterval: FORECAST_POLLING_INTERVAL_MS,
+      skipPollingIfUnfocused: true,
+    },
   );
 
   const { theme } = useTheme();
 
   const isLoading = isGeocoding || isFetchingWeather;
   const errorMessage = geocodeError
-    ? 'Kunde inte tolka platsen. Kontrollera att du skriver in en stad eller ort.'
+    ? 'Could not resolve location. Make sure you enter a city or town.'
     : weatherError
-      ? 'Kunde inte hämta väderprognosen för platsen.'
+      ? 'Could not fetch the weather forecast for the location.'
       : undefined;
 
-  const handleLocationSubmit = (newLocationCity: string) => {
-    saveWeatherLocation({ city: newLocationCity });
-    setIsEditModalOpen(false);
-  };
+  const locationLabel =
+    toPrimaryLocationLabel(formattedWeatherLocation) ||
+    toPrimaryLocationLabel(weatherLocation) ||
+    searchLocation;
 
   return (
     <>
@@ -61,7 +75,7 @@ export function WeatherForecastWidget() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground-secondary">Weather Forecast</h3>
-            {isEditMode && (
+            {isEditMode && onUpdateConfig && (
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
@@ -72,21 +86,26 @@ export function WeatherForecastWidget() {
             )}
           </div>
 
-          {isLoading && <p className="text-xs text-muted">Hämtar väderprognos…</p>}
+          {isLoading && <p className="text-xs text-muted">Fetching weather forecast…</p>}
 
           {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {!isLoading && dailyWeather && (
             <div className="flex flex-col space-y-2 flex-1">
-              <p className="text-xs text-muted text-xs flex-shrink-0">{(weatherLocation || searchLocation).charAt(0).toUpperCase() + (weatherLocation || searchLocation).slice(1)}</p>
+              <p className="text-xs text-muted shrink-0">
+                {locationLabel.charAt(0).toUpperCase() + locationLabel.slice(1)}
+              </p>
               <div className="space-y-1 overflow-y-auto subtle-scrollbar pr-4 flex-1">
                 {dailyWeather.daily.time.map((date, index) => {
                   const weatherType = dailyWeather.daily.weather_code?.[index];
                   const maxTemp = dailyWeather.daily.temperature_2m_max?.[index];
                   const minTemp = dailyWeather.daily.temperature_2m_min?.[index];
-                  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(weatherType, theme);
+                  const { label: weatherTypeLabel, icon: weatherIcon } = getWeatherTypeDisplay(
+                    weatherType,
+                    theme,
+                  );
                   const dayLabel = formatDayLabel(date);
 
                   return (
@@ -121,25 +140,53 @@ export function WeatherForecastWidget() {
           )}
 
           {!isLoading && !dailyWeather && !hasLocation && (
-            <p className="text-xs text-muted">Ingen plats vald ännu. Klicka på Edit för att lägga till.</p>
+            <p className="text-xs text-muted">
+              No location selected yet. Click Edit to add one
+            </p>
           )}
 
           {!isLoading && !dailyWeather && hasLocation && !errorMessage && (
-            <p className="text-xs text-muted">Söker plats och hämtar väderdata…</p>
+            <p className="text-xs text-muted">Searching location and fetching weather data…</p>
           )}
 
           {errorMessage && <p className="text-xs text-muted">{errorMessage}</p>}
         </div>
       </GlassCard>
 
-      {isEditModalOpen && createPortal(
-        <WeatherLocationEditModal
-          title="Weather Forecast"
-          onClose={() => setIsEditModalOpen(false)}
-          onLocationSubmit={handleLocationSubmit}
-        />,
-        document.body,
-      )}
+      {isEditModalOpen &&
+        onUpdateConfig &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-80 flex items-center justify-center bg-black/60 p-4"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <GlassCard
+              className="glass-form w-full max-w-md"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-foreground">Edit weather forecast</h4>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="rounded-md px-2 py-1 text-xs text-muted hover:text-foreground"
+                >
+                  Close
+                </button>
+              </div>
+
+              <WeatherForm
+                initialConfig={{ city: widget.config?.city ?? '' }}
+                onSubmit={(config) => {
+                  onUpdateConfig(config);
+                  setIsEditModalOpen(false);
+                }}
+                onCancel={() => setIsEditModalOpen(false)}
+              />
+            </GlassCard>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

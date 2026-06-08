@@ -1,54 +1,44 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import type { ClockWidgetConfig } from '../../api/types/mirror';
+import { useClockTimezone } from '../../hooks/useClockTimezone';
 import { FormCard } from '../ui/form-card';
+import type { WidgetSettingsFormProps } from '../widgets/types';
 
-interface ClockTimezoneFormProps {
-  timezones: string[];
-  selectedTimezone: string;
-  onTimezoneChange: (timezone: string) => void;
-  onSuccess?: () => void;
-}
+type ClockTimezoneFormProps = WidgetSettingsFormProps<ClockWidgetConfig>;
 
-export function ClockTimezoneForm({
-  timezones,
-  selectedTimezone,
-  onTimezoneChange,
-  onSuccess,
-}: ClockTimezoneFormProps) {
-  const [pendingTimezone, setPendingTimezone] = useState(selectedTimezone);
+export function ClockTimezoneForm({ initialConfig, onSubmit, onCancel }: ClockTimezoneFormProps) {
+  const { selectedTimezone, availableTimezones } = useClockTimezone(initialConfig);
+  const [pendingTimezone, setPendingTimezone] = useState(initialConfig.timezone);
 
   const uniqueTimezones = useMemo(
-    () => Array.from(new Set(timezones)),
-    [timezones]
+    () =>
+      Array.from(
+        new Set([selectedTimezone, ...availableTimezones].filter((timezone) => Boolean(timezone))),
+      ),
+    [availableTimezones, selectedTimezone],
   );
 
-  const applyTimezone = () => {
-    onTimezoneChange(pendingTimezone);
-    onSuccess?.();
-  };
-
   useEffect(() => {
-    if (selectedTimezone && timezones.includes(selectedTimezone)) {
+    if (selectedTimezone) {
       setPendingTimezone(selectedTimezone);
-    } else if (timezones.length > 0) {
-      setPendingTimezone(timezones[0]);
     }
-  }, [selectedTimezone, timezones]);
+  }, [selectedTimezone]);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    applyTimezone();
+    onSubmit({ timezone: pendingTimezone });
   };
 
-  if (timezones.length === 0) {
-    return <div className="p-2 text-sm text-destructive">Inga tidszoner är tillgängliga</div>;
+  if (availableTimezones.length === 0) {
+    return <div className="p-2 text-sm text-destructive">No timezones available</div>;
   }
 
   return (
-    <FormCard onSubmit={onSubmit}>
-      <p className="text-sm font-medium text-foreground">Tidszon</p>
+    <FormCard onSubmit={handleSubmit}>
+      <p className="text-sm font-medium text-foreground">Timezone</p>
 
       <label className="flex flex-col gap-1 text-xs text-muted">
-        Välj tidszon
+        Select timezone
         <select
           value={pendingTimezone}
           onChange={(event) => setPendingTimezone(event.target.value)}
@@ -62,12 +52,23 @@ export function ClockTimezoneForm({
         </select>
       </label>
 
-      <button
-        type="submit"
-        className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white"
-      >
-        Klar
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white"
+        >
+          Save
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-md border border-border px-3 py-2 text-sm text-foreground"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </FormCard>
   );
 }

@@ -5,8 +5,8 @@ using System.Net.Http.Json;
 namespace DashyBoard.Infrastructure.External
 {
     /// <summary>
-    /// GoldApiClient ansvarar för kommunikationen med det externa Gold API:t.
-    /// Vi isolerar HTTP- och integrationslogik här istället för i controller/handler
+    /// GoldApiClient is responsible for communication with the external Gold API.
+    /// We isolate HTTP and integration logic here instead of in the controller/handler.
     /// </summary>
     public sealed class GoldApiClient : IGoldApiClient
     {

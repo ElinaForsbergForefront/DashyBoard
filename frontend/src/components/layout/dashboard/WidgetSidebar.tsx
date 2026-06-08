@@ -14,27 +14,24 @@ export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps)
   return (
     <>
       {/* Desktop: always visible inline */}
-      <aside className="hidden lg:flex w-60 min-h-full bg-card border-r border-border flex-col gap-4 p-4 shrink-0">
+      <aside className="hidden xl:flex w-60 bg-card border-r border-border flex-col shrink-0 overflow-hidden">
         <SidebarContent onAddWidget={onAddWidget} canAddWidget={canAddWidget} />
       </aside>
 
-      {/* Mobile: slide-in overlay */}
       <>
-        {/* Backdrop */}
         <div
           onClick={toggleSidebar}
-          className={`lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
+          className={`xl:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
             isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
         />
 
-        {/* Drawer */}
         <aside
-          className={`lg:hidden fixed top-0 left-0 z-50 h-full w-72 bg-card border-r border-border flex flex-col gap-4 p-4 transition-transform duration-300 ${
+          className={`xl:hidden fixed top-0 left-0 z-50 h-full w-72 bg-card border-r border-border flex flex-col overflow-hidden transition-transform duration-300 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-4 pb-0">
             <SidebarHeading />
             <button
               onClick={toggleSidebar}
@@ -44,6 +41,7 @@ export function WidgetSidebar({ onAddWidget, canAddWidget }: WidgetSidebarProps)
               <CloseIcon />
             </button>
           </div>
+
           <SidebarContent
             hideHeading
             onAddWidget={(widget) => {
@@ -62,7 +60,7 @@ function SidebarHeading() {
   return (
     <div>
       <h2 className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">Widgets</h2>
-      <p className="text-xs text-muted">Klicka för att lägga till i mirror</p>
+      <p className="text-xs text-muted">Click to add to mirror</p>
     </div>
   );
 }
@@ -79,9 +77,13 @@ function SidebarContent({
   const [selectedWidget, setSelectedWidget] = useState<WidgetType | null>(null);
 
   return (
-    <>
-      {!hideHeading && <SidebarHeading />}
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col flex-1 min-h-0">
+      {!hideHeading && (
+        <div className="p-4 pb-0">
+          <SidebarHeading />
+        </div>
+      )}
+      <div className="flex-1 overflow-y-auto min-h-0 p-4 subtle-scrollbar">
         <WidgetPicker
           selectedWidget={selectedWidget}
           onSelectWidget={setSelectedWidget}
@@ -89,7 +91,7 @@ function SidebarContent({
           canAddWidget={canAddWidget}
         />
       </div>
-    </>
+    </div>
   );
 }
 

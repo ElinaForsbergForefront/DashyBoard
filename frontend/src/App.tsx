@@ -8,7 +8,7 @@ function App() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <div className="h-screen overflow-hidden bg-background text-foreground flex flex-col">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolut focus:top-2 focus:left-2 focus:z-100 focus:px-4 focus:py-2 focus:bg-primary focus:text-on-primary focus:rounded-md"
@@ -16,7 +16,7 @@ function App() {
           Skip to main content
         </a>
         {isAuthenticated && <Navigation />}
-        <main id="main-content" className="flex-1 flex flex-col">
+        <main id="main-content" className="flex-1 flex flex-col overflow-hidden">
           {isAuthenticated && <Outlet />}
         </main>
       </div>

@@ -2,6 +2,7 @@
 using DashyBoard.Application.Queries.Weather;
 using DashyBoard.Application.Interfaces;
 using DashyBoard.Domain.Models;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace DashyBoard.Application.Tests.Weather
@@ -31,7 +32,12 @@ namespace DashyBoard.Application.Tests.Weather
                 .Setup(x => x.GetCurrentWeatherAsync("10", "10", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedWeather);
 
-            var handler = new GetCurrentWeatherQueryHandler(mockClient.Object);
+            var mockCache = new Mock<IMemoryCache>();
+            object? cacheValue = null;
+            mockCache.Setup(x => x.TryGetValue(It.IsAny<object>(), out cacheValue)).Returns(false);
+            mockCache.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(Mock.Of<ICacheEntry>());
+
+            var handler = new GetCurrentWeatherQueryHandler(mockClient.Object, mockCache.Object);
 
             // Act
             var result = await handler.Handle(

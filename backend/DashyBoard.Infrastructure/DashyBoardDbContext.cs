@@ -141,7 +141,7 @@ namespace DashyBoard.Infrastructure
                 entity.Property(e => e.RowVersion)
                     .IsRowVersion();
                 
-                // Fixa relationen: en-till-en istället för en-till-många
+                // Fix the relationship: one-to-one instead of one-to-many
                 entity.HasOne(e => e.User)
                       .WithOne(u => u.SpotifyConnection) 
                       .HasForeignKey<SpotifyConnection>(e => e.UserId)

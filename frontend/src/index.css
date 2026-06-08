@@ -310,6 +310,10 @@
     min-height: 12rem;
   }
 
+  .glass-widget-mini {
+    @apply p-3;
+  }
+
   .glass-form {
     @apply p-6;
   }

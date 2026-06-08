@@ -1,6 +1,12 @@
 import { api } from '../apiSlice';
-import type { MirrorDto, CreateMirrorRequest, UpdateMirrorRequest,   AddWidgetRequest,
-  MoveWidgetRequest, } from '../types/mirror';
+import type {
+  MirrorDto,
+  CreateMirrorRequest,
+  UpdateMirrorRequest,
+  AddWidgetRequest,
+  MoveWidgetRequest,
+  UpdateWidgetConfigRequest,
+} from '../types/mirror';
 
 const mirrorApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -27,10 +33,7 @@ const mirrorApi = api.injectEndpoints({
       query: (id) => ({ url: `/mirror/${id}`, method: 'DELETE' }),
       invalidatesTags: [{ type: 'Mirror', id: 'LIST' }],
     }),
-     addWidget: builder.mutation<
-      MirrorDto,
-      { mirrorId: string; body: AddWidgetRequest }
-    >({
+    addWidget: builder.mutation<MirrorDto, { mirrorId: string; body: AddWidgetRequest }>({
       query: ({ mirrorId, body }) => ({
         url: `/mirror/${mirrorId}/widget`,
         method: 'POST',
@@ -41,7 +44,6 @@ const mirrorApi = api.injectEndpoints({
         { type: 'Mirror', id: 'LIST' },
       ],
     }),
-
     moveWidget: builder.mutation<
       MirrorDto,
       { mirrorId: string; widgetId: string; body: MoveWidgetRequest }
@@ -56,11 +58,21 @@ const mirrorApi = api.injectEndpoints({
         { type: 'Mirror', id: 'LIST' },
       ],
     }),
-
-    removeWidget: builder.mutation<
+    updateWidgetConfig: builder.mutation<
       MirrorDto,
-      { mirrorId: string; widgetId: string }
+      { mirrorId: string; widgetId: string; body: UpdateWidgetConfigRequest }
     >({
+      query: ({ mirrorId, widgetId, body }) => ({
+        url: `/mirror/${mirrorId}/widget/${widgetId}/config`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { mirrorId }) => [
+        { type: 'Mirror', id: mirrorId },
+        { type: 'Mirror', id: 'LIST' },
+      ],
+    }),
+    removeWidget: builder.mutation<MirrorDto, { mirrorId: string; widgetId: string }>({
       query: ({ mirrorId, widgetId }) => ({
         url: `/mirror/${mirrorId}/widget/${widgetId}`,
         method: 'DELETE',
@@ -81,5 +93,6 @@ export const {
   useDeleteMirrorMutation,
   useAddWidgetMutation,
   useMoveWidgetMutation,
+  useUpdateWidgetConfigMutation,
   useRemoveWidgetMutation,
 } = mirrorApi;

@@ -11,6 +11,8 @@ interface MirrorCanvasProps {
   mirror: MirrorDto | null;
   onRemoveWidget?: (widgetId: string) => void;
   onMoveWidget?: (widgetId: string, xCm: number, yCm: number) => Promise<void> | void;
+  onUpdateWidgetConfig?: (widgetId: string, config: MirrorDto['widgets'][number]['config']) => void;
+  onWidgetEditorStateChange?: (widgetId: string, isEditing: boolean) => void;
   previewMode?: boolean;
   previewBackground?: 'dark' | 'light';
 }
@@ -19,6 +21,8 @@ export const MirrorCanvas = ({
   mirror,
   onRemoveWidget,
   onMoveWidget,
+  onUpdateWidgetConfig,
+  onWidgetEditorStateChange,
   previewMode = false,
   previewBackground = 'dark',
 }: MirrorCanvasProps) => {
@@ -44,7 +48,7 @@ export const MirrorCanvas = ({
   const widgetSizesPx = useMemo(() => {
     const map: Record<string, { width: number; height: number }> = {};
     for (const widget of widgets) {
-      const def = widgetRegistry.find((w) => w.id === widget.type);
+      const def = widgetRegistry.find((entry) => entry.id === widget.type);
       if (def) {
         map[widget.id] = {
           width: def.cols * GRID_UNIT_CM * scale,
@@ -80,7 +84,7 @@ export const MirrorCanvas = ({
 
   const renderedWidgets = mirror.widgets
     .map((widget) => {
-      const definition = widgetRegistry.find((w) => w.id === widget.type);
+      const definition = widgetRegistry.find((entry) => entry.id === widget.type);
       if (!definition) return null;
 
       const WidgetComponent = definition.component;
@@ -91,12 +95,13 @@ export const MirrorCanvas = ({
       const naturalWidthPx = definition.cols * GRID_UNIT_CM * REFERENCE_SCALE;
       const naturalHeightPx = definition.rows * GRID_UNIT_CM * REFERENCE_SCALE;
       const contentScale = scale / REFERENCE_SCALE;
-
       return (
         <div
           key={widget.id}
           data-widget-id={widget.id}
-          className={`absolute group touch-none select-none ${isEditMode && !previewMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`absolute group touch-none select-none ${
+            isEditMode && !previewMode ? 'cursor-grab active:cursor-grabbing' : ''
+          }`}
           style={{
             left: position.x,
             top: position.y,
@@ -112,9 +117,10 @@ export const MirrorCanvas = ({
           {isEditMode && (
             <button
               type="button"
+              onPointerDown={(event) => event.stopPropagation()}
               onClick={() => memoizedOnRemoveWidget(widget.id)}
               aria-label={`Remove ${definition.name}`}
-              className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white opacity-0 shadow group-hover:opacity-100 transition-opacity"
+              className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white shadow transition-opacity opacity-100 xl:opacity-0 xl:group-hover:opacity-100"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                 <path
@@ -127,7 +133,10 @@ export const MirrorCanvas = ({
             </button>
           )}
 
-          <div style={{ width: slotWidthPx, height: slotHeightPx, overflow: 'hidden' }}>
+          <div
+            className="overflow-hidden rounded transition-shadow"
+            style={{ width: slotWidthPx, height: slotHeightPx }}
+          >
             <div
               style={{
                 width: naturalWidthPx,
@@ -136,7 +145,16 @@ export const MirrorCanvas = ({
                 transformOrigin: 'top left',
               }}
             >
-              <WidgetComponent />
+              <WidgetComponent
+                widget={widget}
+                isEditMode={isEditMode}
+                onUpdateConfig={
+                  onUpdateWidgetConfig
+                    ? (config) => onUpdateWidgetConfig(widget.id, config)
+                    : undefined
+                }
+                onEditingStateChange={onWidgetEditorStateChange}
+              />
             </div>
           </div>
         </div>
@@ -148,16 +166,12 @@ export const MirrorCanvas = ({
     <div
       ref={containerRef}
       className={`flex-1 flex flex-col items-center justify-center gap-3 overflow-hidden p-8 ${
-        previewMode
-          ? previewBackground === 'light'
-            ? 'light'
-            : 'dark-theme-scope'
-          : ''
+        previewMode ? (previewBackground === 'light' ? 'light' : 'dark-theme-scope') : ''
       }`}
     >
       {previewMode ? (
         <div
-          className="relative p-[5px] rounded-[20px] transition-all duration-500"
+          className="relative p-1.25 rounded-[20px] transition-all duration-500"
           style={{
             background:
               previewBackground === 'light'
@@ -172,7 +186,7 @@ export const MirrorCanvas = ({
           <div
             ref={canvasRef}
             style={{ width: canvasWidth, height: canvasHeight }}
-            className={`relative rounded-[16px] overflow-hidden transition-all duration-500 ${
+            className={`relative rounded-2xl overflow-hidden transition-all duration-500 ${
               previewBackground === 'light' ? 'bg-white' : 'bg-[#0d0d10]'
             }`}
             onPointerMove={handlePointerMove}
@@ -182,27 +196,27 @@ export const MirrorCanvas = ({
           </div>
         </div>
       ) : (
-      <div
-        ref={canvasRef}
-        style={{ width: canvasWidth, height: canvasHeight }}
-        className={`relative transition-all duration-500 ${
-          isEditMode
-            ? 'rounded ring-2 ring-primary outline-dashed outline-2 -outline-offset-2 outline-primary/30 bg-surface/50'
-            : 'rounded border border-border bg-surface/30'
-        }`}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-      >
-        <MirrorGrid
-          widthPx={canvasWidth}
-          heightPx={canvasHeight}
-          scale={scale}
-          widthCm={mirror.widthCm}
-          heightCm={mirror.heightCm}
-        />
+        <div
+          ref={canvasRef}
+          style={{ width: canvasWidth, height: canvasHeight }}
+          className={`relative transition-all duration-500 ${
+            isEditMode
+              ? 'rounded ring-2 ring-primary outline-dashed outline-2 -outline-offset-2 outline-primary/30 bg-surface/50'
+              : 'rounded border border-border bg-surface/30'
+          }`}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
+          <MirrorGrid
+            widthPx={canvasWidth}
+            heightPx={canvasHeight}
+            scale={scale}
+            widthCm={mirror.widthCm}
+            heightCm={mirror.heightCm}
+          />
 
-        {renderedWidgets}
-      </div>
+          {renderedWidgets}
+        </div>
       )}
 
       {!previewMode && (
