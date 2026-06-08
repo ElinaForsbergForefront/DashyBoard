@@ -12,6 +12,7 @@ namespace DashyBoard.Application.Interfaces
         Task<Guid> SendFriendRequestAsync(Guid currentUserId, string receiverUsername, CancellationToken ct);
         Task AcceptFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct);
         Task RejectFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct);
+        Task CancelFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct);
         Task RemoveFriendAsync(string username, Guid currentUserId, CancellationToken ct);
         Task BlockUserAsync(string username, Guid currentUserId, CancellationToken ct);
         Task UnblockUserAsync(string username, Guid currentUserId, CancellationToken ct);
@@ -19,6 +20,7 @@ namespace DashyBoard.Application.Interfaces
         // UserRelationship Queries
         Task<IReadOnlyList<UserRelationDto>> GetFriendListAsync(Guid currentUserId, CancellationToken ct);
         Task<IReadOnlyList<UserRelationDto>> GetFriendRequestsAsync(Guid currentUserId, CancellationToken ct);
+        Task<IReadOnlyList<UserRelationDto>> GetSentFriendRequestsAsync(Guid currentUserId, CancellationToken ct);
         Task<IReadOnlyList<UserRelationDto>> GetBlockedUsersAsync(Guid currentUserId, CancellationToken ct);
         Task<UserRelationDto?> GetFriendAsync(Guid currentUserId, string otherUsername, CancellationToken ct);
 

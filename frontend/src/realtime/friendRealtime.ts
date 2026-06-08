@@ -4,6 +4,7 @@ export const FRIEND_EVENT_TYPES = {
   FRIEND_REQUEST_SENT: 'friend-request-sent',
   FRIEND_REQUEST_ACCEPTED: 'friend-request-accepted',
   FRIEND_REQUEST_REJECTED: 'friend-request-rejected',
+  FRIEND_REQUEST_CANCELED: 'friend-request-cancelled',
   FRIEND_REMOVED: 'friend-removed',
   USER_BLOCKED: 'user-blocked',
   USER_UNBLOCKED: 'user-unblocked',
@@ -14,6 +15,7 @@ export const FRIEND_EVENT_TYPES = {
 
 export type FriendEventType = (typeof FRIEND_EVENT_TYPES)[keyof typeof FRIEND_EVENT_TYPES];
 type FriendTagType = 'FriendRequests' | 'Friends' | 'Blocked' | 'Pokes';
+type FriendTagId = 'LIST' | 'SENT';
 
 export interface FriendRealtimeEvent {
   eventType: FriendEventType;
@@ -34,7 +36,7 @@ export function getFriendsHubUrl(): string {
 
 export function getInvalidationTagsForFriendEvent(
   event: FriendRealtimeEvent,
-): Array<{ type: FriendTagType; id: 'LIST' }> {
+): Array<{ type: FriendTagType; id: FriendTagId }> {
   switch (event.eventType) {
     case FRIEND_EVENT_TYPES.FRIEND_REQUEST_SENT:
       return [{ type: 'FriendRequests', id: 'LIST' }];
@@ -42,10 +44,12 @@ export function getInvalidationTagsForFriendEvent(
     case FRIEND_EVENT_TYPES.FRIEND_REQUEST_ACCEPTED:
       return [
         { type: 'FriendRequests', id: 'LIST' },
+        { type: 'FriendRequests', id: 'SENT' },
         { type: 'Friends', id: 'LIST' },
       ];
 
     case FRIEND_EVENT_TYPES.FRIEND_REQUEST_REJECTED:
+    case FRIEND_EVENT_TYPES.FRIEND_REQUEST_CANCELED:
       return [{ type: 'FriendRequests', id: 'LIST' }];
 
     case FRIEND_EVENT_TYPES.FRIEND_REMOVED:
