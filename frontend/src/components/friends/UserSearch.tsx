@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLazySearchUsersQuery } from '../../api/endpoints/user';
 import {
   useGetFriendRequestsQuery,
+  useGetSentFriendRequestsQuery,
   useGetFriendListQuery,
   useGetBlockedUsersQuery,
   useSendFriendRequestMutation,
@@ -18,6 +19,7 @@ export function UserSearch() {
   const [searchUsers, { data: searchResults = [], isFetching: isSearching }] = useLazySearchUsersQuery();
   const [sendFriendRequest, { isLoading: isSendingRequest }] = useSendFriendRequestMutation();
   const { data: requests = [] } = useGetFriendRequestsQuery();
+  const { data: sentFriendRequests = [] } = useGetSentFriendRequestsQuery();
   const { data: friends = [] } = useGetFriendListQuery();
   const { data: blockedUsers = [] } = useGetBlockedUsersQuery();
 
@@ -69,6 +71,9 @@ export function UserSearch() {
       !blockedUsers.some((b) => b.username === user.username),
   );
 
+  const isPendingRequest = (username: string) =>
+    sentRequests.has(username) || sentFriendRequests.some((r) => r.username === username);
+
   return (
     <div className="relative" ref={containerRef}>
       <div className="flex gap-2">
@@ -99,7 +104,7 @@ export function UserSearch() {
           )}
           {!isSearching &&
             filteredResults.map((user) => {
-              const alreadySent = sentRequests.has(user.username!);
+              const pending = isPendingRequest(user.username!);
               return (
                 <div key={user.id} className="flex w-full items-center justify-between gap-3 px-3 py-2">
                   <div className="flex items-center gap-3">
@@ -113,9 +118,9 @@ export function UserSearch() {
                       {user.displayName && <p className="text-xs text-muted">{user.username}</p>}
                     </div>
                   </div>
-                  {alreadySent ? (
-                    <span className="shrink-0 rounded-lg bg-success-subtle px-3 py-1.5 text-xs font-medium text-success">
-                      Request sent ✓
+                  {pending ? (
+                    <span className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-muted border border-border">
+                      Pending
                     </span>
                   ) : (
                     <button

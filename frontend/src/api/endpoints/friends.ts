@@ -10,7 +10,7 @@ const friendsApi = api.injectEndpoints({
     }),
     sendFriendRequest: builder.mutation<string, string>({
       query: (username) => ({ url: `/friends/request/${encodeURIComponent(username)}`, method: 'POST' }),
-      invalidatesTags: [{ type: 'FriendRequests', id: 'LIST' }, { type: 'Friends', id: 'LIST' }],
+      invalidatesTags: [{ type: 'FriendRequests', id: 'LIST' }, { type: 'FriendRequests', id: 'SENT' }, { type: 'Friends', id: 'LIST' }],
     }),
     acceptFriendRequest: builder.mutation<void, string>({
       query: (username) => ({ url: `/friends/accept/${encodeURIComponent(username)}`, method: 'POST' }),
@@ -64,6 +64,14 @@ const friendsApi = api.injectEndpoints({
       query: (pokeId) => ({ url: `/friends/pokes/${pokeId}`, method: 'DELETE' }),
       invalidatesTags: [{ type: 'Pokes', id: 'LIST' }, { type: 'Pokes', id: 'SENT' }],
     }),
+    getSentFriendRequests: builder.query<UserRelationDto[], void>({
+      query: () => '/friends/requests/sent',
+      providesTags: [{ type: 'FriendRequests', id: 'SENT' }],
+    }),
+    cancelFriendRequest: builder.mutation<void, string>({
+      query: (username) => ({ url: `/friends/withdraw/${encodeURIComponent(username)}`, method: 'DELETE' }),
+      invalidatesTags: [{ type: 'FriendRequests', id: 'SENT' }],
+    }),
   }),
 });
 
@@ -83,4 +91,6 @@ export const {
   useGetSentPokesQuery,
   useMarkPokeAsSeenMutation,
   useDismissPokeMutation,
+  useGetSentFriendRequestsQuery,
+  useCancelFriendRequestMutation,
 } = friendsApi;

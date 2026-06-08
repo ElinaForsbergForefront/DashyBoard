@@ -5,6 +5,7 @@ public static class FriendRealtimeEventTypes
     public const string FriendRequestSent = "friend-request-sent";
     public const string FriendRequestAccepted = "friend-request-accepted";
     public const string FriendRequestRejected = "friend-request-rejected";
+    public const string FriendRequestCanceled = "friend-request-cancelled";
     public const string FriendRemoved = "friend-removed";
     public const string UserBlocked = "user-blocked";
     public const string UserUnblocked = "user-unblocked";

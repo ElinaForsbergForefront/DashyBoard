@@ -24,6 +24,8 @@ namespace DashyBoard.Api.Controllers
             _mediator = mediator;
         }
 
+        //////////////////////////////////////////USER//////////////////////////////////////////////////////
+
         private string? GetCurrentSub()
         {
             return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -77,6 +79,8 @@ namespace DashyBoard.Api.Controllers
             return NoContent();
         }
 
+        /////////////////////////////////////////FRIENDS///////////////////////////////////////////////
+
         [HttpGet("requests")]
         [ProducesResponseType(typeof(IReadOnlyList<UserRelationDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetFriendRequests(CancellationToken ct)
@@ -86,6 +90,28 @@ namespace DashyBoard.Api.Controllers
 
             var requests = await _mediator.Send(new GetFriendRequestsQuery(userId.Value), ct);
             return Ok(requests);
+        }
+
+        [HttpGet("requests/sent")]
+        [ProducesResponseType(typeof(IReadOnlyList<UserRelationDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSentFriendRequests(CancellationToken ct)
+        {
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            var requests = await _mediator.Send(new GetSentFriendRequestsQuery(userId.Value), ct);
+            return Ok(requests);
+        }
+
+        [HttpDelete("withdraw/{username}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> CancelFriendRequest(string username, CancellationToken ct)
+        {
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId is null) return Unauthorized();
+
+            await _mediator.Send(new CancelFriendRequestCommand(username, userId.Value), ct);
+            return NoContent();
         }
 
         [HttpGet("list")]
@@ -155,6 +181,8 @@ namespace DashyBoard.Api.Controllers
             var blocked = await _mediator.Send(new GetBlockedUsersQuery(userId.Value), ct);
             return Ok(blocked);
         }
+
+        /////////////////////////////////////////////POKES///////////////////////////////////////////////////
 
         [HttpPost("poke/{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

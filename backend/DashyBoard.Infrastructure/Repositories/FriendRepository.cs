@@ -308,6 +308,73 @@ namespace DashyBoard.Infrastructure.Repositories
             return requests;
         }
 
+        public async Task<IReadOnlyList<UserRelationDto>> GetSentFriendRequestsAsync(Guid currentUserId, CancellationToken ct)
+        {
+            var requests = await _db.UserRelationships
+                .Where(r => r.Status == UserRelationshipStatus.Pending
+                           && r.RequestedByUserId == currentUserId
+                           && (r.User1Id == currentUserId || r.User2Id == currentUserId))
+                .Select(r => new
+                {
+                    Relationship = r,
+                    OtherUserId = r.User1Id == currentUserId ? r.User2Id : r.User1Id
+                })
+                .Join(_db.Users,
+                    r => r.OtherUserId,
+                    u => u.Id,
+                    (r, u) => new UserRelationDto
+                    {
+                        UserId = u.Id,
+                        Username = u.Username,
+                        DisplayName = u.DisplayName,
+                        Status = r.Relationship.Status,
+                        IsFriend = false,
+                        IsPending = true,
+                        IsRequestedByCurrentUser = true,
+                        IsIncomingRequest = false,
+                        IsBlocked = false,
+                        CanSendRequest = false,
+                        CanAccept = false,
+                        CanDecline = false,
+                        CanRemoveFriend = false,
+                        CanBlock = false,
+                        CanUnblock = false
+                    })
+                .ToListAsync(ct);
+
+            return requests;
+        }
+
+        public async Task CancelFriendRequestAsync(string username, Guid currentUserId, CancellationToken ct)
+        {
+            var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
+            if (otherUser == null)
+                throw new KeyNotFoundException($"User '{username}' not found.");
+
+            var relationship = await GetRelationshipBetweenUsersAsync(currentUserId, otherUser.Id, ct);
+
+            if (relationship == null)
+                throw new KeyNotFoundException("Friend request not found.");
+
+            if (!relationship.IsRequestedBy(currentUserId))
+                throw new InvalidOperationException("Cannot cancel this request.");
+
+            var actor = await GetRealtimeUserAsync(currentUserId, ct);
+            var otherUserInfo = ToRealtimeUser(otherUser);
+
+            _db.UserRelationships.Remove(relationship);
+            await _db.SaveChangesAsync(ct);
+
+            await NotifyAsync(
+                otherUser.Id,
+                FriendRealtimeEventTypes.FriendRequestCanceled,
+                actor,
+                otherUserInfo,
+                pokeId: null,
+                shouldToast: false,
+                ct);
+        }
+
         public async Task<UserRelationDto?> GetFriendAsync(Guid currentUserId, string otherUsername, CancellationToken ct)
         {
             var otherUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == otherUsername, ct);
